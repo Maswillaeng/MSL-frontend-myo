@@ -1,8 +1,14 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FaLock, FaLockOpen } from "react-icons/fa";
+import { AiFillPlusCircle } from "react-icons/ai";
 const Login = () => {
   const [id, setId] = useState("");
+  const [userImage, setUserImage] = useState(
+    "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+  );
+  const fileInput = useRef(null);
+  const [introduction, setIntroduction] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,6 +28,27 @@ const Login = () => {
   const regexrName = /^[가-힣a-zA-Z]{3,10}$/;
   //  핸드폰 번호 형식
   const regexrNum = /^01(0|1|6|7|8|9)\d{7,8}$/;
+
+  //프로필 이름 변경
+  const onChange = (e) => {
+    if (e.target.files[0]) {
+      setUserImage(e.target.files[0]);
+    } else {
+      //업로드 취소할 시
+      setUserImage(
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+      );
+      return;
+    }
+    //화면에 프로필 사진 표시 :FileReader API
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.readyState === 2) {
+        setUserImage(reader.result);
+      }
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  };
   // id 검사
   const onIdHandler = (e) => {
     setId(e.currentTarget.value);
@@ -133,10 +160,12 @@ const Login = () => {
   const onSubmitHandler = (e) => {
     e.preventDefault();
     let userData = {
-      id: id,
-      name: name,
-      password: password,
-      confirmPassword: confirmPassword,
+      email: id,
+      pw: password,
+      nickname: name,
+      phoneNumber: number,
+      userImage: userImage,
+      introduction: introduction,
     };
     console.log(userData);
     if (
@@ -156,6 +185,28 @@ const Login = () => {
         {" "}
         <h1 className="mb-10 font-black text-3xl ">MASHILLAENG</h1>
         <form className=" text-left" onSubmit={onSubmitHandler} method="post">
+          <div className="relative my-10 ">
+            <div className="w-40 h-40 border-2 rounded-full mx-auto overflow-hidden">
+              <img src={userImage} className="w-40 h-40" alt="" />
+              <input
+                type="file"
+                accept="image/*"
+                name="profile_img"
+                onChange={onChange}
+                ref={fileInput}
+                className="hidden "
+              />
+            </div>
+            <button
+              className="absolute right-24 top-2/3"
+              onClick={() => {
+                fileInput.current.click();
+              }}
+            >
+              <AiFillPlusCircle className="text-red-500 text-5xl " />
+            </button>
+          </div>
+
           <div className="flex flex-col ">
             <label className="mb-3 text-sm">아이디(이메일)</label>
             <input
@@ -197,7 +248,7 @@ const Login = () => {
               {passNotice.alert ? (
                 <span className="text-black">{passNotice.message}</span>
               ) : (
-                <span className="text-red-500">{passNotice.message}</span>
+                <span className="text-red-500 ">{passNotice.message}</span>
               )}
             </div>
           </div>
