@@ -11,7 +11,7 @@ const Header = () => {
         <div className="flex items-center gap-40">
           <FiSearch className="font-bold text-red-500" />
           <Link to={"/Board"}>Board</Link>
-          <Link to={"/Login"}>Login</Link>
+          <Link to={"/LoginForm"}>Login</Link>
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ import user from "./action/user";
 import { Provider } from "react-redux";
 
 import BoardDetail from "./pages/BoardDetail";
+import Board from "./pages/Board";
+import LoginForm from "./pages/LoginForm";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -19,8 +21,9 @@ root.render(
     <BrowserRouter>
       <Header />
       <Routes>
-        <Route path="/" element={<App />} />
+        <Route path="/" element={<Board />} />
         <Route path="/Login" element={<Login />} />
+        <Route path="/LoginForm" element={<LoginForm />} />
         <Route path="/Board" element={<BoardDetail />} />
       </Routes>
     </BrowserRouter>
