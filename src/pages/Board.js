@@ -72,8 +72,8 @@ const Board = () => {
                                                         <div className="inline-flex items-center border-b border-b-2 border-teal-500 py-2">
                                                             <input className="bg-transparent border-none mr-3 px-2 leading-tight focus:outline-none" type="text" placeholder="검색" />
                                                                 <button className="absolute right-10 top-0 mt-2 mr-4">검색</button>
+                                                            <button className="bg-[#EA4E4E]">글쓰기</button>
                                                         </div>
-                                                        <button className="bg-[#EA4E4E]">글쓰기</button>
                                                     </div>
                                                 </div>
                                             </div>

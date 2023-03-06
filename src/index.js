@@ -13,6 +13,11 @@ import { Provider } from "react-redux";
 import BoardDetail from "./pages/BoardDetail";
 import Board from "./pages/Board";
 import LoginForm from "./pages/LoginForm";
+import MyPage from "./pages/MyPage";
+import axios from "axios";
+
+// axios 쿠키 주고 받기
+axios.defaults.withCredentials = true;
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -25,6 +30,7 @@ root.render(
         <Route path="/Login" element={<Login />} />
         <Route path="/LoginForm" element={<LoginForm />} />
         <Route path="/Board" element={<BoardDetail />} />
+        <Route path="/MyPage/:userId" element={<MyPage />} />
       </Routes>
     </BrowserRouter>
     {/* </Provider> */}
