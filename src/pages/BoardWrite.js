@@ -2,28 +2,38 @@ import React from "react";
 import Editor from "../components/boardWrite/Editor";
 const BoardWrite = () => {
   return (
-    <div className="max-w-4xl mx-auto py-24 ">
-      <div className="mx-auto w-3/6 mb-10 flex">
-        <select name="pets" className="border-2 p-1 flex-none" id="pet-select ">
+    <div className="max-w-4xl mx-auto py-24 relative">
+      <div className="mx-auto w-5/6 mb-10 flex ">
+        <select
+          name="msl"
+          className=" px-5 flex-none text-white bg-red-500 border-red-500 border-r-8"
+          id="pet-select "
+        >
           <option value="">카테고리</option>
-          <option value="dog">Dog</option>
-          <option value="cat">Cat</option>
-          <option value="hamster">Hamster</option>
-          <option value="parrot">Parrot</option>
-          <option value="spider">Spider</option>
-          <option value="goldfish">Goldfish</option>
+          <option value="msl1">msl1</option>
+          <option value="msl2">msl2</option>
+          <option value="msl3">msl3</option>
+          <option value="msl4">msl4</option>
+          <option value="msl5">msl5</option>
+          <option value="msl6">msl6</option>
         </select>{" "}
         <input
-          className="border-2 ml-5 p-1 flex-1"
+          className="border border-red-500 ml-5 p-2 px-2 w-full"
           type="text"
           name="title"
           placeholder="제목"
         />
       </div>{" "}
-      <Editor />{" "}
-      <div className="m-0">
+      <div className="">
+        <Editor /> <div className="absolute right-28">0/1000</div>
+      </div>
+      <div className="flex justify-center gap-20 ">
         {" "}
-        <button className="block mx-auto bg-point  px-40 py-3 mt-20 font-bold font-white">
+        <button className="block border  border-red-500 bg-white  font-bold px-20 py-3 mt-20 ">
+          {" "}
+          임시저장
+        </button>
+        <button className="block bg-red-500 px-20 py-3 mt-20 font-bold text-white">
           {" "}
           글 게시
         </button>
