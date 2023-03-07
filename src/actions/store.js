@@ -22,6 +22,8 @@ let user = createSlice({
     },
   },
 });
+
+// 서버 데이터 전송
 export const registerUser = (dataToSubmit) => async (dispatch) => {
   try {
     const response = await axios.post("/sign", dataToSubmit);
