@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 import App from "./App";
-import Login from "./pages/Login";
+
 //import Boardwrite from "./pages/BoardWrite";
 import Header from "./components/Header";
 
@@ -16,6 +16,7 @@ import LoginForm from "./pages/LoginForm";
 import MyPage from "./pages/MyPage";
 import BoardWrite from "./pages/BoardWrite";
 import axios from "axios";
+import Join from "./pages/Join";
 
 // axios 쿠키 주고 받기
 axios.defaults.withCredentials = true;
@@ -28,7 +29,7 @@ root.render(
         <Header />
         <Routes>
           <Route path="/" element={<Board />} />
-          <Route path="/Login" element={<Login />} />
+          <Route path="/Join" element={<Join />} />
           <Route path="/LoginForm" element={<LoginForm />} />
           <Route path="/Board" element={<BoardDetail />} />
           <Route path="/BoardWrite" element={<BoardWrite />} />
