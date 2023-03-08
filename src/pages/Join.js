@@ -185,7 +185,6 @@ const Join = () => {
       // 오류가 있으면 처리하지 않음
       dispatch(registerUser(userData)).then((response) => {
         if (response.payload.success) {
-          console.log(response.data);
         } else {
           alert("Error");
         }

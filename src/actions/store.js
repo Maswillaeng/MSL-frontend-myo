@@ -12,7 +12,7 @@ let user = createSlice({
   reducers: {
     registerUser(dataToSubmit) {
       const request = axios
-        .post("/sign", dataToSubmit)
+        .post("/api/auth/sign", dataToSubmit)
         .then((response) => response.data);
 
       return {
@@ -26,7 +26,7 @@ let user = createSlice({
 // 서버 데이터 전송
 export const registerUser = (dataToSubmit) => async (dispatch) => {
   try {
-    const response = await axios.post("/sign", dataToSubmit);
+    const response = await axios.post("/api/auth/sign", dataToSubmit);
     dispatch({
       type: REGISTER_USER,
       payload: response.data,
