@@ -2,11 +2,11 @@ import React from "react";
 import { useState, useRef } from "react";
 import { FaLock, FaLockOpen } from "react-icons/fa";
 import { AiFillPlusCircle } from "react-icons/ai";
-//import { useDispatch } from "react-redux";
-//import { registerUser } from "../actions/store";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../actions/store";
 
 const Join = () => {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
   const [userImage, setUserImage] = useState("/img/user.jpg");
@@ -166,14 +166,14 @@ const Join = () => {
   //전송
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    // let userData = {
-    //   email: email,
-    //   pw: password,
-    //   nickname: name,
-    //   phoneNumber: number,
-    //   userImage: userImage,
-    //   introduction: introduction,
-    // };
+    let userData = {
+      email: email,
+      pw: password,
+      nickname: name,
+      phoneNumber: number,
+      userImage: userImage,
+      introduction: introduction,
+    };
 
     if (
       !emailNotice.alert ||
@@ -183,16 +183,15 @@ const Join = () => {
       //!numNotice.alert
     ) {
       // 오류가 있으면 처리하지 않음
-      return alert("오류");
+      dispatch(registerUser(userData)).then((response) => {
+        if (response.payload.success) {
+          console.log(response.data);
+        } else {
+          alert("Error");
+        }
+      });
     }
     return alert("성공");
-    // dispatch(registerUser(userData)).then((response) => {
-    //   if (response.payload.success) {
-    //     console.log(response.data);
-    //   } else {
-    //     alert("Error");
-    //   }
-    // });
   };
   //---------------------
   return (
