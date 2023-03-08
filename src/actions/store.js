@@ -8,19 +8,20 @@ let user = createSlice({
     isLoggedIn: false, // 로그인 상태
     currentUser: null, // 현재 로그인한 사용자 정보
   },
-  //   state 수정 함수 만들기
-  reducers: {
-    registerUser(dataToSubmit) {
-      const request = axios
-        .post("/api/auth/sign", dataToSubmit)
-        .then((response) => response.data);
 
-      return {
-        type: REGISTER_USER,
-        payload: request,
-      };
-    },
-  },
+  // reducers: {
+  //   registerUser(dataToSubmit) {
+  //     const request = axios
+  //       .post("/api/auth/sign", dataToSubmit)
+  //       .then((response) => response.data);
+
+  //     return {
+  //       type: REGISTER_USER,
+  //       payload: request,
+  //     };
+  //   },
+  // },
+  reducers: {},
 });
 
 // 서버 데이터 전송
