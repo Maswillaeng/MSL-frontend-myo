@@ -9,19 +9,18 @@ let user = createSlice({
     currentUser: null, // 현재 로그인한 사용자 정보
   },
 
-  // reducers: {
-  //   registerUser(dataToSubmit) {
-  //     const request = axios
-  //       .post("/api/auth/sign", dataToSubmit)
-  //       .then((response) => response.data);
+  reducers: {
+    registerUser(dataToSubmit) {
+      const request = axios
+        .post("/api/auth/sign", dataToSubmit)
+        .then((response) => response.data);
 
-  //     return {
-  //       type: REGISTER_USER,
-  //       payload: request,
-  //     };
-  //   },
-  // },
-  reducers: {},
+      return {
+        type: REGISTER_USER,
+        payload: request,
+      };
+    },
+  },
 });
 
 // 서버 데이터 전송

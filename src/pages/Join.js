@@ -2,22 +2,30 @@ import React from "react";
 import { useState, useRef } from "react";
 import { FaLock, FaLockOpen } from "react-icons/fa";
 import { AiFillPlusCircle } from "react-icons/ai";
-import { useDispatch } from "react-redux";
-import { registerUser } from "../actions/store";
+import axios from "axios";
+//import { useDispatch } from "react-redux";
+//import { registerUser } from "../actions/store";
 
 const Join = () => {
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();
+  const [join, setJoin] = useState({
+    email: "",
+    usableEmail: false,
+    pw: "",
+    confirmPassword: "",
+    name: "",
+    //number: number,
+    userImage: "/img/user.jpg",
+    introduction: "",
+  });
 
-  const [email, setEmail] = useState("");
-  const [userImage, setUserImage] = useState("/img/user.jpg");
   const fileInput = useRef(null);
-  const [introduction, setIntroduction] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [number, setNumber] = useState("");
-  // const [errorMessage, setErrorMessage] = useState("");
-  // const [successMessage, setSuccessMessage] = useState("");
+
+  const [alertMessage, setAlertMessage] = useState({
+    alert: false,
+    msg: "",
+  });
+
   const [emailNotice, setEmailNotice] = useState({});
   const [passNotice, setPassNotice] = useState({});
   const [confirmPassNotice, setConfirmPassNotice] = useState({});
@@ -34,19 +42,27 @@ const Join = () => {
   const regexrNum = /^01(0|1|6|7|8|9)\d{7,8}$/;
 
   //프로필 이름 변경
+
   const onChange = (e) => {
     if (e.target.files[0]) {
-      setUserImage(e.target.files[0]);
+      let copy = { ...join };
+      copy.userImage = e.target.files[0];
+      setJoin(copy);
     } else {
       //업로드 취소할 시
-      setUserImage("/img/user.jpg");
+      let copy = { ...join };
+      copy.userImage = "/img/user.jpg";
+      setJoin(copy);
       return;
     }
+
     //화면에 프로필 사진 표시 :FileReader API
     const reader = new FileReader();
     reader.onload = () => {
       if (reader.readyState === 2) {
-        setUserImage(reader.result);
+        let copy = { ...join };
+        copy.userImage = reader.result;
+        setJoin(copy);
       }
     };
     reader.readAsDataURL(e.target.files[0]);
@@ -54,13 +70,18 @@ const Join = () => {
   // 자기소개
 
   const onIntroductionHandler = (e) => {
-    setIntroduction(e.currentTarget.value);
+    let copy = { ...join };
+    copy.introduction = e.currentTarget.value;
+    setJoin(copy);
   };
   // email 검사
   const onEmailHandler = (e) => {
-    setEmail(e.currentTarget.value);
+    let copy = { ...join };
+    copy.email = e.currentTarget.value;
+    setJoin(copy);
   };
-  const onBlurEmailHandler = (e) => {
+  const onBlurEmailHandler = async () => {
+    let { email } = join;
     if (email === "") {
       setEmailNotice({ message: "필수항목입니다.", alert: false });
       return;
@@ -71,21 +92,49 @@ const Join = () => {
       });
       return;
     } else {
-      setEmailNotice({
-        message: "사용가능한 이메일입니다.",
-        alert: true,
-      });
+      // setEmailNotice({
+      //   message: "사용가능한 이메일입니다.",
+      //   alert: true,
+      // });
+      try {
+        const response = await axios.post(
+          "/api/auth/sign",
+          { email },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        if (response.status === 200) {
+          setEmailNotice({ message: "사용 가능한 이메일입니다.", alert: true });
+          setJoin((prevState) => ({
+            ...prevState,
+            usableEmail: true,
+          }));
+        } else if (response.status === 409) {
+          setEmailNotice({
+            message: "이미 사용중인 이메일입니다.",
+            alert: true,
+          });
+          setJoin((prevState) => ({
+            ...prevState,
+            usableEmail: false,
+          }));
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
   // Password 검사
   const onPasswordHandler = (e) => {
-    setPassword(e.currentTarget.value);
+    let copy = { ...join };
+    copy.pw = e.currentTarget.value;
+    setJoin(copy);
   };
   const onBlurPasswordHandler = (e) => {
-    if (password === "") {
+    let { pw } = join;
+    if (pw === "") {
       setPassNotice({ message: "필수항목입니다.", alert: false });
       return;
-    } else if (!regexrPass.test(password)) {
+    } else if (!regexrPass.test(pw)) {
       setPassNotice({
         message: "1개 이상 영문과 숫자가 포함한 문자 8~15자리로 입력해주세요",
         alert: false,
@@ -100,13 +149,17 @@ const Join = () => {
   };
   // confirmPassword 검사
   const onConfirmPasswordHandler = (e) => {
-    setConfirmPassword(e.currentTarget.value);
+    let copy = { ...join };
+    copy.confirmPassword = e.currentTarget.value;
+    setJoin(copy);
   };
   const onBlurConfirmPasswordHandler = (e) => {
+    let { confirmPassword } = join;
+    let { pw } = join;
     if (confirmPassword === "") {
       setConfirmPassNotice({ message: "필수항목입니다.", alert: false });
       return;
-    } else if (password !== confirmPassword) {
+    } else if (pw !== confirmPassword) {
       setConfirmPassNotice({
         message: "비밀번호가 일치하지 않습니다.",
         alert: false,
@@ -121,9 +174,13 @@ const Join = () => {
   };
   // 닉네임 검사
   const onNameHandler = (e) => {
-    setName(e.currentTarget.value);
+    let copy = { ...join };
+    copy.name = e.currentTarget.value;
+    setJoin(copy);
   };
+
   const onBlurNameHandler = (e) => {
+    let { name } = join;
     if (name === "") {
       setNameNotice({ message: "필수항목입니다.", alert: false });
       return;
@@ -140,40 +197,34 @@ const Join = () => {
     });
     return;
   };
-  // 전화번호 검사
+  //전화번호 검사
   const onNumberHandler = (e) => {
-    setNumber(e.currentTarget.value);
+    let copy = { ...join };
+    copy.number = e.currentTarget.value;
+    setJoin(copy);
   };
 
-  const onBlurNumHandler = (e) => {
-    if (number === "") {
-      setNumNotice({ message: "필수항목입니다.", alert: false });
-      return;
-    } else if (!regexrNum.test(number)) {
-      setNumNotice({
-        message: "전화번호 형식에 맞게 입력해주세요",
-        alert: false,
-      });
-      return;
-    } else {
-      setNumNotice({
-        message: "",
-        alert: true,
-      });
-    }
-  };
+  // const onBlurNumHandler = (e) => {
+  //   if (number === "") {
+  //     setNumNotice({ message: "필수항목입니다.", alert: false });
+  //     return;
+  //   } else if (!regexrNum.test(number)) {
+  //     setNumNotice({
+  //       message: "전화번호 형식에 맞게 입력해주세요",
+  //       alert: false,
+  //     });
+  //     return;
+  //   } else {
+  //     setNumNotice({
+  //       message: "",
+  //       alert: true,
+  //     });
+  //   }
+  // };
 
   //전송
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    let userData = {
-      email: email,
-      pw: password,
-      nickname: name,
-      phoneNumber: number,
-      userImage: userImage,
-      introduction: introduction,
-    };
 
     if (
       !emailNotice.alert ||
@@ -182,25 +233,56 @@ const Join = () => {
       !nameNotice.alert
       //!numNotice.alert
     ) {
-      // 오류가 있으면 처리하지 않음
-      dispatch(registerUser(userData)).then((response) => {
-        if (response.payload.success) {
-        } else {
-          alert("Error");
-        }
-      });
+      return alert("작성");
+    }
+    joinSubmitData();
+  };
+  const joinSubmitData = async (e) => {
+    try {
+      const response = await axios.post("/api/auth/sign", { join });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
     }
   };
+
+  // 중복아이디 check
+  // const checkId = async (e) => {
+  //   e.preventDefault();
+  //   const { usableEmail } = { join };
+  //   try {
+  //     const response = await axios.post(
+  //       "/api/auth/sign",
+  //       { usableEmail },
+  //       { headers: { "Content-Type": "application/json" } }
+  //     );
+  //     if (response.status === 200) {
+  //       alert("사용 가능한 아이디 입니다.");
+  //       let copy = { ...join };
+  //       copy.usableEmail = true;
+  //       setJoin(copy);
+  //     } else if (response.status === 409) {
+  //       alert("이미 사용중인 아이디 입니다.");
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  // 중복 닉네임
+
   //---------------------
   return (
     <div className="py-14 flex items-center justify-center ">
       <div className="w-96 mx-auto text-center">
         {" "}
-        <h1 className="mb-10 font-black text-3xl ">MASHILLAENG</h1>
+        <h1 className="mb-10 font-black text-3xl text-yellow-500 ">
+          MASHILLAENG
+        </h1>
         <form className=" text-left" onSubmit={onSubmitHandler} method="post">
           <div className="relative my-10 ">
             <div className="w-40 h-40 border-2 rounded-full mx-auto overflow-hidden">
-              <img src={userImage} className="w-40 h-40" alt="" />
+              <img src={join.userImage} className="w-40 h-40" alt="" />
               <input
                 type="file"
                 accept="image/*"
@@ -225,7 +307,7 @@ const Join = () => {
               className=" mb-3 p-2 border "
               type="text"
               name="introduction"
-              value={introduction}
+              value={join.introduction}
               onChange={onIntroductionHandler}
               placeholder="소개글을 작성해주세요"
             />
@@ -237,7 +319,7 @@ const Join = () => {
               className=" mb-3 p-2 border "
               type="text"
               name="email"
-              value={email}
+              value={join.email}
               onChange={onEmailHandler}
               onBlur={onBlurEmailHandler}
               placeholder="이메일 입력"
@@ -256,7 +338,7 @@ const Join = () => {
               className="mb-3 p-2 border "
               type="password"
               name="pass"
-              value={password}
+              value={join.password}
               onChange={onPasswordHandler}
               onBlur={onBlurPasswordHandler}
               placeholder="비밀번호 입력"
@@ -282,7 +364,7 @@ const Join = () => {
               className="mb-5 p-2 border "
               type="password"
               name="repass"
-              value={confirmPassword}
+              value={join.confirmPassword}
               onChange={onConfirmPasswordHandler}
               onBlur={onBlurConfirmPasswordHandler}
               placeholder="비밀번호 재입력"
@@ -310,7 +392,7 @@ const Join = () => {
               className="mb-5 p-2 border"
               type="text"
               name="repass"
-              value={name}
+              value={join.name}
               onChange={onNameHandler}
               onBlur={onBlurNameHandler}
               placeholder="닉네임 입력"
@@ -335,9 +417,9 @@ const Join = () => {
                     name="number"
                     className="w-3/5 p-2 border flex-1 "
                     placeholder="전화번호 입력"
-                    value={number}
+                    value={join.number}
                     onChange={onNumberHandler}
-                    onBlur={onBlurNumHandler}
+                    // onBlur={onBlurNumHandler}
                   />
                   <button className="text-sm bg-red-500 px-4 font-bold text-white flex-none ">
                     {" "}

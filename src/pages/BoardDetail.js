@@ -10,7 +10,7 @@ const BoardDetail = () => {
   //const [isLiked, setIsLiked] = useState("");
   return (
     <div className="mx-auto max-w-4xl py-24 ">
-      <div className="mb-10 flex items-center justify-between">
+      <div className=" mb-10 flex items-center justify-between">
         <div>
           <h2 className="mb-2 font-bold text-red-500">칵테일</h2>
           <div className="mb-2 text-2xl font-black">
