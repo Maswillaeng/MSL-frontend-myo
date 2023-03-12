@@ -78,8 +78,7 @@ const Editor = ({ value, onChange }) => {
 
   return (
     <ReactQuill
-      className="w-5/6  mx-auto"
-      style={{ height: "350px" }}
+      className="w-5/6  mx-auto h-96"
       theme="snow"
       modules={modules}
       formats={formats}

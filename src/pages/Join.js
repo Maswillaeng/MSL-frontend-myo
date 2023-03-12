@@ -11,7 +11,7 @@ const Join = () => {
   const [join, setJoin] = useState({
     email: "",
     usableEmail: false,
-    pw: "",
+    password: "",
     confirmPassword: "",
     nickname: "",
     //number: number,
@@ -121,15 +121,15 @@ const Join = () => {
   // Password 검사
   const onPasswordHandler = (e) => {
     let copy = { ...join };
-    copy.pw = e.currentTarget.value;
+    copy.password = e.currentTarget.value;
     setJoin(copy);
   };
   const onBlurPasswordHandler = (e) => {
-    let { pw } = join;
-    if (pw === "") {
+    let { password } = join;
+    if (password === "") {
       setPassNotice({ message: "필수항목입니다.", alert: false });
       return;
-    } else if (!regexrPass.test(pw)) {
+    } else if (!regexrPass.test(password)) {
       setPassNotice({
         message: "1개 이상 영문과 숫자가 포함한 문자 8~15자리로 입력해주세요",
         alert: false,
@@ -150,11 +150,11 @@ const Join = () => {
   };
   const onBlurConfirmPasswordHandler = (e) => {
     let { confirmPassword } = join;
-    let { pw } = join;
+    let { password } = join;
     if (confirmPassword === "") {
       setConfirmPassNotice({ message: "필수항목입니다.", alert: false });
       return;
-    } else if (pw !== confirmPassword) {
+    } else if (password !== confirmPassword) {
       setConfirmPassNotice({
         message: "비밀번호가 일치하지 않습니다.",
         alert: false,
@@ -259,10 +259,11 @@ const Join = () => {
     joinSubmitData();
   };
   const joinSubmitData = async (e) => {
-    const { email, pw, nickname, phoneNumber, userImage, introduction } = join;
+    const { email, password, nickname, phoneNumber, userImage, introduction } =
+      join;
     let userData = {
       email,
-      pw,
+      password,
       nickname,
       phoneNumber,
       userImage,

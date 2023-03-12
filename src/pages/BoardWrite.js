@@ -1,35 +1,66 @@
 import React from "react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Editor from "../components/boardWrite/Editor";
 import axios from "axios";
+import CategorySelector from "../components/category/CategorySelector";
 const BoardWrite = () => {
-  // editor content
+  // 글 카테고리
+  let categories = [
+    { id: 0, name: "RECIPE" },
+    { id: 1, name: "COCKTAIL / SNACK" },
+    { id: 2, name: "ETC" },
+  ];
 
+  // editor content
   let [posting, setPosting] = useState({
     title: "",
     content: "",
     category: "",
     thumbnail: "",
   });
+  // title 작성
   const onTitleHandler = (e) => {
     setPosting((prevState) => ({
       ...prevState,
       title: e.target.value,
     }));
   };
-  // data 전송
+  // 게시글데이터 전송
+  const postingSubmitData = async (e) => {
+    const { title, content, thumbnail, category } = posting;
+    let contentData = {
+      title,
+      content,
+      thumbnail,
+      category,
+    };
+
+    try {
+      const response = await axios.post("/api/post", { contentData });
+      console.log(response);
+      // 게시물 등록이 성공하면 posting 상태를 초기화
+      setPosting({ title: "", content: "", category: "", thumbnail: "" });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // submit
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    console.log(!posting.title);
-    if (
-      posting.title === "" ||
-      posting.content === ""
-      //!numNotice.alert
-    ) {
-      return alert("작성");
+    let { title, content } = posting;
+    if (title.trim() === "") {
+      alert("제목을 입력해주세요");
+      return;
     }
+
+    if (content.trim() === "") {
+      alert("내용을 입력해주세요");
+      return;
+    }
+
     postingSubmitData();
   };
+
   // editor 내용 변경
   const onEditorChange = (value) => {
     setPosting((prevState) => ({
@@ -37,44 +68,21 @@ const BoardWrite = () => {
       content: value,
     }));
   };
-  const postingSubmitData = async (e) => {
-    const { title, content, thumbnail } = posting;
-    let contentData = {
-      title,
-      content,
-      thumbnail,
-    };
-    try {
-      const response = await axios.post("/api/post", { contentData });
-      console.log(response);
-      // 게시물 등록이 성공하면 posting 상태를 초기화
-      setPosting({ title: "", content: "" });
-    } catch (error) {
-      console.log(error);
-    }
+
+  // 카테고리 선택
+  const handleSelect = (categories) => {
+    setPosting((prevState) => ({
+      ...prevState,
+      category: categories,
+    }));
   };
+
   return (
     <div className="max-w-4xl mx-auto py-24 relative">
-      <div>
-        <form
-          className="mx-auto w-5/6 mb-10 flex "
-          onSubmit={onSubmitHandler}
-          method="post"
-        >
+      <div className="relative">
+        <div className="mx-auto w-5/6 mb-10 flex ">
           {" "}
-          <select
-            name="msl"
-            className=" px-5 flex-none text-white bg-red-500 border-red-500 border-r-8"
-            id="pet-select "
-          >
-            <option value="">카테고리</option>
-            <option value="msl1">msl1</option>
-            <option value="msl2">msl2</option>
-            <option value="msl3">msl3</option>
-            <option value="msl4">msl4</option>
-            <option value="msl5">msl5</option>
-            <option value="msl6">msl6</option>
-          </select>{" "}
+          <CategorySelector categories={categories} onSelect={handleSelect} />
           <input
             className="border border-red-500 ml-5 p-2 px-2 w-full"
             type="text"
@@ -83,19 +91,28 @@ const BoardWrite = () => {
             value={posting.title}
             placeholder="제목"
           />
-        </form>
+        </div>
+        <Editor value={posting.content} onChange={onEditorChange} />{" "}
+        <div className="absolute right-28 bottom-[-80px]">
+          <span
+            className={`${
+              posting.content.length >= 2000 ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            {posting.content.length}
+          </span>{" "}
+          <span className="font-bold">/2000</span>
+        </div>
       </div>{" "}
-      <Editor value={posting.content} onChange={onEditorChange} />{" "}
-      <div className="absolute right-28">0/1000</div>
       <div className="flex justify-center gap-20 ">
         {" "}
-        <button className="block border  border-red-500 bg-white  font-bold px-20 py-3 mt-20 ">
+        <button className="block border  border-red-500 bg-white  font-bold px-20 py-3 mt-28 ">
           {" "}
           임시저장
         </button>
         <button
-          type="submit"
-          className="block bg-red-500 px-20 py-3 mt-20 font-bold text-white"
+          onClick={onSubmitHandler}
+          className="block bg-red-500 px-20 py-3 mt-28 font-bold text-white"
         >
           {" "}
           글 게시
