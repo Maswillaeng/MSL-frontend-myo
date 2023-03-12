@@ -13,7 +13,7 @@ const Join = () => {
     usableEmail: false,
     pw: "",
     confirmPassword: "",
-    name: "",
+    nickname: "",
     //number: number,
     userImage: "/img/user.jpg",
     introduction: "",
@@ -21,15 +21,10 @@ const Join = () => {
 
   const fileInput = useRef(null);
 
-  const [alertMessage, setAlertMessage] = useState({
-    alert: false,
-    msg: "",
-  });
-
   const [emailNotice, setEmailNotice] = useState({});
   const [passNotice, setPassNotice] = useState({});
   const [confirmPassNotice, setConfirmPassNotice] = useState({});
-  const [nameNotice, setNameNotice] = useState({});
+  const [nicknameNotice, setNicknameNotice] = useState({});
   const [numNotice, setNumNotice] = useState({});
   // 이메일 정규식 : 영문자와 숫자만
   const regexrEmail = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -37,7 +32,7 @@ const Join = () => {
   // 비밀번호 형식
   const regexrPass = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,15}$/;
   //  닉네임 형식
-  const regexrName = /^[가-힣a-zA-Z]{3,10}$/;
+  const regexrNickname = /^[가-힣a-zA-Z]{3,10}$/;
   //  핸드폰 번호 형식
   const regexrNum = /^01(0|1|6|7|8|9)\d{7,8}$/;
 
@@ -74,7 +69,7 @@ const Join = () => {
     copy.introduction = e.currentTarget.value;
     setJoin(copy);
   };
-  // email 검사
+  // email 검사 & 중복검사
   const onEmailHandler = (e) => {
     let copy = { ...join };
     copy.email = e.currentTarget.value;
@@ -98,7 +93,7 @@ const Join = () => {
       // });
       try {
         const response = await axios.post(
-          "/api/auth/sign",
+          "/api/auth/duplicate/email",
           { email },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -111,7 +106,7 @@ const Join = () => {
         } else if (response.status === 409) {
           setEmailNotice({
             message: "이미 사용중인 이메일입니다.",
-            alert: true,
+            alert: false,
           });
           setJoin((prevState) => ({
             ...prevState,
@@ -172,29 +167,55 @@ const Join = () => {
       });
     }
   };
-  // 닉네임 검사
-  const onNameHandler = (e) => {
+  // 닉네임 검사 & 중복검사
+  const onNicknameHandler = (e) => {
     let copy = { ...join };
-    copy.name = e.currentTarget.value;
+    copy.nickname = e.currentTarget.value;
     setJoin(copy);
   };
 
-  const onBlurNameHandler = (e) => {
-    let { name } = join;
-    if (name === "") {
-      setNameNotice({ message: "필수항목입니다.", alert: false });
+  const onBlurNicknameHandler = async () => {
+    let { nickname } = join;
+    if (nickname === "") {
+      setNicknameNotice({ message: "필수항목입니다.", alert: false });
       return;
-    } else if (!regexrName.test(name)) {
-      setNameNotice({
+    } else if (!regexrNickname.test(nickname)) {
+      setNicknameNotice({
         message: "3~10자리 한글과 영문으로 이루어진 닉네임을 작성해주세요",
         alert: false,
       });
       return;
+    } else {
+      try {
+        const response = await axios.post(
+          "/api/auth/duplicate/name",
+          { nickname },
+          { headers: { "Context-Type": "application/json" } }
+        );
+        if (response.status === 200) {
+          setNicknameNotice({
+            message: "사용 가능한 닉네임입니다.",
+            alert: true,
+          });
+          setJoin((prevState) => ({
+            ...prevState,
+            usableEmail: true,
+          }));
+        } else if (response.status === 409) {
+          setNicknameNotice({
+            message: "이미 사용중인 닉네임입니다.",
+            alert: false,
+          });
+          setJoin((prevState) => ({
+            ...prevState,
+            usableEmail: false,
+          }));
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
-    setNameNotice({
-      message: "",
-      alert: true,
-    });
+
     return;
   };
   //전화번호 검사
@@ -230,7 +251,7 @@ const Join = () => {
       !emailNotice.alert ||
       !passNotice.alert ||
       !confirmPassNotice.alert ||
-      !nameNotice.alert
+      !nicknameNotice.alert
       //!numNotice.alert
     ) {
       return alert("작성");
@@ -238,8 +259,17 @@ const Join = () => {
     joinSubmitData();
   };
   const joinSubmitData = async (e) => {
+    const { email, pw, nickname, phoneNumber, userImage, introduction } = join;
+    let userData = {
+      email,
+      pw,
+      nickname,
+      phoneNumber,
+      userImage,
+      introduction,
+    };
     try {
-      const response = await axios.post("/api/auth/sign", { join });
+      const response = await axios.post("/api/auth/sign", { userData });
       console.log(response);
     } catch (error) {
       console.log(error);
@@ -286,7 +316,7 @@ const Join = () => {
               <input
                 type="file"
                 accept="image/*"
-                name="profile_img"
+                nickname="profile_img"
                 onChange={onChange}
                 ref={fileInput}
                 className="hidden "
@@ -392,16 +422,16 @@ const Join = () => {
               className="mb-5 p-2 border"
               type="text"
               name="repass"
-              value={join.name}
-              onChange={onNameHandler}
-              onBlur={onBlurNameHandler}
+              value={join.nickname}
+              onChange={onNicknameHandler}
+              onBlur={onBlurNicknameHandler}
               placeholder="닉네임 입력"
             />
             <div className="font-bold mb-3 text-xs text-right">
-              {nameNotice.alert ? (
-                <span className="text-black">{nameNotice.message}</span>
+              {nicknameNotice.alert ? (
+                <span className="text-black">{nicknameNotice.message}</span>
               ) : (
-                <span className="text-red-500">{nameNotice.message}</span>
+                <span className="text-red-500">{nicknameNotice.message}</span>
               )}
             </div>
           </div>
