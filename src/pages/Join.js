@@ -10,11 +10,10 @@ const Join = () => {
   //const dispatch = useDispatch();
   const [join, setJoin] = useState({
     email: "",
-    usableEmail: false,
     password: "",
     confirmPassword: "",
     nickname: "",
-    //number: number,
+    phoneNumber: "",
     userImage: "/img/user.jpg",
     introduction: "",
   });
@@ -25,7 +24,7 @@ const Join = () => {
   const [passNotice, setPassNotice] = useState({});
   const [confirmPassNotice, setConfirmPassNotice] = useState({});
   const [nicknameNotice, setNicknameNotice] = useState({});
-  const [numNotice, setNumNotice] = useState({});
+  const [phoneNumberNotice, setPhoneNumberNotice] = useState({});
   // 이메일 정규식 : 영문자와 숫자만
   const regexrEmail = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
   ///^(?=.*[a-z])(?=.*[0-9])[a-z0-9]{5,15}$/;
@@ -38,26 +37,22 @@ const Join = () => {
 
   //프로필 이름 변경
 
-  const onChange = (e) => {
+  const handleImageUpload = (e) => {
     if (e.target.files[0]) {
-      let copy = { ...join };
-      copy.userImage = e.target.files[0];
-      setJoin(copy);
-    } else {
-      //업로드 취소할 시
-      let copy = { ...join };
-      copy.userImage = "/img/user.jpg";
-      setJoin(copy);
-      return;
+      const formData = new FormData();
+      formData.append("userImage", e.target.files[0]);
     }
+    // else {
+    //   //업로드 취소할 시
+    //   setJoin((prevState) => ({ ...prevState, userImage: "/img/user.jpg" }));
+    //   return;
+    // }
 
     //화면에 프로필 사진 표시 :FileReader API
     const reader = new FileReader();
     reader.onload = () => {
       if (reader.readyState === 2) {
-        let copy = { ...join };
-        copy.userImage = reader.result;
-        setJoin(copy);
+        setJoin((prevState) => ({ ...prevState, userImage: reader.result }));
       }
     };
     reader.readAsDataURL(e.target.files[0]);
@@ -65,15 +60,16 @@ const Join = () => {
   // 자기소개
 
   const onIntroductionHandler = (e) => {
-    let copy = { ...join };
-    copy.introduction = e.currentTarget.value;
-    setJoin(copy);
+    const value = e?.currentTarget?.value;
+    setJoin((prevState) => ({
+      ...prevState,
+      introduction: value,
+    }));
   };
   // email 검사 & 중복검사
   const onEmailHandler = (e) => {
-    let copy = { ...join };
-    copy.email = e.currentTarget.value;
-    setJoin(copy);
+    const value = e?.currentTarget?.value;
+    setJoin((prevState) => ({ ...prevState, email: value }));
   };
   const onBlurEmailHandler = async () => {
     let { email } = join;
@@ -99,19 +95,11 @@ const Join = () => {
         );
         if (response.status === 200) {
           setEmailNotice({ message: "사용 가능한 이메일입니다.", alert: true });
-          setJoin((prevState) => ({
-            ...prevState,
-            usableEmail: true,
-          }));
         } else if (response.status === 409) {
           setEmailNotice({
             message: "이미 사용중인 이메일입니다.",
             alert: false,
           });
-          setJoin((prevState) => ({
-            ...prevState,
-            usableEmail: false,
-          }));
         }
       } catch (error) {
         console.log(error);
@@ -120,9 +108,8 @@ const Join = () => {
   };
   // Password 검사
   const onPasswordHandler = (e) => {
-    let copy = { ...join };
-    copy.password = e.currentTarget.value;
-    setJoin(copy);
+    const value = e?.currentTarget?.value;
+    setJoin((prevState) => ({ ...prevState, password: value }));
   };
   const onBlurPasswordHandler = (e) => {
     let { password } = join;
@@ -144,9 +131,11 @@ const Join = () => {
   };
   // confirmPassword 검사
   const onConfirmPasswordHandler = (e) => {
-    let copy = { ...join };
-    copy.confirmPassword = e.currentTarget.value;
-    setJoin(copy);
+    const value = e?.currentTarget?.value;
+    setJoin((prevState) => ({
+      ...prevState,
+      confirmPassword: value,
+    }));
   };
   const onBlurConfirmPasswordHandler = (e) => {
     let { confirmPassword } = join;
@@ -169,9 +158,11 @@ const Join = () => {
   };
   // 닉네임 검사 & 중복검사
   const onNicknameHandler = (e) => {
-    let copy = { ...join };
-    copy.nickname = e.currentTarget.value;
-    setJoin(copy);
+    const value = e?.currentTarget?.value;
+    setJoin((prevState) => ({
+      ...prevState,
+      nickname: value,
+    }));
   };
 
   const onBlurNicknameHandler = async () => {
@@ -197,19 +188,11 @@ const Join = () => {
             message: "사용 가능한 닉네임입니다.",
             alert: true,
           });
-          setJoin((prevState) => ({
-            ...prevState,
-            usableEmail: true,
-          }));
         } else if (response.status === 409) {
           setNicknameNotice({
             message: "이미 사용중인 닉네임입니다.",
             alert: false,
           });
-          setJoin((prevState) => ({
-            ...prevState,
-            usableEmail: false,
-          }));
         }
       } catch (error) {
         console.log(error);
@@ -220,45 +203,36 @@ const Join = () => {
   };
   //전화번호 검사
   const onNumberHandler = (e) => {
-    let copy = { ...join };
-    copy.number = e.currentTarget.value;
-    setJoin(copy);
+    const value = e?.currentTarget?.value;
+    if (value) {
+      setJoin((prevState) => ({
+        ...prevState,
+        phoneNumber: value,
+      }));
+    }
   };
 
-  // const onBlurNumHandler = (e) => {
-  //   if (number === "") {
-  //     setNumNotice({ message: "필수항목입니다.", alert: false });
-  //     return;
-  //   } else if (!regexrNum.test(number)) {
-  //     setNumNotice({
-  //       message: "전화번호 형식에 맞게 입력해주세요",
-  //       alert: false,
-  //     });
-  //     return;
-  //   } else {
-  //     setNumNotice({
-  //       message: "",
-  //       alert: true,
-  //     });
-  //   }
-  // };
+  const onBlurNumHandler = (e) => {
+    let { phoneNumber } = join;
+    if (phoneNumber === "") {
+      setPhoneNumberNotice({ message: "필수항목입니다.", alert: false });
+      return;
+    } else if (!regexrNum.test(phoneNumber)) {
+      setPhoneNumberNotice({
+        message: "전화번호 형식에 맞게 입력해주세요",
+        alert: false,
+      });
+      return;
+    } else {
+      setPhoneNumberNotice({
+        message: "",
+        alert: true,
+      });
+    }
+  };
 
   //전송
   const onSubmitHandler = (e) => {
-    e.preventDefault();
-
-    if (
-      !emailNotice.alert ||
-      !passNotice.alert ||
-      !confirmPassNotice.alert ||
-      !nicknameNotice.alert
-      //!numNotice.alert
-    ) {
-      return alert("작성");
-    }
-    joinSubmitData();
-  };
-  const joinSubmitData = async (e) => {
     const { email, password, nickname, phoneNumber, userImage, introduction } =
       join;
     let userData = {
@@ -269,12 +243,28 @@ const Join = () => {
       userImage,
       introduction,
     };
-    try {
-      const response = await axios.post("/api/auth/sign", { userData });
-      console.log(response);
-    } catch (error) {
-      console.log(error);
+    e.preventDefault();
+
+    if (
+      !emailNotice.alert ||
+      !passNotice.alert ||
+      !confirmPassNotice.alert ||
+      !nicknameNotice.alert ||
+      !phoneNumberNotice.alert
+    ) {
+      console.log(userData);
+      return alert("작성");
     }
+    const joinSubmitData = async (e) => {
+      try {
+        const response = await axios.post("/api/auth/sign", { userData });
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    joinSubmitData();
   };
 
   // 중복아이디 check
@@ -318,12 +308,13 @@ const Join = () => {
                 type="file"
                 accept="image/*"
                 nickname="profile_img"
-                onChange={onChange}
+                onChange={handleImageUpload}
                 ref={fileInput}
                 className="hidden "
               />
             </div>
             <button
+              type="button"
               className="absolute right-24 top-2/3"
               onClick={() => {
                 fileInput.current.click();
@@ -448,33 +439,37 @@ const Join = () => {
                     name="number"
                     className="w-3/5 p-2 border flex-1 "
                     placeholder="전화번호 입력"
-                    value={join.number}
+                    value={join.phoneNumber}
                     onChange={onNumberHandler}
-                    // onBlur={onBlurNumHandler}
+                    onBlur={onBlurNumHandler}
                   />
-                  <button className="text-sm bg-red-500 px-4 font-bold text-white flex-none ">
+                  {/* <button className="text-sm bg-red-500 px-4 font-bold text-white flex-none ">
                     {" "}
                     인증번호 받기
-                  </button>
+                  </button> */}
                 </div>
                 <div className="font-bold mb-3 text-xs text-left ">
-                  {numNotice.alert ? (
-                    <span className="text-black ">{numNotice.message}</span>
+                  {phoneNumberNotice.alert ? (
+                    <span className="text-black ">
+                      {phoneNumberNotice.message}
+                    </span>
                   ) : (
-                    <span className="text-red-500 ">{numNotice.message}</span>
+                    <span className="text-red-500 ">
+                      {phoneNumberNotice.message}
+                    </span>
                   )}
                 </div>
               </div>
             </div>
           </div>
-          <div className="mb-5">
+          {/* <div className="mb-5">
             <input
               type="text"
               name="repass"
               className="w-full p-2 border bg-transparent"
               placeholder="인증번호 입력하세요"
             />
-          </div>
+          </div> */}
           <div className="">
             <button
               type="submit"
