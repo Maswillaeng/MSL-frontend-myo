@@ -1,9 +1,15 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Editor from "../components/boardWrite/Editor";
 import axios from "axios";
 import CategorySelector from "../components/category/CategorySelector";
 const BoardWrite = () => {
+  // title Focus
+  const titleInputRef = useRef(null);
+
+  // content Focus
+  const contentEditorRef = useRef(null);
+
   // 글 카테고리
   let categories = [
     { id: 0, name: "RECIPE" },
@@ -47,17 +53,18 @@ const BoardWrite = () => {
   // submit
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    let { title, content } = posting;
-    if (title.trim() === "") {
-      alert("제목을 입력해주세요");
-      return;
+    let { title, content, category } = posting;
+    if (!title.trim()) {
+      return titleInputRef.current.focus();
     }
 
-    if (content.trim() === "") {
-      alert("내용을 입력해주세요");
+    if (category === "") {
+      alert("카테고리를 선택해주세요");
       return;
     }
-
+    if (!content.trim()) {
+      return contentEditorRef.current.querySelector(".ql-editor").focus();
+    }
     postingSubmitData();
   };
 
@@ -90,19 +97,13 @@ const BoardWrite = () => {
             onChange={onTitleHandler}
             value={posting.title}
             placeholder="제목"
+            ref={titleInputRef}
           />
         </div>
-        <Editor value={posting.content} onChange={onEditorChange} />{" "}
-        <div className="absolute right-28 bottom-[-80px]">
-          <span
-            className={`${
-              posting.content.length >= 2000 ? "text-red-500" : "text-gray-500"
-            }`}
-          >
-            {posting.content.length}
-          </span>{" "}
-          <span className="font-bold">/2000</span>
-        </div>
+        <div ref={contentEditorRef}>
+          <Editor value={posting.content} onChange={onEditorChange} />
+        </div>{" "}
+        <div className="absolute right-28 bottom-[-80px]"></div>
       </div>{" "}
       <div className="flex justify-center gap-20 ">
         {" "}

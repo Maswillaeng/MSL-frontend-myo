@@ -78,6 +78,7 @@ const Editor = ({ value, onChange }) => {
 
   return (
     <ReactQuill
+      placeholder="내용을 입력해주세요"
       className="w-5/6  mx-auto h-96"
       theme="snow"
       modules={modules}
