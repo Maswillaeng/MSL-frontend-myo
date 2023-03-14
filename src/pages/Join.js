@@ -3,11 +3,11 @@ import { useState, useRef } from "react";
 import { FaLock, FaLockOpen } from "react-icons/fa";
 import { AiFillPlusCircle } from "react-icons/ai";
 import axios from "axios";
-//import { useDispatch } from "react-redux";
-//import { registerUser } from "../actions/store";
+import { Formik, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { toast, ToastContainer } from "react-toastify";
 
 const Join = () => {
-  //const dispatch = useDispatch();
   const [join, setJoin] = useState({
     email: "",
     password: "",
@@ -17,7 +17,12 @@ const Join = () => {
     userImage: "/img/user.jpg",
     introduction: "",
   });
-
+  const schema = Yup.object().shape({
+    email: Yup.string().matches(
+      /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+      "올바른 이메일 형식으로 작성해주세요"
+    ),
+  });
   const fileInput = useRef(null);
 
   const [emailNotice, setEmailNotice] = useState({});
@@ -296,7 +301,7 @@ const Join = () => {
   return (
     <div className="py-14 flex items-center justify-center ">
       <div className="w-96 mx-auto text-center">
-        {" "}
+        <ToastContainer />{" "}
         <h1 className="mb-10 font-black text-3xl text-yellow-500 ">
           MASHILLAENG
         </h1>

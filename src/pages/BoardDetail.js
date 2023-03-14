@@ -1,13 +1,38 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AiOutlineHeart } from "react-icons/ai";
 import { FiShare } from "react-icons/fi";
 import { BsThreeDots } from "react-icons/bs";
-
+import axios from "axios";
 import Comments from "../components/boardDetail/Comments";
 const BoardDetail = () => {
   const [userImage, setUserImage] = useState("/img/user.jpg");
+  // 게시글 정보
+  const [post, setPost] = useState([]);
+  // 현재 사용자가 해당 게시글의 작성자인지 여부
+  const [isWriter, setIsWriter] = useState(false);
   //const [isLiked, setIsLiked] = useState("");
+  // useEffect(() => {
+  //   const fetchPost = async () => {
+  //     try {
+  //       const res = await axios.get(`/api/post/${postId}`);
+
+  //       if (res.data && res.data.length === 0) {
+  //         alert("조회된 결과가 없습니다");
+  //       } else {
+  //         setPost(res.data.result);
+  //         setIsWriter(res.data.result.isWriter);
+
+  //         await axios.post(`/api/post/${postId}`);
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
+
+  //   fetchPost();
+  // }, [_id]);
+
   return (
     <div className="mx-auto max-w-4xl py-24 ">
       <div className=" mb-10 flex items-center justify-between">

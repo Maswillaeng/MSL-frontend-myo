@@ -1,12 +1,16 @@
 import React from "react";
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Editor from "../components/boardWrite/Editor";
 import axios from "axios";
+import { toast } from "react-toastify";
 import CategorySelector from "../components/category/CategorySelector";
+import { Link } from "react-router-dom";
 const BoardWrite = () => {
   // title Focus
   const titleInputRef = useRef(null);
-
+  // 페이지 이동
+  const navigate = useNavigate();
   // content Focus
   const contentEditorRef = useRef(null);
 
@@ -24,6 +28,7 @@ const BoardWrite = () => {
     category: "",
     thumbnail: "",
   });
+
   // title 작성
   const onTitleHandler = (e) => {
     setPosting((prevState) => ({
@@ -31,29 +36,36 @@ const BoardWrite = () => {
       title: e.target.value,
     }));
   };
+  let { title, content, category } = posting;
   // 게시글데이터 전송
   const postingSubmitData = async (e) => {
-    const { title, content, thumbnail, category } = posting;
-    let contentData = {
-      title,
-      content,
-      thumbnail,
-      category,
-    };
-
     try {
-      const response = await axios.post("/api/post", { contentData });
-      console.log(response);
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      formData.append("category", category);
+      //인증된 사용자만 이용할 수 있는 기능이므로 미리 정의한 api라는 axios interceptor로 user의 id를 토큰에서 얻은 후 같이 서버에 요청을 보낸다.
+      // formData.append("user_id", jwtUtils.getId(token));
+
+      const response = await axios.post("/api/post", formData);
+
+      if (response.data && response.data.ok === 1) {
+        let postId = response.data.insertedId;
+
+        navigate(`/api/post/${postId}`);
+        setPosting({ title: "", content: "", category: "", thumbnail: "" });
+        console.log(response);
+      }
       // 게시물 등록이 성공하면 posting 상태를 초기화
-      setPosting({ title: "", content: "", category: "", thumbnail: "" });
     } catch (error) {
       console.log(error);
+      alert("게시물을 저장하는 도중 오류가 발생하였습니다.");
     }
   };
   // submit
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    let { title, content, category } = posting;
+
     if (!title.trim()) {
       return titleInputRef.current.focus();
     }
