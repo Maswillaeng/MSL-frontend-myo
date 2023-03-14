@@ -17,6 +17,7 @@ import MyPage from "./pages/MyPage";
 import BoardWrite from "./pages/BoardWrite";
 import axios from "axios";
 import Join from "./pages/Join";
+// import PrivateRoute from "./routes/PrivateRoute";
 
 // axios 쿠키 주고 받기
 axios.defaults.withCredentials = true;
@@ -32,7 +33,11 @@ root.render(
           <Route path="/Join" element={<Join />} />
           <Route path="/LoginForm" element={<LoginForm />} />
           <Route path="/Board" element={<BoardDetail />} />
-          <Route path="/BoardWrite" element={<BoardWrite />} />
+          <Route
+            path="/BoardWrite"
+            element={<BoardWrite />}
+            // element={<PrivateRoute path="/BoardWrite" component={BoardWrite} />}
+          />
           <Route path="/MyPage/:userId" element={<MyPage />} />
         </Routes>
       </BrowserRouter>
