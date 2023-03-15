@@ -3,9 +3,9 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Editor from "../components/boardWrite/Editor";
 import axios from "axios";
-import { toast } from "react-toastify";
+
 import CategorySelector from "../components/category/CategorySelector";
-import { Link } from "react-router-dom";
+
 const BoardWrite = () => {
   // title Focus
   const titleInputRef = useRef(null);

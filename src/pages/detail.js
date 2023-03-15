@@ -133,14 +133,12 @@ const BoardDetail = () => {
             <DialogTitle>{"Use Google's location service?"}</DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-slide-description">
-                Let Google help apps determine location. This means sending
-                anonymous location data to Google, even when no apps are
-                running.
+                삭제하시겠습니까?
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <button onClick={handleClose}>Disagree</button>
-              <button onClick={handleClose}>Agree</button>
+              <button onClick={handleClose}>예</button>
+              <button onClick={handleClose}>아니오</button>
             </DialogActions>
           </Dialog>
         </div>

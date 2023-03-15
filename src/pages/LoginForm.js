@@ -1,36 +1,39 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { setCookie } from "../function/cookies";
+// import { setCookie } from "../function/cookies";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setToken } from "../redux/reducers/AuthReducer";
 
 const LoginForm = () => {
   const navigation = useNavigate();
+  const dispatch = useDispatch();
   const [errmessage, setErrmessage] = useState("");
 
   // 유저 입력 데이터 묶기
-  const [user, setUser] = useState({
-    userId: "",
-    userPwd: "",
+  const [join, setJoin] = useState({
+    email: "",
+    password: "",
   });
-  const { userId, userPwd } = user;
+
   const inputValue = (e) => {
     const { name, value } = e.target;
-    setUser({
-      ...user,
+    setJoin({
+      ...join,
       [name]: value,
     });
   };
-
+  const { email, password } = join;
   // 로그인 유효성
   const loginSubmit = (e) => {
     e.preventDefault();
-    console.log(user);
 
     //유효성 검사
-    if (userId === "" || userPwd === "") {
+    if (email === "" || password === "") {
       setErrmessage("아이디 비밀번호를 입력해주세요");
       return;
     }
+    loginForm();
     // 요청 (맞는 문법인지 아직 모르겠음)
     // axios.post(`http://localhost:8000/login`,{
     // id: userId,
@@ -53,7 +56,18 @@ const LoginForm = () => {
     // setErrmessage('아이디 또는 비밀번호가 맞지 않습니다');
     // })
   };
-
+  const loginForm = async () => {
+    try {
+      const { data } = await axios.post("/api/auth/login", { email, password });
+      dispatch(setToken(data.jwt));
+      alert("로그인 성공");
+      setTimeout(() => {
+        navigation("/");
+      }, 2000);
+    } catch (e) {
+      console.log("error");
+    }
+  };
   return (
     <div>
       <div
@@ -77,8 +91,8 @@ const LoginForm = () => {
                 <input
                   className="rounded-3xl border-none bg-gray-50 bg-opacity-20 px-6 py-2 placeholder-slate-100 outline-none backdrop-blur-md"
                   onChange={inputValue}
-                  value={userId}
-                  name="userId"
+                  value={email}
+                  name="email"
                   type="text"
                   placeholder="아이디"
                 />
@@ -87,8 +101,8 @@ const LoginForm = () => {
                 <input
                   className="rounded-3xl border-none bg-gray-50 bg-opacity-20 px-6 py-2 placeholder-slate-100 outline-none backdrop-blur-md"
                   onChange={inputValue}
-                  value={userPwd}
-                  name="userPwd"
+                  value={password}
+                  name="password"
                   type="password"
                   placeholder="비밀번호"
                 />

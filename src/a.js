@@ -1,21 +1,100 @@
-import jwtDecode from "jwt-decode";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Formik, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { Button, TextField } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+// SignUp 컴포넌트 scss 이용
+import "../sign-up/signUp.scss";
+import { useDispatch } from "react-redux";
+import { setToken } from "../../redux/reducers/AuthReducer";
 
-export class jwtUtils {
-  // 토큰 유효성 검사
-  static isAuth(token) {
-    if (!token) {
-      return false;
+const Login = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const validationSchema = Yup.object().shape({
+    email: Yup.string()
+      .email("올바른 이메일 형식이 아닙니다!")
+      .required("이메일을 입력하세요!"),
+    password: Yup.string().required("패스워드를 입력하세요!"),
+  });
+  const submit = async (values) => {
+    const { email, password } = values;
+    try {
+      const { data } = await axios.post("/api/auth/signin", {
+        email,
+        password,
+      });
+      dispatch(setToken(data.jwt));
+      toast.success(<h3>로그인 성공😎</h3>, {
+        position: "top-center",
+        autoClose: 2000,
+      });
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    } catch (e) {
+      // 서버에서 받은 에러 메시지 출력
+      toast.error(e.response.data.message + "😭", {
+        position: "top-center",
+      });
     }
-    const decoded = jwtDecode(token);
-    if (decoded.exp > new Date().getTime() / 1000) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-  // 토큰에서 유저 id 가져오기
-  static getId(token) {
-    const decoded = jwtDecode(token);
-    return decoded.jti;
-  }
-}
+  };
+
+  return (
+    <Formik
+      initialValues={{
+        email: "",
+        password: "",
+      }}
+      validationSchema={validationSchema}
+      onSubmit={submit}
+    >
+      {({ values, handleSubmit, handleChange }) => (
+        <div className="signup-wrapper">
+          <ToastContainer />
+          <form onSubmit={handleSubmit} autoComplete="off">
+            <div className="input-forms">
+              <div className="input-forms-item">
+                <div className="input-label">이메일</div>
+                <TextField
+                  value={values.email}
+                  name="email"
+                  variant="outlined"
+                  onChange={handleChange}
+                />
+                <div className="error-message">
+                  <ErrorMessage name="email" />
+                </div>
+              </div>
+              <div className="input-forms-item">
+                <div className="input-label">비밀번호</div>
+                <TextField
+                  value={values.password}
+                  name="password"
+                  variant="outlined"
+                  type="password"
+                  onChange={handleChange}
+                />
+                <div className="error-message">
+                  <ErrorMessage name="password" />
+                </div>
+              </div>
+              <Button
+                color="primary"
+                variant="contained"
+                fullWidth
+                type="submit"
+              >
+                로그인
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
+    </Formik>
+  );
+};
+
+export default Login;

@@ -1,46 +1,32 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 import App from "./App";
-
+import axios from "axios";
 //import Boardwrite from "./pages/BoardWrite";
-import Header from "./components/Header";
 
 import { Provider } from "react-redux";
-import store from "./actions/store";
-import BoardDetail from "./pages/BoardDetail";
-import Board from "./pages/Board";
-import LoginForm from "./pages/LoginForm";
-import MyPage from "./pages/MyPage";
-import BoardWrite from "./pages/BoardWrite";
-import axios from "axios";
-import Join from "./pages/Join";
-// import PrivateRoute from "./routes/PrivateRoute";
 
+// import PrivateRoute from "./routes/PrivateRoute";
+import store from "./redux/configStore";
+import { PersistGate } from "redux-persist/integration/react";
+import persistStore from "redux-persist/es/persistStore";
 // axios 쿠키 주고 받기
 axios.defaults.withCredentials = true;
+const persistor = persistStore(store);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Board />} />
-          <Route path="/Join" element={<Join />} />
-          <Route path="/LoginForm" element={<LoginForm />} />
-          <Route path="/Board" element={<BoardDetail />} />
-          <Route
-            path="/BoardWrite"
-            element={<BoardWrite />}
-            // element={<PrivateRoute path="/BoardWrite" component={BoardWrite} />}
-          />
-          <Route path="/MyPage/:userId" element={<MyPage />} />
-        </Routes>
-      </BrowserRouter>
+      <PersistGate persistor={persistor}>
+        <BrowserRouter>
+          {" "}
+          <App />
+        </BrowserRouter>
+      </PersistGate>
     </Provider>
   </React.StrictMode>
 );
