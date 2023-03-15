@@ -15,8 +15,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
+// import Slide from "@mui/material/Slide";
+// import { TransitionProps } from "@mui/material/transitions";
 
 const BoardDetail = () => {
   // 토큰가지고오기
@@ -31,7 +31,14 @@ const BoardDetail = () => {
   // URL 파라미터 받기 - post의 id
   const { postId } = useParams();
   // 삭제 modal이 보이는 여부 상태
-  const [show, setShow] = useState(false);
+  const [open, setOpen] = useState(false);
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
   // post 가져오기
   useEffect(() => {
     const getBoard = async () => {
@@ -60,7 +67,7 @@ const BoardDetail = () => {
                   <button
                     className="delete-button"
                     onClick={() => {
-                      setShow(true);
+                      setOpen(true);
                     }}
                   >
                     삭제
@@ -111,7 +118,9 @@ const BoardDetail = () => {
                 <BsThreeDots />
               </div>
             </div>
-
+            <button className="delete-button" onClick={handleClickOpen}>
+              삭제
+            </button>
             <Comments />
           </div>
           <Dialog
