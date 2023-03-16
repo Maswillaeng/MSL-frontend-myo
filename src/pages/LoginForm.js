@@ -37,7 +37,7 @@ const LoginForm = () => {
     }
     onValid();
 
-      // 요청 (testing)
+    // 요청 (testing)
     //   axios.post(`/api/auth/login/`,{
     //   email: email,
     //   password: password
@@ -58,14 +58,14 @@ const LoginForm = () => {
     // 입력값 초기화
     setJoin((prevState) => ({ ...prevState, password: "" }));
     const response = await loginUser({ email, password });
-    if (response.status) {
+    if (response.status === 200) {
       // 쿠키에 Refresh Token, store에 Access Token 저장
       setRefreshToken(response.json.refresh_token);
       dispatch(SET_TOKEN(response.json.access_token));
 
       return navigate("/");
     } else {
-      console.log(response.json);
+      setErrmessage("아이디 비밀번호가 일치하지않습니다");
     }
   };
   return (

@@ -22,31 +22,67 @@ const timeoutPromise = () => {
 const getPromise = async (url, option) => {
   return await Promise.race([requestPromise(url, option), timeoutPromise()]);
 };
+// login
 
 export const loginUser = async (credentials) => {
-  const option = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json;charset=UTF-8",
-    },
-    data: JSON.stringify(credentials),
-  };
-
-  const data = await getPromise("/api/auth/login", option).catch(() => {
-    return statusError;
-  });
-
-  if (parseInt(Number(data.status) / 100) === 2) {
-    const status = data.status;
-    const code = data.status;
-    const json = data.data;
-
+  try {
+    const response = await axios.post("/api/auth/login", credentials, {
+      headers: {
+        "Content-Type": "application/json;charset=UTF-8",
+      },
+    });
+    const status = response.status;
+    const code = response.status;
+    const json = response.data;
     return {
       status,
       code,
       json,
     };
-  } else {
+  } catch (error) {
+    if (error.response) {
+      const status = error.response.status;
+      const code = error.response.status;
+      const json = error.response.data;
+      return {
+        status,
+        code,
+        json,
+      };
+    } else {
+      return statusError;
+    }
+  }
+};
+// logout
+
+export const requestToken = async (refreshToken) => {
+  try {
+    const response = await axios.post(
+      "/login-url",
+      {
+        refresh_token: refreshToken,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8",
+        },
+      }
+    );
+
+    const { status, data, statusText } = response;
+
+    if (parseInt(status / 100) === 2) {
+      return {
+        status,
+        code: statusText,
+        json: data,
+      };
+    } else {
+      return statusError;
+    }
+  } catch (error) {
+    console.error(error);
     return statusError;
   }
 };
