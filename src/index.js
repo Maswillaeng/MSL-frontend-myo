@@ -6,28 +6,26 @@ import "./index.css";
 import App from "./App";
 import axios from "axios";
 //import Boardwrite from "./pages/BoardWrite";
-
 import { Provider } from "react-redux";
-
+import { CookiesProvider } from "react-cookie";
+import store from "./store";
 // import PrivateRoute from "./routes/PrivateRoute";
-import store from "./redux/configStore";
-import { PersistGate } from "redux-persist/integration/react";
-import persistStore from "redux-persist/es/persistStore";
+
 // axios 쿠키 주고 받기
 axios.defaults.withCredentials = true;
-const persistor = persistStore(store);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <PersistGate persistor={persistor}>
+    <CookiesProvider>
+      {" "}
+      <Provider store={store}>
         <BrowserRouter>
           {" "}
           <App />
         </BrowserRouter>
-      </PersistGate>
-    </Provider>
+      </Provider>
+    </CookiesProvider>
   </React.StrictMode>
 );
 

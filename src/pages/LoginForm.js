@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 // import { setCookie } from "../function/cookies";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setToken } from "../redux/reducers/AuthReducer";
+import { loginUser } from "../api/User.js";
+import { setRefreshToken } from "../storage/Cookie";
+import { SET_TOKEN } from "../store/Auth";
 
 const LoginForm = () => {
-  const navigation = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [errmessage, setErrmessage] = useState("");
 
@@ -33,7 +35,7 @@ const LoginForm = () => {
       setErrmessage("아이디 비밀번호를 입력해주세요");
       return;
     }
-    loginForm();
+    onValid();
     // 요청 (맞는 문법인지 아직 모르겠음)
     // axios.post(`http://localhost:8000/login`,{
     // id: userId,
@@ -56,16 +58,18 @@ const LoginForm = () => {
     // setErrmessage('아이디 또는 비밀번호가 맞지 않습니다');
     // })
   };
-  const loginForm = async () => {
-    try {
-      const { data } = await axios.post("/api/auth/login", { email, password });
-      dispatch(setToken(data.jwt));
-      alert("로그인 성공");
-      setTimeout(() => {
-        navigation("/");
-      }, 2000);
-    } catch (e) {
-      console.log("error");
+  const onValid = async () => {
+    // 입력값 초기화
+    setJoin((prevState) => ({ ...prevState, password: "" }));
+    const response = await loginUser({ email, password });
+    if (response.status) {
+      // 쿠키에 Refresh Token, store에 Access Token 저장
+      setRefreshToken(response.json.refresh_token);
+      dispatch(SET_TOKEN(response.json.access_token));
+
+      return navigate("/");
+    } else {
+      console.log(response.json);
     }
   };
   return (
