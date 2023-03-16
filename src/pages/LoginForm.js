@@ -46,12 +46,6 @@ const LoginForm = () => {
     // })
     //     .then(res => {
     //         console.log(res)
-    //
-    //         // 받아온 토큰 저장 처리
-    //         setCookie(user.email)
-    //         sessionStorage.setItem('access',res.data.accessToken);
-    //         // 만료시간..?
-    //         sessionStorage.setItem('accessTime',res.data.tokenTime);
     //         navigation("/");
     // }).catch(err => {
     // console.log(err.exception)
@@ -110,7 +104,7 @@ const LoginForm = () => {
                   type="password"
                   placeholder="비밀번호"
                 />
-                <div className="text-center font-bold text-white">
+                <div className="mt-3 text-center text-sm font-bold text-white">
                   {errmessage}
                 </div>
               </div>

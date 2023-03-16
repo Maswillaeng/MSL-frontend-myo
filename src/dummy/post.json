@@ -1,0 +1,69 @@
+[
+      {
+        "post_id": "post-id",
+        "nickname": "myomyo",
+        "thumbnail": "",
+        "title": "첫 게시글",
+        "content": "악 떨려욤",
+        "view": "22",
+        "like": "11",
+        "creatAt": "2023-03-03 16:13:22",
+        "commentCount": "2",
+        "hashTag": "#해시태그",
+        "category": "recipe"
+      },
+      {
+        "post_id": "post-id",
+        "nickname": "아니아니",
+        "thumbnail": "",
+        "title": "으잉",
+        "content": "활동좀해 ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ",
+        "view": "22",
+        "like": "11",
+        "creatAt": "2023-03-03 16:13:22",
+        "commentCount": "2",
+        "hashTag": "#해시태그",
+        "category": "recipe"
+      },
+      {
+        "post_id": "post-id",
+        "nickname": "myomyoring",
+        "thumbnail": "",
+        "title": "두번 게시글",
+        "content": "그 사이에 누가 썼네 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ",
+        "view": "33",
+        "like": "17",
+        "creatAt": "2023-03-04 16:13:22",
+        "commentCount": "0",
+        "hashTag": "#해시태그",
+        "category": "cocktail"
+      },
+      {
+        "post_id": "post-id",
+        "nickname": "myohan",
+        "thumbnail": "",
+        "title": "게시글 어케 씀",
+        "content": "잘쓰고 있는건가 관종띠",
+        "view": "0",
+        "like": "0",
+        "creatAt": "2023-03-06 16:13:22",
+        "commentCount": "0",
+        "hashTag": "",
+        "category": "etc"
+      },
+      {
+        "post_id": "post-id",
+        "nickname": "myoring",
+        "thumbnail": "",
+        "title": "가입한 적 없는데?",
+        "content": "칵테일바 놀러오라는 낚시",
+        "view": "67905",
+        "like": "11012",
+        "creatAt": "2023-03-10 16:13:22",
+        "commentCount": "89",
+        "hashTag": "#해시태그",
+        "category": "etc"
+      }
+    ]
+  }
+  ]
