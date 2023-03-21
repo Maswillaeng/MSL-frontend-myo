@@ -36,20 +36,22 @@ const LoginForm = () => {
       return;
     }
     onValid();
-    // 요청 (맞는 문법인지 아직 모르겠음)
-    // axios.post(`http://localhost:8000/login`,{
-    // id: userId,
-    // password: userPwd
-    // },{ headers: {
-    //         "Content-Type": `application/json`,
-    //     },
-    // })
-    //     .then(res => {
-    //         console.log(res)
-    //         navigation("/");
-    // }).catch(err => {
-    // console.log(err.exception)
-    // setErrmessage('아이디 또는 비밀번호가 맞지 않습니다');
+
+      // 요청 (testing)
+    //   axios.post(`/api/auth/login/`,{
+    //   email: email,
+    //   password: password
+    //   },{
+    //   headers: {
+    //     "Content-Type": `application/json`,
+    //       },
+    //   })
+    //       .then(res => {
+    //           console.log(res)
+    //           navigate("/");
+    //   }).catch(err => {
+    //   console.log(err.exception)
+    //   setErrmessage('아이디 또는 비밀번호가 맞지 않습니다');
     // })
   };
   const onValid = async () => {

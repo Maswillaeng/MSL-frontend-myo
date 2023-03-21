@@ -1,12 +1,34 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Link} from "react-router-dom";
+import {Pagination} from "@mui/material";
 
-const EtcTab = ({etcList, loading}) => {
-    const [etc, setEtc] = useState('')
-    useEffect(()=>{
-        setEtc(etcList.length)
-        console.log(etcList)
-    },[])
+
+const AllTab = ({allList, etc, loading}) => {
+    // 검색
+    const [userInput, setUserInput] = useState('')
+    const getSearchValue = (e) => {
+        setUserInput(e.target.value)
+    }
+    const searched = allList.filter((item) =>
+    item.title.includes(userInput)
+    )
+
+    // 페이지 네이션
+    // 현재 페이지
+    const [currentPage, setCurrentPage] = useState(1);
+    // 게시물 자를 갯수
+    const [postsPerPage, setPostsPerPage] = useState(6);
+    // 페이징 끝 번호
+    const indexOfLast = currentPage * postsPerPage;
+    // 페이징 첫 번호
+    const indexOfFirst = indexOfLast - postsPerPage;
+
+    // 첫번호 끝번호로 현재페이지에서 보여줄 숫자 배열 만들기
+    const pageNumbers = [];
+    for (let i = 1; i <= Math.ceil(etc / postsPerPage); i++) {
+        pageNumbers.push(i);
+    }
+
     return (
         <>
             {/* 게시물 수 확인 용 */}
@@ -61,7 +83,8 @@ const EtcTab = ({etcList, loading}) => {
 
                                 {/* 게시물 */}
                                 {
-                                    etcList.map((post, index) => {
+                                    allList.slice(indexOfFirst, indexOfLast)
+                                        .map((post, index) => {
                                         return (
                                             <tr className="flex" key={index}>
                                                 <td className="w-2/3 px-4 py-4">
@@ -116,50 +139,25 @@ const EtcTab = ({etcList, loading}) => {
                 </div>
             </div>
 
-            {/* 페이징 */
-            }
-            <div className="flex items-center justify-between mt-6">
-                <div className="m-auto items-center hidden md:flex gap-x-3">
-                    <a
-                        href="#"
-                        className="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60"
-                    >
-                        1
-                    </a>
-                    <a
-                        href="#"
-                        className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                    >
-                        2
-                    </a>
-                    <a
-                        href="#"
-                        className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                    >
-                        3
-                    </a>
-                    <a
-                        href="#"
-                        className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                    >
-                        4
-                    </a>
-                    <a
-                        href="#"
-                        className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                    >
-                        5
-                    </a>
-                    <a
-                        href="#"
-                        className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                    >
-                        6
-                    </a>
-                </div>
+            {/* 페이징 */}
+            {/*<Pagination count={10}></Pagination>*/}
+            <div className="">
+                <nav>
+                    <ul className="pagination flex m-auto">
+                        {pageNumbers.map((number) => (
+                            <li key={number} className="page-item mx-3">
+                                <button onClick={() => setCurrentPage(number)} className="page-link">
+                                    {number}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
             </div>
+            <Pagination count={ pageNumbers } defaultPage={1}>
+            </Pagination>
         </>
     );
 };
 
-export default EtcTab;
+export default AllTab;
