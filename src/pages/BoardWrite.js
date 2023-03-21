@@ -51,7 +51,6 @@ const BoardWrite = () => {
 
       if (response.data && response.data.ok === 1) {
         let postId = response.data.insertedId;
-
         navigate(`/api/post/${postId}`);
         setPosting({ title: "", content: "", category: "", thumbnail: "" });
         console.log(response);

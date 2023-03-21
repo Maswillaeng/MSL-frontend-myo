@@ -1,7 +1,7 @@
 import "./App.css";
 import "./style/input.css";
 import Header from "./components/Header";
-import { useSelector } from "react-redux";
+
 import { Routes, Route } from "react-router-dom";
 import BoardDetail from "./pages/BoardDetail";
 import Board from "./pages/Board";

@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { AiOutlineHeart } from "react-icons/ai";
 import { FiShare } from "react-icons/fi";
@@ -29,6 +29,7 @@ const BoardDetail = () => {
   const { postId } = useParams();
   // 삭제 modal이 보이는 여부 상태
   const [open, setOpen] = useState(false);
+  const copyUrlRef = useRef();
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -36,6 +37,17 @@ const BoardDetail = () => {
   const handleClose = () => {
     setOpen(false);
   };
+
+  // post 가져오기
+  useEffect(() => {
+    const getBoard = async () => {
+      const { data } = await axios.get(`/api/post/${postId}`);
+      return data;
+    };
+    getBoard()
+      .then((result) => setPost(result))
+      .then(() => setIsLoaded(true));
+  }, []);
   // modal 효과
   // const Transition = React.forwardRef(function Transition(
   //   props: TransitionProps & {
@@ -45,33 +57,32 @@ const BoardDetail = () => {
   // ) {
   //   return <Slide direction="up" ref={ref} {...props} />;
   // });
-  // post 가져오기
-  // useEffect(() => {
-  //   const getBoard = async () => {
-  //     const { data } = await axios.get(`/api/post/${postId}`);
-  //     return data;
-  //   };
-  //   getBoard()
-  //     .then((result) => setPost(result))
-  //     .then(() => setIsLoaded(true));
-  // }, []);
+
+  // url 복사
+  const copyUrl = () => {};
+  // report 복사
+  const report = () => {};
   return (
     <React.Fragment>
       <div className="mx-auto max-w-4xl py-24 ">
         <div className=" mb-10 flex items-center justify-between">
           <div>
-            <h2 className="mb-2 font-bold text-red-500">칵테일</h2>
+            <h2 className="mb-2 font-bold text-red-500">
+              {post.category}칵테일
+            </h2>
             <div className="mb-2 text-2xl font-black">
-              무슨 칵테일이 어쩌고 저쩌고
+              {post.title}무슨 칵테일이 어쩌고 저쩌고
             </div>
             <div>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 border-2 rounded-full overflow-hidden">
-                  <img src={userImage} className="w-10 h-10" alt="" />
+                  <img src={post.userImage} className="w-10 h-10" alt="" />
                 </div>
-                <div className="font-bold relative ">닉네임</div>
-                <div class="w-0.5 h-5 bg-gray-200 after:absolute after:inset-0 after:content after:''"></div>
-                <div className="text-slate-400 text-s">2023.2.26 19:01</div>
+                <div className="font-bold relative ">{post.nickname}닉네임</div>
+                <div className="w-0.5 h-5 bg-gray-200 after:absolute after:inset-0 after:content after:''"></div>
+                <div className="text-slate-400 text-s">
+                  {post.created_at}2023.2.26 19:01
+                </div>
               </div>
             </div>
           </div>
@@ -80,14 +91,18 @@ const BoardDetail = () => {
             <div>0</div>
           </div>
         </div>
-        <div className="mb-5 h-96 border-2 p-10 bg-white"> 텍스트 내용</div>
+        <div className="mb-5 h-96 border-2 p-10 bg-white">
+          {" "}
+          {post.content}텍스트 내용
+        </div>
         <div className="text-right">
           {" "}
           <div className=" text-red-500 mb-10 inline-flex gap-7 rounded-full border border-red-500  py-3 px-7 align-middle text-xl">
             {" "}
-            <FiShare />
-            <BsThreeDots />
-          </div>
+            <FiShare onClick={copyUrl} />
+            <BsThreeDots onClick={report} />
+          </div>{" "}
+          <div>d</div>
         </div>
         <button className="delete-button" onClick={handleClickOpen}>
           삭제

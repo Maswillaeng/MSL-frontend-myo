@@ -1,10 +1,12 @@
 import React from "react";
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaLock, FaLockOpen } from "react-icons/fa";
 import { AiFillPlusCircle } from "react-icons/ai";
 import axios from "axios";
 
 const Join = () => {
+  const navigate = useNavigate();
   const [join, setJoin] = useState({
     email: "",
     password: "",
@@ -63,13 +65,12 @@ const Join = () => {
       introduction: value,
     }));
   };
-  // email 검사 & 중복검사
+  let { email } = join;
   const onEmailHandler = (e) => {
     const value = e?.currentTarget?.value;
     setJoin((prevState) => ({ ...prevState, email: value }));
   };
-  const onBlurEmailHandler = async () => {
-    let { email } = join;
+  const onBlurEmailHandler = () => {
     if (email === "") {
       setEmailNotice({ message: "필수항목입니다.", alert: false });
       return;
@@ -79,30 +80,44 @@ const Join = () => {
         alert: false,
       });
       return;
-    } else {
-      // setEmailNotice({
-      //   message: "사용가능한 이메일입니다.",
-      //   alert: true,
-      // });
-      try {
-        const response = await axios.post(
-          "/api/auth/duplicate/email",
-          { email },
-          { headers: { "Content-Type": "application/json" } }
-        );
-        if (response.status === 200) {
-          setEmailNotice({ message: "사용 가능한 이메일입니다.", alert: true });
-        } else if (response.status === 409) {
-          setEmailNotice({
-            message: "이미 사용중인 이메일입니다.",
-            alert: false,
-          });
-        }
-      } catch (error) {
-        console.log(error);
-      }
     }
   };
+  // email 검사 & 중복검사
+  const onCheckEmailHandler = async () => {
+    try {
+      const response = await axios.post(
+        "/api/auth/duplicate/email",
+        { email },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      if (response.status === 200) {
+        setEmailNotice({ message: "사용 가능한 이메일입니다.", alert: true });
+      } else if (response.status === 409) {
+        setEmailNotice({
+          message: "이미 사용중인 이메일입니다.",
+          alert: false,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // await axios
+  // .get(`/api/auth/duplicate/email?email=${email}`)
+  // .then((response) => {
+  //   setCheckEmail(response.data.checkEmail);
+  //   if (response) {
+  //     setEmailNotice({ message: "사용 가능한 이메일입니다.", alert: true });
+  //   } else if (response === false) {
+  //     setEmailNotice({
+  //       message: "이미 사용중인 이메일입니다.",
+  //       alert: false,
+  //     });
+  //   }
+  // })
+  // .catch((error) => {
+  //   console.log(error);
+  // });
   // Password 검사
   const onPasswordHandler = (e) => {
     const value = e?.currentTarget?.value;
@@ -153,6 +168,7 @@ const Join = () => {
       });
     }
   };
+  let { nickname } = join;
   // 닉네임 검사 & 중복검사
   const onNicknameHandler = (e) => {
     const value = e?.currentTarget?.value;
@@ -163,7 +179,6 @@ const Join = () => {
   };
 
   const onBlurNicknameHandler = async () => {
-    let { nickname } = join;
     if (nickname === "") {
       setNicknameNotice({ message: "필수항목입니다.", alert: false });
       return;
@@ -173,30 +188,29 @@ const Join = () => {
         alert: false,
       });
       return;
-    } else {
-      try {
-        const response = await axios.post(
-          "/api/auth/duplicate/name",
-          { nickname },
-          { headers: { "Context-Type": "application/json" } }
-        );
-        if (response.status === 200) {
-          setNicknameNotice({
-            message: "사용 가능한 닉네임입니다.",
-            alert: true,
-          });
-        } else if (response.status === 409) {
-          setNicknameNotice({
-            message: "이미 사용중인 닉네임입니다.",
-            alert: false,
-          });
-        }
-      } catch (error) {
-        console.log(error);
-      }
     }
-
-    return;
+  };
+  const onCheckNicknameHandler = async () => {
+    try {
+      const response = await axios.post(
+        "/api/auth/duplicate/nickname",
+        { nickname },
+        { headers: { "Context-Type": "application/json" } }
+      );
+      if (response.status === 200) {
+        setNicknameNotice({
+          message: "사용 가능한 닉네임입니다.",
+          alert: true,
+        });
+      } else if (response.status === 409) {
+        setNicknameNotice({
+          message: "이미 사용중인 닉네임입니다.",
+          alert: false,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
   //전화번호 검사
   const onNumberHandler = (e) => {
@@ -230,15 +244,12 @@ const Join = () => {
 
   //전송
   const onSubmitHandler = (e) => {
-    const { email, password, nickname, phoneNumber, userImage, introduction } =
-      join;
+    const { email, password, nickname, phoneNumber } = join;
     let userData = {
       email,
       password,
       nickname,
       phoneNumber,
-      userImage,
-      introduction,
     };
     e.preventDefault();
 
@@ -256,6 +267,7 @@ const Join = () => {
       try {
         const response = await axios.post("/api/auth/sign", { userData });
         console.log(response);
+        navigate("/");
       } catch (error) {
         console.log(error);
       }
@@ -264,32 +276,6 @@ const Join = () => {
     joinSubmitData();
   };
 
-  // 중복아이디 check
-  // const checkId = async (e) => {
-  //   e.preventDefault();
-  //   const { usableEmail } = { join };
-  //   try {
-  //     const response = await axios.post(
-  //       "/api/auth/sign",
-  //       { usableEmail },
-  //       { headers: { "Content-Type": "application/json" } }
-  //     );
-  //     if (response.status === 200) {
-  //       alert("사용 가능한 아이디 입니다.");
-  //       let copy = { ...join };
-  //       copy.usableEmail = true;
-  //       setJoin(copy);
-  //     } else if (response.status === 409) {
-  //       alert("이미 사용중인 아이디 입니다.");
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // 중복 닉네임
-
-  //---------------------
   return (
     <div className="py-14 flex items-center justify-center ">
       <div className="w-96 mx-auto text-center">
@@ -333,15 +319,27 @@ const Join = () => {
 
           <div className="flex flex-col ">
             <label className="mb-3 text-sm">아이디(이메일)</label>
-            <input
-              className=" mb-3 p-2 border "
-              type="text"
-              name="email"
-              value={join.email}
-              onChange={onEmailHandler}
-              onBlur={onBlurEmailHandler}
-              placeholder="이메일 입력"
-            />
+            <div className="flex gap-3">
+              {" "}
+              <input
+                className="w-3/4 mb-3 p-2 border "
+                type="text"
+                name="email"
+                value={join.email}
+                onChange={onEmailHandler}
+                onBlur={onBlurEmailHandler}
+                placeholder="이메일 입력"
+              />
+              <button
+                type="button"
+                className="h-10 w-1/4 bg-red-500 font-bold text-white "
+                onClick={onCheckEmailHandler}
+              >
+                {" "}
+                중복확인
+              </button>
+            </div>
+
             <div className="font-bold mb-3 text-xs text-right">
               {emailNotice.alert ? (
                 <span className="text-black">{emailNotice.message}</span>
@@ -406,15 +404,26 @@ const Join = () => {
           </div>
           <div className="flex flex-col ">
             <label className="mb-3 text-sm">닉네임</label>
-            <input
-              className="mb-5 p-2 border"
-              type="text"
-              name="repass"
-              value={join.nickname}
-              onChange={onNicknameHandler}
-              onBlur={onBlurNicknameHandler}
-              placeholder="닉네임 입력"
-            />
+            <div className="flex gap-3">
+              <input
+                className="w-3/4 mb-5 p-2 border"
+                type="text"
+                name="repass"
+                value={join.nickname}
+                onChange={onNicknameHandler}
+                onBlur={onBlurNicknameHandler}
+                placeholder="닉네임 입력"
+              />
+              <button
+                type="button"
+                className="w-1/4 h-10 bg-red-500 font-bold text-white"
+                onClick={onCheckNicknameHandler}
+              >
+                {" "}
+                중복확인
+              </button>
+            </div>
+
             <div className="font-bold mb-3 text-xs text-right">
               {nicknameNotice.alert ? (
                 <span className="text-black">{nicknameNotice.message}</span>
