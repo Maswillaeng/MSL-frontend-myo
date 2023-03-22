@@ -260,7 +260,6 @@ const Join = () => {
       !nicknameNotice.alert ||
       !phoneNumberNotice.alert
     ) {
-      console.log(userData);
       return alert("작성");
     }
     const joinSubmitData = async (e) => {
@@ -270,6 +269,7 @@ const Join = () => {
         navigate("/");
       } catch (error) {
         console.log(error);
+        console.log(userData);
       }
     };
 

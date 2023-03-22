@@ -1,9 +1,11 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { AiOutlineHeart } from "react-icons/ai";
 import { FiShare } from "react-icons/fi";
-import { BsThreeDots } from "react-icons/bs";
+import { MdOutlineReportProblem } from "react-icons/md";
+
 import axios from "axios";
 import Comments from "../components/boardDetail/Comments";
 // material
@@ -29,7 +31,10 @@ const BoardDetail = () => {
   const { postId } = useParams();
   // 삭제 modal이 보이는 여부 상태
   const [open, setOpen] = useState(false);
-  const copyUrlRef = useRef();
+  //현재 url
+  const location = useLocation();
+  // baseUrl
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -48,19 +53,25 @@ const BoardDetail = () => {
       .then((result) => setPost(result))
       .then(() => setIsLoaded(true));
   }, []);
-  // modal 효과
-  // const Transition = React.forwardRef(function Transition(
-  //   props: TransitionProps & {
-  //     children: React.ReactElement<any, any>,
-  //   },
-  //   ref: React.Ref<unknown>
-  // ) {
-  //   return <Slide direction="up" ref={ref} {...props} />;
-  // });
 
   // url 복사
-  const copyUrl = () => {};
-  // report 복사
+  const handleCopyClipBoard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("클립보드에 링크가 복사되었어요.");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleClick = (event) => {
+    const baseUrl = "http://localhost:3000";
+    const pathname = window.location.pathname;
+    const url = baseUrl + pathname;
+    handleCopyClipBoard(url);
+    console.log(url);
+  };
+  // report
   const report = () => {};
   return (
     <React.Fragment>
@@ -95,14 +106,13 @@ const BoardDetail = () => {
           {" "}
           {post.content}텍스트 내용
         </div>
-        <div className="text-right">
-          {" "}
-          <div className=" text-red-500 mb-10 inline-flex gap-7 rounded-full border border-red-500  py-3 px-7 align-middle text-xl">
-            {" "}
-            <FiShare onClick={copyUrl} />
-            <BsThreeDots onClick={report} />
-          </div>{" "}
-          <div>d</div>
+        <div className="select">
+          <div className="w-1/6 justify-between flex text-red-500 mb-10 rounded-full border border-red-500 py-3 px-7 align-middle text-xl">
+            <div onClick={handleClick}>
+              <FiShare />
+            </div>
+            <MdOutlineReportProblem onClick={report} />
+          </div>
         </div>
         <button className="delete-button" onClick={handleClickOpen}>
           삭제
