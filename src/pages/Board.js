@@ -6,7 +6,6 @@ import {Link} from "react-router-dom";
 import axios from "axios";
 import moment from 'moment';
 import 'moment/locale/ko';
-import DPOST from '../dummy/post.js';
 import All_tab from "../components/board/All_tab";
 
 const Board = () => {
@@ -38,11 +37,9 @@ const Board = () => {
         const [cockList, setCockList] = useState([]);
         const [recipeList, setRecipeList] = useState([]);
         const [etcList, setEtcList] = useState([]);
-
+        // 로딩 상태
         const [loading, setLoading] = useState(false);
         const [etc, setEtc] = useState();
-
-
 
         // 게시글 불러오기
         useEffect(() => {
@@ -59,22 +56,20 @@ const Board = () => {
             //
             //  setLoading(false)
 
-            // const ListData = async () => {
-            //     setLoading(true)
-            //     const res = await axios.get("/api/post");
-            //     setAllList(res.data.result);
-            //     setLoading(false)
-            // };
-            // ListData();
-            setLoading(true)
-            setAllList(DPOST)
-            setEtc(DPOST.length)
-            setRecipeList(allList.filter(item => item.category === "recipe"))
-            setCockList(allList.filter(item => item.category === "cocktail"))
-            setEtcList(allList.filter(item => item.category === "etc"))
+            const ListData = async () => {
+                setLoading(true)
+                try {
+                    const res = await axios.post("/api/post");
+                    console.log(res);
+                    setAllList(res.data);
+                    setLoading(false)
+                }
+                catch (err) {
+                    console.log(err);
+                };
+            };
 
-            setLoading(false)
-            // console.log(EtcData.code)
+            ListData();
         }, []);
 
         // 게시글 시간 표기
@@ -90,7 +85,7 @@ const Board = () => {
                             backgroundImage:
                                 "url(https://cdn.pixabay.com/photo/2015/03/30/12/35/mojito-698499_1280.jpg)",
                         }}
-                    ></div>
+                    />
 
                     {/* 탭 */}
                     <div className="w-full h-20">

@@ -1,19 +1,12 @@
 import React, {useState} from 'react';
 import {Link} from "react-router-dom";
 import {Pagination} from "@mui/material";
+import Search from "./Search";
 
 
 const AllTab = ({allList, etc, loading}) => {
-    // 검색
-    const [userInput, setUserInput] = useState('')
-    const getSearchValue = (e) => {
-        setUserInput(e.target.value)
-    }
-    const searched = allList.filter((item) =>
-    item.title.includes(userInput)
-    )
 
-    // 페이지 네이션
+    // 페이지 네이션 (게시물 후에 수정 예정!)
     // 현재 페이지
     const [currentPage, setCurrentPage] = useState(1);
     // 게시물 자를 갯수
@@ -27,6 +20,20 @@ const AllTab = ({allList, etc, loading}) => {
     const pageNumbers = [];
     for (let i = 1; i <= Math.ceil(etc / postsPerPage); i++) {
         pageNumbers.push(i);
+    }
+
+    // 검색 (테스트 중!)
+    const [userInput, setUserInput] = useState('')
+    const [searchFilterList, setSearchFilterList] = useState([])
+    const getSearchValue = (e) => {
+        setUserInput(e.target.value)
+    }
+    const onSearch = (e) => {
+        const filterData = allList.filter((item) =>
+        item.title.includes(userInput)
+    )
+            setSearchFilterList(filterData)
+            console.log(filterData)
     }
 
     return (
@@ -54,16 +61,15 @@ const AllTab = ({allList, etc, loading}) => {
                                         조회순
                                     </button>
                                 </div>
+
                                 {/* 검색, 글쓰기 버튼 */}
                                 <div className="flex justify-end">
                                     <div
                                         className="relative text-lg bg-transparent text-gray-800">
-                                        <div
-                                            className="inline-flex text-sm items-center border-b border-b-2 py-3">
-                                            <input
-                                                className="bg-transparent border-none mr-3 leading-tight focus:outline-none"
-                                                type="text" placeholder="검색"/>
-                                            <button className="right-10 top-0 mr-4">검색</button>
+                                        <div className="inline-flex text-sm items-center border-b border-b-2 py-3">
+                                            <input className="bg-transparent border-none mr-3 leading-tight focus:outline-none"
+                                                type="text" placeholder="검색" value={ userInput } onChange={ getSearchValue } />
+                                            <button className="right-10 top-0 mr-4" onClick={ onSearch } >검색</button>
                                         </div>
                                         <button
                                             className="w-16 rounded-md mx-3 h-8 text-sm text-white font-bold bg-[#EA4E4E]">
@@ -74,66 +80,41 @@ const AllTab = ({allList, etc, loading}) => {
                                     </div>
                                 </div>
                             </div>
+                            {loading && <div className="text-center"> 로딩 중... </div>}
 
-                            <table
-                                className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                {loading && <div className="text-center"> 로딩 중... </div>}
-                                <tbody
-                                    className="bg-transparent divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                            {/* 게시물 */}
+                            <div className="mx-1 grid grid-cols-4">
 
-                                {/* 게시물 */}
-                                {
-                                    allList.slice(indexOfFirst, indexOfLast)
-                                        .map((post, index) => {
-                                        return (
-                                            <tr className="flex" key={index}>
-                                                <td className="w-2/3 px-4 py-4">
-                                                                        <span
-                                                                            className="text-xs mt-1 rounded-md p-1 bg-amber-300">NEW
-                                                                        </span>
-                                                    <Link className="inline" to="/Board">
-                                                        <div
-                                                            className="inline-block w-80 pt-2 px-1 text-md font-bold text-ellipsis overflow-hidden whitespace-nowrap hover:underline">
-                                                            {post.title}
-                                                        </div>
-                                                        <div
-                                                            className="w-80 mt-1 text-sm opacity-50 text-ellipsis overflow-hidden whitespace-nowrap">
-                                                            {post.content}
-                                                        </div>
-                                                    </Link>
-                                                    <div className="">
-                                                        {post.hashTag.map((hash, index) => {
-                                                            return (
-                                                                <div
-                                                                    className="inline-flex p-1 mx-1 mt-2 text-center text-xs bg-gray-200 rounded-md"
-                                                                    key={index}>
-                                                                    {hash}
-                                                                </div>
-                                                            )
-                                                        })}
-                                                    </div>
-                                                </td>
-                                                <td className="w-20 m-auto text-sm text-gray-500 text-center">
-                                                    {post.nickname}
-                                                </td>
-                                                <td className="w-20 m-auto text-sm text-gray-500 text-center">
-                                                    {post.creatAt}
-                                                </td>
-                                                <td className="w-20 m-auto text-sm text-gray-500 text-center">
-                                                    💬 {post.commentCount}
-                                                </td>
-                                                <td className="w-20 m-auto text-sm text-gray-500 text-center">
-                                                    👀 {post.view}
-                                                </td>
-                                                <td className="w-20 m-auto text-sm text-gray-500 text-center">
-                                                    💗 {post.like}
-                                                </td>
-                                            </tr>
-                                        )
-                                    })
-                                }
-                                </tbody>
-                            </table>
+                                <div className="text-center p-5 h-80">
+                                    <div className="h-52 overflow-hidden rounded-md">
+                                        {/* thumnail */}
+                                        <img src="https://cdn.pixabay.com/photo/2013/02/21/19/06/drink-84533_1280.jpg" />
+                                    </div>
+                                    <div className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis">
+                                        {/* title */}
+                                        여기는 전체 탭 입니다. 테스트 중이에요
+                                    </div>
+                                    <span className="text-sm pr-3">
+                                    {/*  nickname  */}
+                                        묘묘
+                                    </span>
+                                    <span className="text-sm">
+                                    1분 전
+                                    </span>
+                                    <span className="text-sm pl-3">
+                                        {/* 댓글수 */}
+                                        💬 3
+                                    </span>
+                                    <span className="text-sm pl-3">
+                                        {/* 조회수 */}
+                                        👀 100
+                                    </span>
+                                    <span className="text-sm pl-3">
+                                        {/* 좋아요 */}
+                                        💗 100
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -141,21 +122,21 @@ const AllTab = ({allList, etc, loading}) => {
 
             {/* 페이징 */}
             {/*<Pagination count={10}></Pagination>*/}
-            <div className="">
-                <nav>
-                    <ul className="pagination flex m-auto">
-                        {pageNumbers.map((number) => (
-                            <li key={number} className="page-item mx-3">
-                                <button onClick={() => setCurrentPage(number)} className="page-link">
-                                    {number}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-            </div>
-            <Pagination count={ pageNumbers } defaultPage={1}>
-            </Pagination>
+            {/*<div className="">*/}
+            {/*    <nav>*/}
+            {/*        <ul className="pagination flex m-auto">*/}
+            {/*            {pageNumbers.map((number) => (*/}
+            {/*                <li key={number} className="page-item mx-3">*/}
+            {/*                    <button onClick={() => setCurrentPage(number)} className="page-link">*/}
+            {/*                        {number}*/}
+            {/*                    </button>*/}
+            {/*                </li>*/}
+            {/*            ))}*/}
+            {/*        </ul>*/}
+            {/*    </nav>*/}
+            {/*</div>*/}
+
+            <Pagination count={ pageNumbers } defaultPage={1}></Pagination>
         </>
     );
 };
