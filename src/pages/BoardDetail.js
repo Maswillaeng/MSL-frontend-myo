@@ -106,8 +106,8 @@ const BoardDetail = () => {
           {" "}
           {post.content}텍스트 내용
         </div>
-        <div className="select">
-          <div className="w-1/6 justify-between flex text-red-500 mb-10 rounded-full border border-red-500 py-3 px-7 align-middle text-xl">
+        <div className="select flex">
+          <div className="ml-auto w-1/6 justify-between flex text-red-500 mb-10 rounded-full border border-red-500 py-3 px-7 align-middle text-xl">
             <div onClick={handleClick}>
               <FiShare />
             </div>
