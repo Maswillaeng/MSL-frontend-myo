@@ -246,10 +246,10 @@ const Join = () => {
   const onSubmitHandler = (e) => {
     const { email, password, nickname, phoneNumber } = join;
     let userData = {
-      email,
-      password,
-      nickname,
-      phoneNumber,
+      email: email,
+      password: password,
+      nickname: nickname,
+      phoneNumber: phoneNumber,
     };
     e.preventDefault();
 
@@ -264,7 +264,15 @@ const Join = () => {
     }
     const joinSubmitData = async (e) => {
       try {
-        const response = await axios.post("/api/auth/sign", { userData });
+        const response = await axios.post(
+          "/api/auth/sign",
+          JSON.stringify(userData),
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         console.log(response);
         navigate("/");
       } catch (error) {
