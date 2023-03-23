@@ -62,16 +62,20 @@ const LoginForm = () => {
 
       // 로그인 API 호출
       const response = await loginUser({ email, password, token });
-
+      console.log(response.status);
       // 로그인 성공 처리
       if (response.status === 200) {
-        setRefreshToken(response.json.refresh_token);
-        dispatch(SET_TOKEN(response.json.access_token));
-        navigate("/");
+        setRefreshToken(response.refresh_token);
+        dispatch(SET_TOKEN(response.access_token));
+        console.log("성공");
+        return navigate("/");
       }
     } catch (error) {
       // 로그인 실패 처리
+      setJoin((prevState) => ({ ...prevState, password: "" }));
       setErrmessage("아이디 비밀번호가 일치하지않습니다");
+      console.log("안됨");
+      console.error(error);
     }
   };
   return (
