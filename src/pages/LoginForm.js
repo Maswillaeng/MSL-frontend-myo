@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../api/User.js";
+import { fetchToken } from "../api/User.js";
 import { setRefreshToken } from "../storage/Cookie";
 import { SET_TOKEN } from "../store/Auth";
 
@@ -55,16 +56,21 @@ const LoginForm = () => {
     // })
   };
   const onValid = async () => {
-    // 입력값 초기화
-    setJoin((prevState) => ({ ...prevState, password: "" }));
-    const response = await loginUser({ email, password });
-    if (response.status === 200) {
-      // 쿠키에 Refresh Token, store에 Access Token 저장
-      setRefreshToken(response.json.refresh_token);
-      dispatch(SET_TOKEN(response.json.access_token));
+    try {
+      // 토큰을 받아옴
+      const token = await fetchToken({ email, password });
 
-      return navigate("/");
-    } else {
+      // 로그인 API 호출
+      const response = await loginUser({ email, password, token });
+
+      // 로그인 성공 처리
+      if (response.status === 200) {
+        setRefreshToken(response.json.refresh_token);
+        dispatch(SET_TOKEN(response.json.access_token));
+        navigate("/");
+      }
+    } catch (error) {
+      // 로그인 실패 처리
       setErrmessage("아이디 비밀번호가 일치하지않습니다");
     }
   };
