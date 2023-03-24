@@ -7,6 +7,8 @@ import axios from "axios";
 import moment from "moment";
 import "moment/locale/ko";
 import All_tab from "../components/board/All_tab";
+import boardList from "./Dummy_postList_data"
+import {useSelector} from "react-redux";
 
 const Board = () => {
   // 게시판 토글 탭
@@ -38,36 +40,35 @@ const Board = () => {
   const [etcList, setEtcList] = useState([]);
   // 로딩 상태
   const [loading, setLoading] = useState(false);
-  const [etc, setEtc] = useState();
+  // 게시물 갯수 (임시)
+  const [postCount, setPostCount] = useState();
 
+  //test dummy
+  // const token = useSelector(state => state.token);
+  // {headers: {"content-Type": "application/json",}}
   // 게시글 불러오기
+
   useEffect(() => {
-    // setLoading(true)
-    //
-    // axios.get(`/api/post`)
-    //     .then(res => {
-    //       const {resList, ...EtcData} = res.data
-    //       setAllList(resList)
-    //       setEtc(EtcData)
-    //       console.log(EtcData.code)
-    //     })
-    //     .catch(err => console.log(err))
-    //
-    //  setLoading(false)
-
     const ListData = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.post("/api/post");
-        console.log(res);
-        setAllList(res.data);
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+      const postRes = await axios.get("/api/post")
+      console.log(postRes.status) //200
+      console.log(postRes.statusText) //ok
+      console.log(postRes.data) //list - id,created_date,content,thumnail,title,user_id
+      // 각 탭에 보내야 할 카테고리 DB 필요할 듯
+    }
+    setLoading(true)
+    setAllList(boardList)
 
-    ListData();
+    // ListData()
+    //   .then((postRes) => {
+    //     setAllList(postRes.data)
+    //     setPostCount(postRes.data.length) // 임시 게시물 갯수 카운트
+    //   })
+    //   .catch((err) => console.log("게시물 리스트 에러 " + err))
+
+
+
+    setLoading(false)
   }, []);
 
   // 게시글 시간 표기
@@ -106,7 +107,7 @@ const Board = () => {
         <div>
           <section className="container px-4 mx-auto">
             {index === 0 ? (
-              <All_tab allList={allList} etc={etc} loading={loading} />
+              <All_tab allList={allList} postCount={postCount} loading={loading} />
             ) : index === 1 ? (
               <Recipe_tab recipeList={recipeList} loading={loading} />
             ) : index === 2 ? (
