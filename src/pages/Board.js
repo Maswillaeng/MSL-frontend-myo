@@ -54,19 +54,17 @@ const Board = () => {
       console.log(postRes.status) //200
       console.log(postRes.statusText) //ok
       console.log(postRes.data) //list - id,created_date,content,thumnail,title,user_id
-      // 각 탭에 보내야 할 카테고리 DB 필요할 듯
+      // 각 탭에 보내야 할 카테고리 DB 필요할 듯, 그러므로 All_tab만 현재 구현 중
     }
     setLoading(true)
-    setAllList(boardList)
+    // setAllList(boardList)
 
-    // ListData()
-    //   .then((postRes) => {
-    //     setAllList(postRes.data)
-    //     setPostCount(postRes.data.length) // 임시 게시물 갯수 카운트
-    //   })
-    //   .catch((err) => console.log("게시물 리스트 에러 " + err))
-
-
+    ListData()
+      .then((postRes) => {
+        setAllList(postRes.data)
+        setPostCount(postRes.data.length) // 임시 게시물 갯수 카운트, totalCount 전달받으면 그거 쓸 예정
+      })
+      .catch((err) => console.log("게시물 리스트 에러 " + err))
 
     setLoading(false)
   }, []);

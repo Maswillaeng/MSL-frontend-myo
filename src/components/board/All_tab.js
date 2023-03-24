@@ -6,7 +6,7 @@ import axios from "axios";
 
 const AllTab = ({ allList, postCount, loading }) => {
 
-// 페이지 네이션 (onlyFront ver.)
+// 페이지 네이션 (frontOnly ver.)거
   // 현재 페이지
   const [currentPage, setCurrentPage] = useState(1);
   // 게시물 자를 갯수
@@ -20,6 +20,7 @@ const AllTab = ({ allList, postCount, loading }) => {
   for (let i = 1; i <= Math.ceil(allList.length / postsPerPage); i++) {
     pageNumbers.push(i);
   }
+
 // 페이지 네이션 (offset ver.)
   const navigate = useNavigate()
   const updateOffset = () => {
@@ -79,7 +80,7 @@ const AllTab = ({ allList, postCount, loading }) => {
     <>
       {/*/!* 게시물 수 확인 용 *!/{postCount}*/}
       <span className="m-auto">
-        <span className="text-red-500 text-lg font-bold">{allList.length}</span>개 글을
+        <span className="text-red-500 text-lg font-bold">{postCount}</span>개 글을
         불러왔습니다
       </span>
 
@@ -149,10 +150,10 @@ const AllTab = ({ allList, postCount, loading }) => {
                       <div>
                       <span className="text-sm pr-3">
                     {/*  nickname  */}
-                        {item.nickName}
+                        {item.nickname}
                     </span>
                       <span className="text-sm">
-                      {/*  creat_At */}
+                      {/*  creat_At ?? 변수명이 뭐지?? */}
                         {item.createdDate}
                       </span>
                       </div>
@@ -161,15 +162,17 @@ const AllTab = ({ allList, postCount, loading }) => {
                         {/*{item.postId ===  }*/}
                   </span>
                       <span className="text-sm pl-3">
-                    {/* 조회수 뺄지 말지 고려 중 */}
+                    {/* 조회수는 아직 구현 중 */}
                         👀 9999
                   </span>
                       <span className="text-sm pl-3">
-                    {/* 좋아요 */}
+                    {/* 좋아요는 조인 테스트 중 */}
                         💗 100
                   </span>
                       <div className="grid grid-cols-3">
-                    <span className="bg-gray-200 rounded-md text-xs p-1 m-1 overflow-hidden whitespace-nowrap text-ellipsis ">#해시태그</span>
+                    <span className="bg-gray-200 rounded-md text-xs p-1 m-1 overflow-hidden whitespace-nowrap text-ellipsis ">
+                      #해시태그
+                    </span>
                     </div>
                     </div>
                           </Link>
@@ -181,7 +184,7 @@ const AllTab = ({ allList, postCount, loading }) => {
         </div>
       </div>
 
-      {/* 페이징 */}
+      {/* 페이징 frontOnly ver. */}
         <div className="my-5 m-auto text-2xl">
           <nav>
             <ul className="pagination flex m-auto">
