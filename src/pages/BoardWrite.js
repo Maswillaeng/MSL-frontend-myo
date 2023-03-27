@@ -114,7 +114,6 @@ const BoardWrite = () => {
         <div ref={contentEditorRef}>
           <Editor value={posting.content} onChange={onEditorChange} />
         </div>{" "}
-        <div className="absolute right-28 bottom-[-80px]"></div>
       </div>{" "}
       <div className="flex justify-center gap-20 ">
         {" "}

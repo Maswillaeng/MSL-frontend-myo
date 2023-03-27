@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginSuccess, loginFailure } from "../redux/auth/actions";
+// import { setCookie } from "../function/cookies";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { loginUser } from "../api/User.js";
+import { fetchToken } from "../api/User.js";
+import { setRefreshToken } from "../storage/Cookie";
+import { SET_TOKEN } from "../store/Auth";
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [errmessage, setErrmessage] = useState("");
-  // const [accessToken, setAccessToken] = useState("");
-  // const [refreshToken, setRefreshToken] = useState("");
 
   // 유저 입력 데이터 묶기
   const [join, setJoin] = useState({
@@ -24,7 +26,6 @@ const LoginForm = () => {
       [name]: value,
     });
   };
-
   const { email, password } = join;
   // 로그인 유효성
   const loginSubmit = (e) => {
@@ -35,55 +36,48 @@ const LoginForm = () => {
       setErrmessage("아이디 비밀번호를 입력해주세요");
       return;
     }
-    dispatch(getTokens(email, password));
+    onValid();
+
+    // 요청 (testing)
+    //   axios.post(`/api/auth/login/`,{
+    //   email: email,
+    //   password: password
+    //   },{
+    //   headers: {
+    //     "Content-Type": `application/json`,
+    //       },
+    //   })
+    //       .then(res => {
+    //           console.log(res)
+    //           navigate("/");
+    //   }).catch(err => {
+    //   console.log(err.exception)
+    //   setErrmessage('아이디 또는 비밀번호가 맞지 않습니다');
+    // })
   };
-
-  // access token과 refresh token을 받아오는 함수
-  const getTokens = (email, password) => async (dispatch) => {
+  const onValid = async () => {
     try {
-      const response = await axios.post("/api/auth/login", {
-        email: email,
-        password: password,
-      });
+      // 토큰을 받아옴
+      const token = await fetchToken({ email, password });
 
-      const accessToken = response.data.accessToken;
-      const refreshToken = response.data.refreshToken;
-      localStorage.setItem("accessToken", JSON.stringify(accessToken));
-      localStorage.setItem("refreshToken", JSON.stringify(refreshToken));
-
-      dispatch(loginSuccess(accessToken, refreshToken));
-      console.log("성공");
-      navigate("/");
+      // 로그인 API 호출
+      const response = await loginUser({ email, password, token });
+      console.log(response.status);
+      // 로그인 성공 처리
+      if (response.status === 200) {
+        setRefreshToken(response.refresh_token);
+        dispatch(SET_TOKEN(response.access_token));
+        console.log("성공");
+        return navigate("/");
+      }
     } catch (error) {
+      // 로그인 실패 처리
+      setJoin((prevState) => ({ ...prevState, password: "" }));
+      setErrmessage("아이디 비밀번호가 일치하지않습니다");
+      console.log("안됨");
       console.error(error);
-      dispatch(loginFailure(error));
-      console.log("실패");
     }
   };
-  //기존 방식
-  // async function getTokens(email, password) {
-  //   try {
-  //     const response = await axios.post("/api/auth/login", {
-  //       email: email,
-  //       password: password,
-  //     });
-  //     console.log(response.data);
-  //     const accessToken = response.data.accessToken;
-  //     const refreshToken = response.data.refreshToken;
-  //     // access token과 refresh token을 localstorage에 저장
-  //     localStorage.setItem("accessToken", JSON.stringify(accessToken));
-  //     // 다시 가지고 올 때 const accessToken = JSON.parse(localStorage.getItem("accessToken"));
-  //     localStorage.setItem("refreshToken", JSON.stringify(accessToken));
-  //     console.log("성공");
-  //     console.log(accessToken, refreshToken);
-  //     return navigate("/");
-  //   } catch (error) {
-  //     console.error(error);
-  //     console.log("실패");
-  //     return null;
-  //   }
-  // }
-
   return (
     <div>
       <div

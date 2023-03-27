@@ -1,26 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
-import { removeCookie } from "../function/cookies";
+
 import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
 const Header = () => {
-  const navigation = useNavigate();
-  // const LogoutHandler = () => {
-  //   removeCookie("");
-  //   sessionStorage.removeItem("access");
-  //   sessionStorage.removeItem("accessTime");
-  //   setIsLogin(false);
-  //   navigation("/");
-  // };
-
   //로그인&로그아웃
-
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-    // 로그아웃 요청 처리
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     dispatch(DELETE_TOKEN());
   };
   return (
