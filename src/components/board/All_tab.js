@@ -6,7 +6,7 @@ import axios from "axios";
 
 const AllTab = ({ allList, postCount, loading }) => {
 
-// 페이지 네이션 (frontOnly ver.)거
+// 페이지 네이션 (frontOnly ver.)
   // 현재 페이지
   const [currentPage, setCurrentPage] = useState(1);
   // 게시물 자를 갯수
@@ -24,19 +24,23 @@ const AllTab = ({ allList, postCount, loading }) => {
 // 페이지 네이션 (offset ver.)
   const navigate = useNavigate()
   const updateOffset = () => {
-    const limit = 8; // 화면에 보여줄 데이터 갯수
-    const offset = (currentPage-1) * limit; // 데이터 시작점
-    const queryString = `limit=${limit}&offset=${offset}`
+
+    const size = 8; // 화면에 보여줄 데이터 갯수
+    const page = (currentPage-1) * size; // 데이터 시작점
+    const queryString = `size=${size}&page=${page}`
 
     navigate(`?${queryString}`)
+
   }
 
 // 좋아요, 댓글수, 해시태그 등...(회의를 해봐야 할 듯!)
 
   // 댓글수 카운트 (테스트 중)
   // const [commentList, setCommentList] = useState([]);
+
   // 좋아요 수 카운트 (껍데기)
-  // const [likeList, setLikeList] = useState(([]))
+  // const [likeList, setLikeList] = useState(([]));
+
   // 게시물 postId + 댓글 postId 매칭 시켜서 length 불러올 방법 고려 중...
   // const CommentList = async () => {
   //   const CommentRes = await axios.get(`api/post/${postId}/comment`)
@@ -44,6 +48,7 @@ const AllTab = ({ allList, postCount, loading }) => {
   //   console.log(CommentRes.statusText)
   //   console.log(CommentRes.data)
   // }
+
   // 좋아요 없는 요청!
   // const LikeList = async () => {
   //   const LikeRes = await axios.get(`api/post/${postId}/like`)
@@ -51,6 +56,7 @@ const AllTab = ({ allList, postCount, loading }) => {
   //   console.log(LikeRes.statusText)
   //   console.log(LikeRes.data)
   // }
+
   // useEffect(() => {
   //   CommentList()
   //       .then((CommentRes) => setCommentList(CommentRes.data))
@@ -60,7 +66,6 @@ const AllTab = ({ allList, postCount, loading }) => {
   //       .then((LikeRes) => setLikeList(LikeRes.data))
   //       .catch((err) => console.log("좋아요 리스트 에러 " + err))
   // },[])
-
 
   // 검색 (테스트 중)
   const [userInput, setUserInput] = useState("");
@@ -78,10 +83,13 @@ const AllTab = ({ allList, postCount, loading }) => {
 
   return (
     <>
-      {/*/!* 게시물 수 확인 용 *!/{postCount}*/}
+      {/* 게시물 수 확인 용 */}
+      {/* { postCount } */}
+
       <span className="m-auto">
-        <span className="text-red-500 text-lg font-bold">{postCount}</span>개 글을
-        불러왔습니다
+        <span className="text-red-500 text-lg font-bold">
+          {postCount}
+        </span>개 글을 불러왔습니다
       </span>
 
       <div className="flex flex-col">
@@ -89,6 +97,7 @@ const AllTab = ({ allList, postCount, loading }) => {
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg p-2">
               <div className="flex w-full h-11 border-b-2 border-black">
+
                 {/* 정렬 버튼 */}
                 <div className="inline-flex flex-auto text-xs">
                   <button className="mx-3 decoration-red">
@@ -114,8 +123,7 @@ const AllTab = ({ allList, postCount, loading }) => {
                         type="text"
                         placeholder="검색"
                         value={userInput}
-                        onChange={getSearchValue}
-                      />
+                        onChange={getSearchValue} />
                       <button
                         className="right-10 top-0 mr-4"
                         onClick={onSearch}
@@ -124,7 +132,9 @@ const AllTab = ({ allList, postCount, loading }) => {
                       </button>
                     </div>
                     <button className="w-16 rounded-md mx-3 h-8 text-sm text-white font-bold bg-[#EA4E4E]">
-                      <Link to={"/BoardWrite"}>글쓰기</Link>
+                      <Link to={"/BoardWrite"}>
+                        글쓰기
+                      </Link>
                     </button>
                   </div>
                 </div>
@@ -136,6 +146,7 @@ const AllTab = ({ allList, postCount, loading }) => {
                   <div className="mx-1 grid grid-cols-4">
                     {
                       allList.slice(indexOfFirst, indexOfLast).map((item,index) => (
+
                           <Link to="/Board" key={index}>
                     <div className="text-center p-5 h-auto" >
                       <div className="h-52 overflow-hidden rounded-md">
@@ -147,38 +158,44 @@ const AllTab = ({ allList, postCount, loading }) => {
                         {/* title */}
                         {item.title}
                       </div>
+
                       <div>
-                      <span className="text-sm pr-3">
-                    {/*  nickname  */}
-                        {item.nickname}
-                    </span>
-                      <span className="text-sm">
-                      {/*  creat_At ?? 변수명이 뭐지?? */}
-                        {item.createdDate}
-                      </span>
+                        <span className="text-sm pr-3">
+                          {/*  user_id  */}
+                          <Link to="/MyPage/:user_id">
+                          {item.user_id}
+                          </Link>
+                        </span>
+                        <span className="text-sm">
+                          {/*  creat_At  */}
+                          {item.created_date}
+                        </span>
                       </div>
+
                       <span className="text-sm text-[#EA4E4E]">
-                    {/* 댓글수 */}
-                        {/*{item.postId ===  }*/}
-                  </span>
+                        {/* 댓글수 */}
+                        {/* {item.postId === } */}
+                      </span>
+
                       <span className="text-sm pl-3">
                     {/* 조회수는 아직 구현 중 */}
                         👀 9999
-                  </span>
+                      </span>
+
                       <span className="text-sm pl-3">
-                    {/* 좋아요는 조인 테스트 중 */}
+                    {/* 좋아요 테스트 중 */}
                         💗 100
-                  </span>
+                      </span>
+
                       <div className="grid grid-cols-3">
-                    <span className="bg-gray-200 rounded-md text-xs p-1 m-1 overflow-hidden whitespace-nowrap text-ellipsis ">
-                      #해시태그
-                    </span>
-                    </div>
+                        <span className="bg-gray-200 rounded-md text-xs p-1 m-1 overflow-hidden whitespace-nowrap text-ellipsis ">
+                          #해시태그
+                        </span>
+                      </div>
                     </div>
                           </Link>
-              ))
-              }
-
+                    ))
+                    }
             </div>
           </div>
         </div>
@@ -194,10 +211,12 @@ const AllTab = ({ allList, postCount, loading }) => {
                       {number}
                     </button>
                   </li>
-              ))}
+                ))
+              }
             </ul>
           </nav>
         </div>
+
       </div>
     </>
   );

@@ -49,23 +49,32 @@ const Board = () => {
   // 게시글 불러오기
 
   useEffect(() => {
+
+    //api 요청 시 마다 헤더에 at 담아주는 설정
+    // axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+    // const authenticated = useSelector((state) => state.authToken.authenticated);
+
+    //?? 왜 자꾸 토큰 달라고 하는 걸까
+    //{headers : {"Content-Type" : "application/json"} }
+    // 전체 게시물 리스트 요청
     const ListData = async () => {
-      const postRes = await axios.get("/api/post")
+      const postRes = await axios.get("api/post/posts",{})
+      // 콘솔 확인용
       console.log(postRes.status) //200
       console.log(postRes.statusText) //ok
       console.log(postRes.data) //list - id,created_date,content,thumnail,title,user_id
       // 각 탭에 보내야 할 카테고리 DB 필요할 듯, 그러므로 All_tab만 현재 구현 중
     }
+
     setLoading(true)
     // setAllList(boardList)
-
     ListData()
       .then((postRes) => {
         setAllList(postRes.data)
         setPostCount(postRes.data.length) // 임시 게시물 갯수 카운트, totalCount 전달받으면 그거 쓸 예정
       })
       .catch((err) => console.log("게시물 리스트 에러 " + err))
-
     setLoading(false)
   }, []);
 
