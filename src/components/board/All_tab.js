@@ -7,19 +7,19 @@ import axios from "axios";
 const AllTab = ({ allList, postCount, loading }) => {
 
 // 페이지 네이션 (frontOnly ver.)
-  // 현재 페이지
-  const [currentPage, setCurrentPage] = useState(1);
-  // 게시물 자를 갯수
-  const [postsPerPage, setPostsPerPage] = useState(8);
-  // 페이징 끝 번호
-  const indexOfLast = currentPage * postsPerPage;
-  // 페이징 첫 번호
-  const indexOfFirst = indexOfLast - postsPerPage;
-  // 첫번호 끝번호로 현재페이지에서 보여줄 숫자 배열 만들기
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(allList.length / postsPerPage); i++) {
-    pageNumbers.push(i);
-  }
+//   // 현재 페이지
+//   const [currentPage, setCurrentPage] = useState(1);
+//   // 게시물 자를 갯수
+//   const [postsPerPage, setPostsPerPage] = useState(8);
+//   // 페이징 끝 번호
+//   const indexOfLast = currentPage * postsPerPage;
+//   // 페이징 첫 번호
+//   const indexOfFirst = indexOfLast - postsPerPage;
+//   // 첫번호 끝번호로 현재페이지에서 보여줄 숫자 배열 만들기
+//   const pageNumbers = [];
+//   for (let i = 1; i <= Math.ceil(allList.length / postsPerPage); i++) {
+//     pageNumbers.push(i);
+//   }
 
 // 페이지 네이션 (offset ver.)
   const navigate = useNavigate()
@@ -137,13 +137,13 @@ const AllTab = ({ allList, postCount, loading }) => {
               {/* 게시물 */}
                   <div className="mx-1 grid grid-cols-4">
                     {
-                      allList.slice(indexOfFirst, indexOfLast).map((item,index) => (
+                      allList.map((item) => (
 
-                          <Link to="/Board" key={index}>
+                          <Link to="/Board" key={item.id}>
                     <div className="text-center p-5 h-auto" >
                       <div className="h-52 overflow-hidden rounded-md">
                         {/* thumnail */}
-                        <img src={item.thumnail} />
+                        <img src={item.thumbnail} />
                       </div>
 
                       <div className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis hover:text-[#EA4E4E]">
@@ -155,12 +155,12 @@ const AllTab = ({ allList, postCount, loading }) => {
                         <span className="text-sm pr-3">
                           {/*  user_id  */}
                           <Link to="/MyPage/:user_id">
-                          {item.user_id}
+                          {item.nickname}
                           </Link>
                         </span>
                         <span className="text-sm">
                           {/*  creat_At  */}
-                          {item.created_date}
+                          {/*{item.created_date}*/}
                         </span>
                       </div>
 
@@ -194,20 +194,20 @@ const AllTab = ({ allList, postCount, loading }) => {
       </div>
 
       {/* 페이징 frontOnly ver. */}
-        <div className="my-5 m-auto text-2xl">
-          <nav>
-            <ul className="pagination flex m-auto">
-              { pageNumbers.map((number) => (
-                  <li key={number} className={number === currentPage ? "page-item mx-3 font-bold text-[#EA4E4E]" : "page-item mx-3"}>
-                    <button onClick={() => setCurrentPage(number)} className="page-link">
-                      {number}
-                    </button>
-                  </li>
-                ))
-              }
-            </ul>
-          </nav>
-        </div>
+      {/*  <div className="my-5 m-auto text-2xl">*/}
+      {/*    <nav>*/}
+      {/*      <ul className="pagination flex m-auto">*/}
+      {/*        { pageNumbers.map((number) => (*/}
+      {/*            <li key={number} className={number === currentPage ? "page-item mx-3 font-bold text-[#EA4E4E]" : "page-item mx-3"}>*/}
+      {/*              <button onClick={() => setCurrentPage(number)} className="page-link">*/}
+      {/*                {number}*/}
+      {/*              </button>*/}
+      {/*            </li>*/}
+      {/*          ))*/}
+      {/*        }*/}
+      {/*      </ul>*/}
+      {/*    </nav>*/}
+      {/*  </div>*/}
 
       </div>
     </>
