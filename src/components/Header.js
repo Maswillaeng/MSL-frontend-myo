@@ -5,7 +5,7 @@ import { FiSearch } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
 const Header = () => {
-  //로그인&로그아웃
+  // 로그인&로그아웃
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
 
@@ -23,9 +23,9 @@ const Header = () => {
         <div className="flex items-center gap-40">
           <FiSearch className="font-bold text-red-500" />
           <Link to={"/Board"}>Board</Link>
-          {authenticated ? (
+          { authenticated ? (
             <>
-              <Link to={"/MyPage:userId"}>MyPage</Link>
+              <Link to={"/MyPage/:userId"}>MyPage</Link>
               <button onClick={handleLogout}>Logout</button>
             </>
           ) : (

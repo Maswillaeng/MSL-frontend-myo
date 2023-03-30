@@ -23,15 +23,7 @@ const AllTab = ({ allList, postCount, loading }) => {
 
 // 페이지 네이션 (offset ver.)
   const navigate = useNavigate()
-  const updateOffset = () => {
 
-    const size = 8; // 화면에 보여줄 데이터 갯수
-    const page = (currentPage-1) * size; // 데이터 시작점
-    const queryString = `size=${size}&page=${page}`
-
-    navigate(`?${queryString}`)
-
-  }
 
 // 좋아요, 댓글수, 해시태그 등...(회의를 해봐야 할 듯!)
 

@@ -55,18 +55,30 @@ const Board = () => {
 
     // const authenticated = useSelector((state) => state.authToken.authenticated);
 
-    //?? 왜 자꾸 토큰 달라고 하는 걸까
     //{headers : {"Content-Type" : "application/json"} }
     // 전체 게시물 리스트 요청
+
+    // const updateOffset = () => {
+    //
+    //   const size = 8; // 화면에 보여줄 데이터 갯수
+    //   const page = (currentPage-1) * size; // 데이터 시작점
+    //   const queryString = `size=${size}&page=${page}`
+    //
+    //   navigate(`?${queryString}`)
+    //
+    // }
+
+    // { params: { "size": 8, "page": 1 }
     const ListData = async () => {
-      const postRes = await axios.get("api/post/posts",{})
+      // 페이지네이션 전송방법 때문에 post 요청으로 변경 예정
+      const postRes = await axios.post("api/post/posts", {
+        size: 8, page: 1})
       // 콘솔 확인용
       console.log(postRes.status) //200
       console.log(postRes.statusText) //ok
       console.log(postRes.data) //list - id,created_date,content,thumnail,title,user_id
       // 각 탭에 보내야 할 카테고리 DB 필요할 듯, 그러므로 All_tab만 현재 구현 중
     }
-
     setLoading(true)
     // setAllList(boardList)
     ListData()
