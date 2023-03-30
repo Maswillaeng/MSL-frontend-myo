@@ -31,10 +31,8 @@ const BoardDetail = () => {
   const { postId } = useParams();
   // 삭제 modal이 보이는 여부 상태
   const [open, setOpen] = useState(false);
-  //현재 url
-  const location = useLocation();
-  // baseUrl
 
+  // baseUrl
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -71,6 +69,7 @@ const BoardDetail = () => {
     handleCopyClipBoard(url);
     console.log(url);
   };
+
   // report
   const report = () => {};
   return (

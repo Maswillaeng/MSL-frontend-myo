@@ -13,7 +13,8 @@ const BoardWrite = () => {
   const navigate = useNavigate();
   // content Focus
   const contentEditorRef = useRef(null);
-
+  // editor
+  const editorRef = useRef();
   // 글 카테고리
   let categories = [
     { id: 0, name: "RECIPE" },
@@ -36,7 +37,9 @@ const BoardWrite = () => {
       title: e.target.value,
     }));
   };
-  let { title, content, category } = posting;
+  let { title, content, category, thumbnail } = posting;
+  //img 전송
+
   // 게시글데이터 전송
   const postingSubmitData = async (e) => {
     try {
@@ -44,23 +47,43 @@ const BoardWrite = () => {
       formData.append("title", title);
       formData.append("content", content);
       formData.append("category", category);
-      //인증된 사용자만 이용할 수 있는 기능이므로 미리 정의한 api라는 axios interceptor로 user의 id를 토큰에서 얻은 후 같이 서버에 요청을 보낸다.
-      // formData.append("user_id", jwtUtils.getId(token));
-
+      formData.append("thumbnail", thumbnail);
+      // 이미지 데이터 추가
+      const quill = editorRef.current?.getEditor(); // optional chaining 사용
+      const delta = quill?.getContents(); // optional chaining 사용
+      console.log(delta);
+      const images =
+        delta &&
+        delta.ops
+          .filter((op) => op.insert && op.insert.image)
+          .map((op) => op.insert.image);
+      if (images && images.length > 0) {
+        images.forEach((image, i) => {
+          formData.append(`image${i}`, image);
+        });
+      }
+      console.log(images);
       const response = await axios.post("/api/post", formData);
-
+      console.log(response);
       if (response.data && response.data.ok === 1) {
         let postId = response.data.insertedId;
         navigate(`/api/post/${postId}`);
-        setPosting({ title: "", content: "", category: "", thumbnail: "" });
-        console.log(response);
+        setPosting({
+          title: "",
+          content: "",
+          category: "",
+          thumbnail: "",
+        });
+        console.log("성공");
       }
       // 게시물 등록이 성공하면 posting 상태를 초기화
     } catch (error) {
       console.log(error);
+      console.log("실패");
       alert("게시물을 저장하는 도중 오류가 발생하였습니다.");
     }
   };
+
   // submit
   const onSubmitHandler = (e) => {
     e.preventDefault();
@@ -112,7 +135,11 @@ const BoardWrite = () => {
           />
         </div>
         <div ref={contentEditorRef}>
-          <Editor value={posting.content} onChange={onEditorChange} />
+          <Editor
+            ref={editorRef}
+            value={posting.content}
+            onChange={onEditorChange}
+          />
         </div>{" "}
       </div>{" "}
       <div className="flex justify-center gap-20 ">
