@@ -66,7 +66,7 @@ const BoardWrite = () => {
 
       const response = await axiosInstance.post("/api/post", formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("AccessToken")}`,
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         data: { grant_type: "refresh_token", refresh_token: "{Refresh_token}" },
       });

@@ -48,8 +48,9 @@ const LoginForm = () => {
 
       const accessToken = response.data.accessToken;
       const refreshToken = response.data.refreshToken;
-      localStorage.setItem("accessToken", JSON.stringify(accessToken));
-      localStorage.setItem("refreshToken", JSON.stringify(refreshToken));
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
       dispatch(SET_TOKEN(state));
       dispatch(loginSuccess(accessToken, refreshToken));
       console.log("성공");
