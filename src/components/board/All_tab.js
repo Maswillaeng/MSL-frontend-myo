@@ -18,13 +18,20 @@ const AllTab = () => {
     const size = 8;
     // 현재 페이지 바꾸기
     const currentPage = (e) => {
+        const { name } = e.target
+        console.log(name)
 
         let offset = page;
-        if(offset <= 0){
-            offset = 0;
-        }else {
-            offset = (page-1) * size
-        }
+
+        if(name === "prevBtn"){
+           offset = offset-1
+        }else if (name === "nextBtn")
+            offset = offset+1
+        // if(offset <= 0){
+        //     offset = 0;
+        // }else {
+        //     offset = (page-1) * size
+        // }
         setPage(offset)
     }
 
@@ -50,9 +57,7 @@ const AllTab = () => {
         // }
         // getHashTag()
         //     .then((hash) => console.log(hash))
-
         setLoading(true)
-
         ListData()
             .then((posts) => {
                 setAllList(posts)
@@ -133,7 +138,7 @@ const AllTab = () => {
                                 </div>
                             </div>
 
-                            { loading && <div className="text-center"> 로딩 중... </div>}
+                            { loading && <div className="text-center text-3xl mt-5"> 로딩 중... </div> }
 
                             {/* 게시물 */}
                             <div className="mx-1 grid grid-cols-4">
@@ -194,9 +199,9 @@ const AllTab = () => {
                 </div>
 
                 <div className="my-5 m-auto text-2xl">
-                    <button className={ page === 0 ? "text-gray-300" : "" } onClick={ currentPage } disabled={ page === 0 } > 이전 </button>
+                    <button className={ page === 0 ? "text-gray-300" : "" } name="prevBtn" onClick={ (e) => currentPage(e) } disabled={ page === 0 } > 이전 </button>
                     <span>{page+1}</span>
-                    <button onClick={ () => setPage(page+1) }>다음</button>
+                    <button name="nextBtn" onClick={ (e) => currentPage(e) }>다음</button>
                 </div>
 
                 {/* 페이징 frontOnly ver. */}
