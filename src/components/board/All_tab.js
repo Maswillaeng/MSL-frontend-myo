@@ -10,6 +10,7 @@ const AllTab = () => {
     const [loading, setLoading] = useState(false);
     // 게시물 갯수 (확인 용)
     const [postCount, setPostCount] = useState();
+    const [lastPost, setLastPost] = useState(false)
     // 페이지 네이션 (offset ver.)
     const navigate = useNavigate()
     // 현재 페이지
@@ -62,6 +63,9 @@ const AllTab = () => {
             .then((posts) => {
                 setAllList(posts)
                 setPostCount(posts.length) // 임시 게시물 갯수 카운트, totalCount 전달받으면 그거 쓸 예정
+                if (postCount < 8){
+                    setLastPost(true)
+                }else setLastPost(false)
             })
             .catch((err) => console.log("게시물 리스트 에러 " + err))
 
@@ -198,10 +202,12 @@ const AllTab = () => {
                     </div>
                 </div>
 
+                {/* 페이지 네이션 */}
+                {/* 게시물의 끝을 요청 후에 알아서 다음 버튼이 한 텀 늦음 갯수 or 페이지 마지막 번호를 알아야 할 듯 */}
                 <div className="my-5 m-auto text-2xl">
                     <button className={ page === 0 ? "text-gray-300" : "" } name="prevBtn" onClick={ (e) => currentPage(e) } disabled={ page === 0 } > 이전 </button>
                     <span>{page+1}</span>
-                    <button name="nextBtn" onClick={ (e) => currentPage(e) }>다음</button>
+                    <button className={ lastPost === true ? "text-gray-300" : "" } name="nextBtn" onClick={ (e) => currentPage(e) } disabled={ lastPost === true ? true : false }>다음</button>
                 </div>
 
                 {/* 페이징 frontOnly ver. */}
