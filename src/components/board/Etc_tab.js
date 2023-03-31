@@ -1,16 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {Link} from "react-router-dom";
 
-const EtcTab = ({etcList, loading}) => {
-    const [etc, setEtc] = useState('')
-    useEffect(()=>{
-        setEtc(etcList.length)
-        console.log(etcList)
-    },[])
+const EtcTab = () => {
+
     return (
         <>
             {/* 게시물 수 확인 용 */}
-            <span className="m-auto"><span className="text-red-500 text-lg font-bold">{etc}</span>개 글을 불러왔습니다</span>
+            <span className="m-auto"><span className="text-red-500 text-lg font-bold">기타</span>개 글을 불러왔습니다</span>
 
             <div className="flex flex-col">
                 <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">

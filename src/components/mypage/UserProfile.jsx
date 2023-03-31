@@ -127,7 +127,7 @@ const UserProfile = () => {
                         <Grid container>
                             <Grid item xs="6">
                                 <div className="m-auto border rounded-full w-52 h-52 overflow-hidden">
-                                    <img src={ imgFile ? imgFile : "/img/user.jpg" } className=" w-52 h-52"/>
+                                    <img src={ imgFile ? imgFile : "/img/user.jpg" } className="w-52 h-52"/>
                                     <input type="file" accept="image/*" id="profile_photo" className="hidden overflow-hidden w-0 h-0 p-0" onChange={ handleImg } ref={ imgRef }/>
                                 </div>
                                 <label htmlFor="profile_photo" className="cursor-pointer">프로필 사진 변경</label>
