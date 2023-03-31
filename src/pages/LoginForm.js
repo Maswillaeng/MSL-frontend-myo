@@ -39,7 +39,7 @@ const LoginForm = () => {
   };
 
   // access token과 refresh token을 받아오는 함수
-  const getTokens = (email, password, token) => async (dispatch) => {
+  const getTokens = (email, password, state) => async (dispatch) => {
     try {
       const response = await axios.post("/api/auth/login", {
         email: email,
@@ -50,7 +50,7 @@ const LoginForm = () => {
       const refreshToken = response.data.refreshToken;
       localStorage.setItem("accessToken", JSON.stringify(accessToken));
       localStorage.setItem("refreshToken", JSON.stringify(refreshToken));
-      dispatch(SET_TOKEN(token));
+      dispatch(SET_TOKEN(state));
       dispatch(loginSuccess(accessToken, refreshToken));
       console.log("성공");
       navigate("/");

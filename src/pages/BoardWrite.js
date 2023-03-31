@@ -30,6 +30,10 @@ const BoardWrite = () => {
     thumbnail: "",
   });
 
+  //axios 인스턴스 생성
+  const axiosInstance = axios.create({
+    baseURL: "http://localhost:8080",
+  });
   // title 작성
   const onTitleHandler = (e) => {
     setPosting((prevState) => ({
@@ -38,7 +42,6 @@ const BoardWrite = () => {
     }));
   };
   let { title, content, category, thumbnail } = posting;
-  //img 전송
 
   // 게시글데이터 전송
   const postingSubmitData = async (e) => {
@@ -51,20 +54,24 @@ const BoardWrite = () => {
       // 이미지 데이터 추가
       const quill = editorRef.current?.getEditor(); // optional chaining 사용
       const delta = quill?.getContents(); // optional chaining 사용
-      console.log(delta);
-      const images =
-        delta &&
-        delta.ops
-          .filter((op) => op.insert && op.insert.image)
-          .map((op) => op.insert.image);
+
+      const images = delta?.ops
+        ?.filter((op) => op.insert && op.insert.image)
+        ?.map((op) => op.insert.image);
       if (images && images.length > 0) {
         images.forEach((image, i) => {
           formData.append(`image${i}`, image);
         });
       }
-      console.log(images);
-      const response = await axios.post("/api/post", formData);
+
+      const response = await axiosInstance.post("/api/post", formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("AccessToken")}`,
+        },
+        data: { grant_type: "refresh_token", refresh_token: "{Refresh_token}" },
+      });
       console.log(response);
+
       if (response.data && response.data.ok === 1) {
         let postId = response.data.insertedId;
         navigate(`/api/post/${postId}`);
@@ -75,11 +82,12 @@ const BoardWrite = () => {
           thumbnail: "",
         });
         console.log("성공");
+        console.log(postId);
       }
       // 게시물 등록이 성공하면 posting 상태를 초기화
     } catch (error) {
       console.log(error);
-      console.log("실패");
+
       alert("게시물을 저장하는 도중 오류가 발생하였습니다.");
     }
   };
@@ -100,24 +108,41 @@ const BoardWrite = () => {
       return contentEditorRef.current.querySelector(".ql-editor").focus();
     }
     postingSubmitData();
+
+    // onImageUpload();
   };
 
   // editor 내용 변경
   const onEditorChange = (value) => {
-    setPosting((prevState) => ({
-      ...prevState,
+    setPosting((prevPosting) => ({
+      ...prevPosting,
       content: value,
     }));
   };
 
   // 카테고리 선택
   const handleSelect = (categories) => {
-    setPosting((prevState) => ({
-      ...prevState,
+    setPosting((prevPosting) => ({
+      ...prevPosting,
       category: categories,
     }));
   };
-
+  // 이미지 삽입
+  // const onImageUpload = async (file) => {
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("image", file);
+  //     const response = await axios.post("/api/post/image", formData);
+  //     console.log(response);
+  //     const imageUrl = response.data.imageUrl;
+  //     const quill = editorRef.current?.getEditor(); // optional chaining 사용
+  //     quill?.insertEmbed(quill?.getLength(), "image", imageUrl);
+  //   } catch (error) {
+  //     console.log(error);
+  //     console.log("이미지 업로드 실패");
+  //     alert("이미지 업로드에 실패하였습니다.");
+  //   }
+  // };
   return (
     <div className="max-w-4xl mx-auto py-24 relative">
       <div className="relative">
