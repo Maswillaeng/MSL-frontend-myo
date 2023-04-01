@@ -53,6 +53,7 @@ const LoginForm = () => {
 
       dispatch(SET_TOKEN(state));
       dispatch(loginSuccess(accessToken, refreshToken));
+      loadAuthToken();
       console.log("성공");
       navigate("/");
     } catch (error) {
@@ -61,29 +62,15 @@ const LoginForm = () => {
       console.log("실패");
     }
   };
-  //기존 방식
-  // async function getTokens(email, password) {
-  //   try {
-  //     const response = await axios.post("/api/auth/login", {
-  //       email: email,
-  //       password: password,
-  //     });
-  //     console.log(response.data);
-  //     const accessToken = response.data.accessToken;
-  //     const refreshToken = response.data.refreshToken;
-  //     // access token과 refresh token을 localstorage에 저장
-  //     localStorage.setItem("accessToken", JSON.stringify(accessToken));
-  //     // 다시 가지고 올 때 const accessToken = JSON.parse(localStorage.getItem("accessToken"));
-  //     localStorage.setItem("refreshToken", JSON.stringify(accessToken));
-  //     console.log("성공");
-  //     console.log(accessToken, refreshToken);
-  //     return navigate("/");
-  //   } catch (error) {
-  //     console.error(error);
-  //     console.log("실패");
-  //     return null;
-  //   }
-  // }
+  // 페이지 로드 시 localStorage에서 token을 가져와서 header에 설정하는 함수
+  const loadAuthToken = () => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+  };
+
+  // 초기화
 
   return (
     <div>

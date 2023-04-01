@@ -1,8 +1,7 @@
-import React, { useRef, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-const Editor = ({ value, onChange }) => {
+const Editor = ({ value, onChange, onImageUpload }) => {
   const modules = {
     toolbar: {
       container: [
@@ -57,6 +56,9 @@ const Editor = ({ value, onChange }) => {
         ["image", "video"],
         ["clean"],
       ],
+      image: {
+        uploadCallback: onImageUpload, // 이미지가 업로드될 때마다 onImageUpload 함수 호출
+      },
     },
   };
   const formats = [

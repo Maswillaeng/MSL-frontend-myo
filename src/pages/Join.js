@@ -244,8 +244,9 @@ const Join = () => {
 
   //전송
   const onSubmitHandler = (e) => {
-    const { email, password, nickname, phoneNumber } = join;
+    const { email, password, nickname, phoneNumber, userImage } = join;
     let userData = {
+      userImage: userImage,
       email: email,
       password: password,
       nickname: nickname,

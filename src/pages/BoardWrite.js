@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Editor from "../components/boardWrite/Editor";
 import axios from "axios";
@@ -30,10 +30,36 @@ const BoardWrite = () => {
     thumbnail: "",
   });
 
-  //axios 인스턴스 생성
-  const axiosInstance = axios.create({
-    baseURL: "http://localhost:8080",
-  });
+  // // editor 랩핑
+  // const EditorWithRef = React.forwardRef((props, ref) => {
+  //   return <Editor {...props} forwardedRef={ref} />;
+  // });
+
+  // 이미지 업로드 콜백 함수
+  // const onImageUpload = (file) => {
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     // 이미지 데이터 추출
+  //     const dataUrl = reader.result;
+  //     const base64Image = dataUrl.split(",")[1];
+
+  //     // 추출된 이미지 데이터를 posting 상태의 thumbnail 속성에 저장
+  //     setPosting((prevState) => ({
+  //       ...prevState,
+  //       thumbnail: base64Image,
+  //     }));
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
+  // const onImageUpload = async (file) => {
+  //   const thumbnailUrl = await uploadThumbnail(file); // file을 업로드하고, 썸네일 URL을 받아옴
+  //   setPosting((prevState) => ({
+  //     ...prevState,
+  //     thumbnail: thumbnailUrl,
+  //   }));
+  //   // 받아온 URL을 thumbnail 상태로 설정
+  // };
+
   // title 작성
   const onTitleHandler = (e) => {
     setPosting((prevState) => ({
@@ -42,7 +68,9 @@ const BoardWrite = () => {
     }));
   };
   let { title, content, category, thumbnail } = posting;
-
+  useEffect(() => {
+    console.log(thumbnail);
+  }, [thumbnail]);
   // 게시글데이터 전송
   const postingSubmitData = async (e) => {
     try {
@@ -51,43 +79,36 @@ const BoardWrite = () => {
       formData.append("content", content);
       formData.append("category", category);
       formData.append("thumbnail", thumbnail);
-      // 이미지 데이터 추가
-      const quill = editorRef.current?.getEditor(); // optional chaining 사용
-      const delta = quill?.getContents(); // optional chaining 사용
 
-      const images = delta?.ops
-        ?.filter((op) => op.insert && op.insert.image)
-        ?.map((op) => op.insert.image);
-      if (images && images.length > 0) {
-        images.forEach((image, i) => {
-          formData.append(`image${i}`, image);
-        });
-      }
-
-      const response = await axiosInstance.post("/api/post", formData, {
+      let accessToken = localStorage.getItem("accessToken");
+      let refreshToken = localStorage.getItem("refreshToken");
+      const response = await axios.post("/api/post", formData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
         },
-        data: { grant_type: "refresh_token", refresh_token: "{Refresh_token}" },
+        withCredentials: true,
+        data: { grant_type: "refresh_token", refresh_token: refreshToken },
       });
-      console.log(response);
+
+      console.log(thumbnail);
 
       if (response.data && response.data.ok === 1) {
-        let postId = response.data.insertedId;
-        navigate(`/api/post/${postId}`);
+        let postId = response.data;
+
         setPosting({
           title: "",
           content: "",
           category: "",
           thumbnail: "",
         });
-        console.log("성공");
-        console.log(postId);
+
+        navigate(`/api/post/${postId}`);
       }
+
       // 게시물 등록이 성공하면 posting 상태를 초기화
     } catch (error) {
       console.log(error);
-
       alert("게시물을 저장하는 도중 오류가 발생하였습니다.");
     }
   };
@@ -108,8 +129,6 @@ const BoardWrite = () => {
       return contentEditorRef.current.querySelector(".ql-editor").focus();
     }
     postingSubmitData();
-
-    // onImageUpload();
   };
 
   // editor 내용 변경
@@ -127,27 +146,11 @@ const BoardWrite = () => {
       category: categories,
     }));
   };
-  // 이미지 삽입
-  // const onImageUpload = async (file) => {
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("image", file);
-  //     const response = await axios.post("/api/post/image", formData);
-  //     console.log(response);
-  //     const imageUrl = response.data.imageUrl;
-  //     const quill = editorRef.current?.getEditor(); // optional chaining 사용
-  //     quill?.insertEmbed(quill?.getLength(), "image", imageUrl);
-  //   } catch (error) {
-  //     console.log(error);
-  //     console.log("이미지 업로드 실패");
-  //     alert("이미지 업로드에 실패하였습니다.");
-  //   }
-  // };
+
   return (
     <div className="max-w-4xl mx-auto py-24 relative">
       <div className="relative">
         <div className="mx-auto w-5/6 mb-10 flex ">
-          {" "}
           <CategorySelector categories={categories} onSelect={handleSelect} />
           <input
             className="border border-red-500 ml-5 p-2 px-2 w-full"
@@ -161,23 +164,21 @@ const BoardWrite = () => {
         </div>
         <div ref={contentEditorRef}>
           <Editor
-            ref={editorRef}
+            forwardedRef={editorRef}
             value={posting.content}
             onChange={onEditorChange}
+            // onImageUpload={onImageUpload}
           />
-        </div>{" "}
-      </div>{" "}
+        </div>
+      </div>
       <div className="flex justify-center gap-20 ">
-        {" "}
         <button className="block border  border-red-500 bg-white  font-bold px-20 py-3 mt-28 ">
-          {" "}
           임시저장
         </button>
         <button
           onClick={onSubmitHandler}
           className="block bg-red-500 px-20 py-3 mt-28 font-bold text-white"
         >
-          {" "}
           글 게시
         </button>
       </div>
