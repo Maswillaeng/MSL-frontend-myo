@@ -30,36 +30,6 @@ const BoardWrite = () => {
     thumbnail: "",
   });
 
-  // // editor 랩핑
-  // const EditorWithRef = React.forwardRef((props, ref) => {
-  //   return <Editor {...props} forwardedRef={ref} />;
-  // });
-
-  // 이미지 업로드 콜백 함수
-  // const onImageUpload = (file) => {
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     // 이미지 데이터 추출
-  //     const dataUrl = reader.result;
-  //     const base64Image = dataUrl.split(",")[1];
-
-  //     // 추출된 이미지 데이터를 posting 상태의 thumbnail 속성에 저장
-  //     setPosting((prevState) => ({
-  //       ...prevState,
-  //       thumbnail: base64Image,
-  //     }));
-  //   };
-  //   reader.readAsDataURL(file);
-  // };
-  // const onImageUpload = async (file) => {
-  //   const thumbnailUrl = await uploadThumbnail(file); // file을 업로드하고, 썸네일 URL을 받아옴
-  //   setPosting((prevState) => ({
-  //     ...prevState,
-  //     thumbnail: thumbnailUrl,
-  //   }));
-  //   // 받아온 URL을 thumbnail 상태로 설정
-  // };
-
   // title 작성
   const onTitleHandler = (e) => {
     setPosting((prevState) => ({
@@ -68,9 +38,22 @@ const BoardWrite = () => {
     }));
   };
   let { title, content, category, thumbnail } = posting;
-  useEffect(() => {
-    console.log(thumbnail);
-  }, [thumbnail]);
+  //img 데이터 전송
+  const imgSubmitData = async (e) => {
+    try {
+      const formData = new FormData();
+      formData.append("photo", thumbnail);
+      const response = await axios.post("/api/post/upload", formData);
+      if (response.data && response.data.ok === 1) {
+        setPosting({
+          photo: "",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // 게시글데이터 전송
   const postingSubmitData = async (e) => {
     try {
@@ -78,7 +61,6 @@ const BoardWrite = () => {
       formData.append("title", title);
       formData.append("content", content);
       formData.append("category", category);
-      formData.append("thumbnail", thumbnail);
 
       let accessToken = localStorage.getItem("accessToken");
       let refreshToken = localStorage.getItem("refreshToken");
@@ -91,16 +73,12 @@ const BoardWrite = () => {
         data: { grant_type: "refresh_token", refresh_token: refreshToken },
       });
 
-      console.log(thumbnail);
-
       if (response.data && response.data.ok === 1) {
         let postId = response.data;
-
         setPosting({
           title: "",
           content: "",
           category: "",
-          thumbnail: "",
         });
 
         navigate(`/api/post/${postId}`);
@@ -111,6 +89,10 @@ const BoardWrite = () => {
       console.log(error);
       alert("게시물을 저장하는 도중 오류가 발생하였습니다.");
     }
+  };
+  const handleClick = () => {
+    onSubmitHandler();
+    imgSubmitData();
   };
 
   // submit
@@ -176,7 +158,7 @@ const BoardWrite = () => {
           임시저장
         </button>
         <button
-          onClick={onSubmitHandler}
+          onClick={handleClick}
           className="block bg-red-500 px-20 py-3 mt-28 font-bold text-white"
         >
           글 게시

@@ -1,7 +1,7 @@
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-const Editor = ({ value, onChange, onImageUpload }) => {
+const Editor = ({ value, onChange, handleImageUpload }) => {
   const modules = {
     toolbar: {
       container: [
@@ -57,7 +57,7 @@ const Editor = ({ value, onChange, onImageUpload }) => {
         ["clean"],
       ],
       image: {
-        uploadCallback: onImageUpload, // 이미지가 업로드될 때마다 onImageUpload 함수 호출
+        uploadCallback: handleImageUpload, // 이미지가 업로드될 때마다 onImageUpload 함수 호출
       },
     },
   };

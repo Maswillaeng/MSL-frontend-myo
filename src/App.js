@@ -15,18 +15,19 @@ function App() {
   const [authToken, setAuthToken] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    let token = localStorage.getItem("accessToken");
 
     if (token) {
       setAuthToken(token);
     }
-  }, []);
+  }, [setAuthToken]);
 
   axios.interceptors.request.use(
     (config) => {
       if (authToken) {
         config.headers.Authorization = `Bearer ${authToken}`;
       }
+
       return config;
     },
     (error) => {

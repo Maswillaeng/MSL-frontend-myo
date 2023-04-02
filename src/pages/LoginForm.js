@@ -53,8 +53,7 @@ const LoginForm = () => {
 
       dispatch(SET_TOKEN(state));
       dispatch(loginSuccess(accessToken, refreshToken));
-      loadAuthToken();
-      console.log("성공");
+
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -62,15 +61,6 @@ const LoginForm = () => {
       console.log("실패");
     }
   };
-  // 페이지 로드 시 localStorage에서 token을 가져와서 header에 설정하는 함수
-  const loadAuthToken = () => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    }
-  };
-
-  // 초기화
 
   return (
     <div>
