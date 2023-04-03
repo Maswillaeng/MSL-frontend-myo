@@ -33,13 +33,34 @@ const Join = () => {
   const regexrNickname = /^[가-힣a-zA-Z]{3,10}$/;
   //  핸드폰 번호 형식
   const regexrNum = /^01(0|1|6|7|8|9)\d{7,8}$/;
+  // img 전송
+  const onSubmitImgData = async (e) => {
+    const { userImage } = join;
+    const formData = new FormData();
+    formData.append("photo", userImage);
 
+    try {
+      const response = await axios.post("/api/user/upload", formData);
+      setJoin((prevState) => ({
+        ...prevState,
+        userImage: response.data.path,
+      }));
+
+      // path property가 없음
+      console.log(response);
+      console.log(response.data.path);
+    } catch (error) {
+      console.log("이미지 전송 실패");
+      console.log(error);
+    }
+  };
   //프로필 이름 변경
 
   const handleImageUpload = (e) => {
     if (e.target.files[0]) {
       const formData = new FormData();
       formData.append("userImage", e.target.files[0]);
+      onSubmitImgData();
     }
     // else {
     //   //업로드 취소할 시
@@ -102,22 +123,7 @@ const Join = () => {
       console.log(error);
     }
   };
-  // await axios
-  // .get(`/api/auth/duplicate/email?email=${email}`)
-  // .then((response) => {
-  //   setCheckEmail(response.data.checkEmail);
-  //   if (response) {
-  //     setEmailNotice({ message: "사용 가능한 이메일입니다.", alert: true });
-  //   } else if (response === false) {
-  //     setEmailNotice({
-  //       message: "이미 사용중인 이메일입니다.",
-  //       alert: false,
-  //     });
-  //   }
-  // })
-  // .catch((error) => {
-  //   console.log(error);
-  // });
+
   // Password 검사
   const onPasswordHandler = (e) => {
     const value = e?.currentTarget?.value;
@@ -244,15 +250,17 @@ const Join = () => {
 
   //전송
   const onSubmitHandler = (e) => {
+    e.preventDefault();
+    // onSubmitImgData();
+
     const { email, password, nickname, phoneNumber, userImage } = join;
     let userData = {
-      userImage: userImage,
+      userImagePath: userImage,
       email: email,
       password: password,
       nickname: nickname,
       phoneNumber: phoneNumber,
     };
-    e.preventDefault();
 
     if (
       !emailNotice.alert ||
@@ -274,11 +282,11 @@ const Join = () => {
             },
           }
         );
+
         console.log(response);
         navigate("/");
       } catch (error) {
         console.log(error);
-        console.log(userData);
       }
     };
 

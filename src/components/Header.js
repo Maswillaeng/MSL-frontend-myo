@@ -23,7 +23,7 @@ const Header = () => {
         <div className="flex items-center gap-40">
           <FiSearch className="font-bold text-red-500" />
           <Link to={"/Board"}>Board</Link>
-          { authenticated ? (
+          {authenticated ? (
             <>
               <Link to={"/MyPage/:userId"}>MyPage</Link>
               <button onClick={handleLogout}>Logout</button>
