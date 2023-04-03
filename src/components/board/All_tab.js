@@ -8,11 +8,10 @@ const AllTab = () => {
     const [allList, setAllList] = useState([]);
     // 로딩 상태
     const [loading, setLoading] = useState(false);
-    // 게시물 갯수 (확인 용)
-    const [postCount, setPostCount] = useState();
-    const [lastPost, setLastPost] = useState(false)
     // 페이지 네이션 (offset ver.)
-    const navigate = useNavigate()
+    // 마지막 게시물 인지용 (임시)
+    const [lastPost, setLastPost] = useState(false)
+    const [postCount, setPostCount] = useState(0);
     // 현재 페이지
     const [page, setPage] = useState(0);
     // 화면에 보여줄 데이터 갯수
@@ -20,34 +19,23 @@ const AllTab = () => {
     // 현재 페이지 바꾸기
     const currentPage = (e) => {
         const { name } = e.target
-        console.log(name)
-
         let offset = page;
-
         if(name === "prevBtn"){
            offset = offset-1
         }else if (name === "nextBtn")
             offset = offset+1
-        // if(offset <= 0){
-        //     offset = 0;
-        // }else {
-        //     offset = (page-1) * size
-        // }
         setPage(offset)
     }
 
     useEffect(() => {
         const ListData = async () => {
-            const postRes = await axios.post("api/post/posts", {
-                size: size, page: page
-            })
+            const postRes = await axios.get(`api/post/posts/${page}`)
             // 콘솔 확인용
             console.log(postRes.status) //200
-            console.log(postRes.data) //list - id,nickname, thumbnail,title (날짜는 어디에..?)
+            console.log(postRes.data) //list - id,nickname,thumbnail,title,
 
-            return postRes.data;
+            return postRes.data.content;
         }
-
     // 해시태그 테스트, 현재 jwt 권한 걸려있음
         // const getHashTag = async () => {
         //   const hashRes = await axios.get("api/post/9/hashtag")
@@ -58,12 +46,13 @@ const AllTab = () => {
         // }
         // getHashTag()
         //     .then((hash) => console.log(hash))
+
         setLoading(true)
         ListData()
             .then((posts) => {
                 setAllList(posts)
-                setPostCount(posts.length) // 임시 게시물 갯수 카운트, totalCount 전달받으면 그거 쓸 예정
-                if (postCount < 8){
+                setPostCount(posts.length) // 임시 게시물 갯수 카운트
+                if (postCount < 8) { // 8보다 적은 게시물이 올 경우 다음 버튼 비활성화
                     setLastPost(true)
                 }else setLastPost(false)
             })
@@ -73,7 +62,7 @@ const AllTab = () => {
 
     }, [page])
 
-    // 검색 (테스트 중)
+    // 검색 ...?
     const [userInput, setUserInput] = useState("");
     const [searchFilterList, setSearchFilterList] = useState([]);
     const getSearchValue = (e) => {
@@ -88,7 +77,6 @@ const AllTab = () => {
     return (
         <>
             {/* 게시물 수 확인 용 */}
-            {/* { postCount } */}
 
             <span className="m-auto">
                 <span className="text-red-500 text-lg font-bold">{postCount}</span>개 글을 불러왔습니다
@@ -152,9 +140,8 @@ const AllTab = () => {
                                         <div className="text-center p-5 h-auto" key={item.id}>
                                             <Link to="/Board">
                                                 <div className="h-52 overflow-hidden rounded-md">
-                                                    {/* thumnail */}
-                                                    {/* 더미데이터 불렀을 때, 썸네일에 타이틀 들어와서 경로가 맞지않아 잘못된 요청 콘솔 에러 뜸*/}
-                                                    {/*<img src={item.thumbnail} />*/}
+                                                    {/* thumbnail */}
+                                                    <img src={item.thumbnail} />
                                                 </div>
                                                 <div
                                                     className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis hover:text-[#EA4E4E]">
@@ -163,7 +150,6 @@ const AllTab = () => {
                                                     {item.title}
                                                 </div>
                                             </Link>
-
                                             <div>
                                                 {/*  user_id  */}
                                                 <span className="text-sm pr-3">
@@ -173,7 +159,7 @@ const AllTab = () => {
                                                 </span>
                                                 {/*  creat_At  */}
                                                 <span className="text-sm">
-                                                    {/*{item.created_date}*/}
+                                                    {item.createdDate}
                                                 </span>
                                             </div>
                                             {/* 댓글수 */}
@@ -203,29 +189,12 @@ const AllTab = () => {
                 </div>
 
                 {/* 페이지 네이션 */}
-                {/* 게시물의 끝을 요청 후에 알아서 다음 버튼이 한 텀 늦음 갯수 or 페이지 마지막 번호를 알아야 할 듯 */}
+                {/* 게시물의 끝을 요청 후에 알아서 다음 버튼이 한 텀 늦음, 갯수 or 페이지 마지막 번호를 알아야 할 듯 */}
                 <div className="my-5 m-auto text-2xl">
                     <button className={ page === 0 ? "text-gray-300" : "" } name="prevBtn" onClick={ (e) => currentPage(e) } disabled={ page === 0 } > 이전 </button>
                     <span>{page+1}</span>
                     <button className={ lastPost === true ? "text-gray-300" : "" } name="nextBtn" onClick={ (e) => currentPage(e) } disabled={ lastPost === true ? true : false }>다음</button>
                 </div>
-
-                {/* 페이징 frontOnly ver. */}
-                {/*  <div className="my-5 m-auto text-2xl">*/}
-                {/*    <nav>*/}
-                {/*      <ul className="pagination flex m-auto">*/}
-                {/*        { pageNumbers.map((number) => (*/}
-                {/*            <li key={number} className={number === currentPage ? "page-item mx-3 font-bold text-[#EA4E4E]" : "page-item mx-3"}>*/}
-                {/*              <button onClick={() => setCurrentPage(number)} className="page-link">*/}
-                {/*                {number}*/}
-                {/*              </button>*/}
-                {/*            </li>*/}
-                {/*          ))*/}
-                {/*        }*/}
-                {/*      </ul>*/}
-                {/*    </nav>*/}
-                {/*  </div>*/}
-
             </div>
         </>
     );

@@ -1,18 +1,22 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, {useContext} from "react";
+import {Link, useNavigate} from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
+import AuthContext from "../context/AuthContextProvider";
 const Header = () => {
+
   // 로그인&로그아웃
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
 
+  const { isLoggedIn, logoutHandler }= useContext(AuthContext)
+
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    logoutHandler();
     dispatch(DELETE_TOKEN());
+    window.location.assign("/LoginForm")
   };
   return (
     <div className="relative bg-main font-extrabold">
@@ -23,10 +27,10 @@ const Header = () => {
         <div className="flex items-center gap-40">
           <FiSearch className="font-bold text-red-500" />
           <Link to={"/Board"}>Board</Link>
-          { authenticated ? (
+          { isLoggedIn ? (
             <>
               <Link to={"/MyPage/:userId"}>MyPage</Link>
-              <button onClick={handleLogout}>Logout</button>
+              <button onClick={ handleLogout }>Logout</button>
             </>
           ) : (
             <Link to={"/LoginForm"}>Login</Link>

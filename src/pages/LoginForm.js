@@ -1,21 +1,23 @@
-import React, { useState } from "react";
+import React, {useContext, useState} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginSuccess, loginFailure } from "../redux/auth/actions";
 import { SET_TOKEN } from "../store/Auth";
-
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import AuthContext from "../context/AuthContextProvider";
 const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [errmessage, setErrmessage] = useState("");
+
+  const { setIsLoggedIn, loginHandler } = useContext(AuthContext)
 
   // 유저 입력 데이터 묶기
   const [join, setJoin] = useState({
     email: "",
     password: "",
   });
+  // 유효성 검사 메세지
+  const [errMSG, setErrMSG] = useState("");
 
   const inputValue = (e) => {
     const { name, value } = e.target;
@@ -24,20 +26,19 @@ const LoginForm = () => {
       [name]: value,
     });
   };
-
   const { email, password } = join;
+
   // 로그인 유효성
   const loginSubmit = (e) => {
     e.preventDefault();
 
     //유효성 검사
     if (email === "" || password === "") {
-      setErrmessage("아이디 비밀번호를 입력해주세요");
+      setErrMSG("아이디 비밀번호를 입력해주세요");
       return;
     }
     dispatch(getTokens(email, password));
   };
-
   // access token과 refresh token을 받아오는 함수
   const getTokens = (email, password, state) => async (dispatch) => {
     try {
@@ -45,14 +46,14 @@ const LoginForm = () => {
         email: email,
         password: password,
       });
-
       const accessToken = response.data.accessToken;
       const refreshToken = response.data.refreshToken;
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.clear();
+      loginHandler(accessToken, refreshToken)
 
       dispatch(SET_TOKEN(state));
       dispatch(loginSuccess(accessToken, refreshToken));
+      setIsLoggedIn(true);
 
       navigate("/");
     } catch (error) {
@@ -101,7 +102,7 @@ const LoginForm = () => {
                   placeholder="비밀번호"
                 />
                 <div className="mt-3 text-center text-sm font-bold text-white">
-                  {errmessage}
+                  {errMSG}
                 </div>
               </div>
               <div className="mt-4 flex justify-center text-lg">
