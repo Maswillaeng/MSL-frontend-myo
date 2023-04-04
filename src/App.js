@@ -37,7 +37,6 @@ function App() {
 
   return (
 
-
     <div className="App">
       <Header />
       <Routes>
@@ -51,7 +50,7 @@ function App() {
           element={<BoardWrite />}
           // element={<PrivateRoute path="/BoardWrite" component={BoardWrite} />}
         />
-        <Route path="/MyPage/:userId" element={<MyPage />} />
+        <Route path="/MyPage" element={<MyPage />} />
       </Routes>
     </div>
   );

@@ -2,64 +2,62 @@ import React, {useEffect, useState} from "react";
 import {Link, useLocation, useNavigate, useParams} from "react-router-dom";
 import {Pagination} from "@mui/material";
 import axios from "axios";
+import Moment from 'react-moment';
+import 'moment-timezone';
 
 const AllTab = () => {
     // 게시물 데이터
     const [allList, setAllList] = useState([]);
     // 로딩 상태
     const [loading, setLoading] = useState(false);
-    // 페이지 네이션 (offset ver.)
-    // 마지막 게시물 인지용 (임시)
-    const [lastPost, setLastPost] = useState(false)
-    const [postCount, setPostCount] = useState(0);
-    // 현재 페이지
-    const [page, setPage] = useState(0);
-    // 화면에 보여줄 데이터 갯수
-    const size = 8;
-    // 현재 페이지 바꾸기
-    const currentPage = (e) => {
-        const { name } = e.target
-        let offset = page;
-        if(name === "prevBtn"){
-           offset = offset-1
-        }else if (name === "nextBtn")
-            offset = offset+1
-        setPage(offset)
-    }
 
+    // 페이지 네이션 (offset ver.)
+    // 게시물 인지
+    // page는 0부터 시작하지만, 첫 페이지 버튼은 1부터 시작
+    const [firstPost, setFirstPost] = useState(1)
+    // 마지막 페이지
+    const [lastPost, setLastPost] = useState(0)
+    // 페이지 당 게시물 수 확인
+    const [postCount, setPostCount] = useState(0);
+    // 페이지 당 게시물 수 확인
+    const [totalPostCount, setTotalPostCount] = useState(0);
+    // 서버 데이터의 현재 페이지
+    const [page, setPage] = useState(0);
+    // 현재 페이지 바꾸기
+    const currentPage = (e, value) => {
+        setPage(value-1)
+        setFirstPost(value)
+    }
+    // page가 변경 될 때마다 서버에서 데이터 요청
     useEffect(() => {
         const ListData = async () => {
             const postRes = await axios.get(`api/post/posts/${page}`)
             // 콘솔 확인용
             console.log(postRes.status) //200
-            console.log(postRes.data) //list - id,nickname,thumbnail,title,
-
-            return postRes.data.content;
+            console.log(postRes.data) //list - id,nickname,thumbnail,title,createdDate
+            return postRes.data;
         }
-    // 해시태그 테스트, 현재 jwt 권한 걸려있음
-        // const getHashTag = async () => {
-        //   const hashRes = await axios.get("api/post/9/hashtag")
-        //   console.log(hashRes.status)
-        //   console.log(hashRes)
-        //
-        //   return hashRes;
-        // }
-        // getHashTag()
-        //     .then((hash) => console.log(hash))
 
+    // 해시태그 테스트, 현재 jwt 권한 걸려있음
+    //     const getHashTag = async () => {
+    //       const hashRes = await axios.get("api/post/9/hashtag")
+    //       console.log(hashRes.status)
+    //       console.log(hashRes)
+    //
+    //       return hashRes;
+    //     }
+    //     getHashTag()
+    //         .then((hash) => console.log(hash))
         setLoading(true)
         ListData()
             .then((posts) => {
-                setAllList(posts)
-                setPostCount(posts.length) // 임시 게시물 갯수 카운트
-                if (postCount < 8) { // 8보다 적은 게시물이 올 경우 다음 버튼 비활성화
-                    setLastPost(true)
-                }else setLastPost(false)
+                setAllList(posts.content)
+                setTotalPostCount(posts.totalElements) // 전체 게시물 갯수
+                setPostCount(posts.numberOfElements) // 현재 페이지 게시물 갯수
+                setLastPost(posts.totalPages) // 총 페이지 수
             })
             .catch((err) => console.log("게시물 리스트 에러 " + err))
-
         setLoading(false)
-
     }, [page])
 
     // 검색 ...?
@@ -69,17 +67,37 @@ const AllTab = () => {
         setUserInput(e.target.value);
     };
     const onSearch = (e) => {
-        const filterData = allList.filter((item) => item.title.includes(userInput));
-        setSearchFilterList(filterData);
-        console.log(filterData);
+        // value 데이터를 서버에 요청 보내서 검색 기능 만들어야 할 듯.
+    };
+
+    // 업로드 시간
+    const displayCreatedAt = (createdDate) => {
+        const today = new Date() // 현재 시간
+        const timeValue = new Date(createdDate) // 게시물 시간
+
+        // 분 화
+        const betweenTime = Math.floor((today.getTime() - timeValue.getTime()) / 1000 / 60);
+        // 1분 미만 = 방금 전
+        if (betweenTime < 1) return <span>방금 전</span>;
+        // 1시간 미만 = ~분 전
+        if (betweenTime < 60) {
+            return <span>{ betweenTime }분 전</span>;
+        }
+        // 시간 화
+        const betweenTimeHour = Math.floor(betweenTime / 60);
+        // 24시간 미만 = ~시간 전
+        if (betweenTimeHour < 24) {
+            return <span>{ betweenTimeHour }시간 전</span>;
+        }
+        // 24시간 이상 = YYYY년 MM월 DD일
+        return <Moment format="Y년 M월 D일">{ timeValue }</Moment>
     };
 
     return (
         <>
             {/* 게시물 수 확인 용 */}
-
-            <span className="m-auto">
-                <span className="text-red-500 text-lg font-bold">{postCount}</span>개 글을 불러왔습니다
+            <span className="m-auto">총
+                <span className="text-red-500 text-lg font-bold">{ totalPostCount }</span>개 글이 있습니다
             </span>
 
             <div className="flex flex-col">
@@ -159,7 +177,8 @@ const AllTab = () => {
                                                 </span>
                                                 {/*  creat_At  */}
                                                 <span className="text-sm">
-                                                    {item.createdDate}
+                                                    { displayCreatedAt(item.createdDate) }
+                                                    {/*{ displayCreatedAt("2022-12-24T16:11:45.820984") }*/}
                                                 </span>
                                             </div>
                                             {/* 댓글수 */}
@@ -189,11 +208,15 @@ const AllTab = () => {
                 </div>
 
                 {/* 페이지 네이션 */}
-                {/* 게시물의 끝을 요청 후에 알아서 다음 버튼이 한 텀 늦음, 갯수 or 페이지 마지막 번호를 알아야 할 듯 */}
+                {/* page 현재 페이지 count 마지막 페이지 수 onChange 화살표 눌렀을 때 함수 hidePrevButton 이전버튼 숨기기 hideNextButton 다음버튼 숨기기 */}
                 <div className="my-5 m-auto text-2xl">
-                    <button className={ page === 0 ? "text-gray-300" : "" } name="prevBtn" onClick={ (e) => currentPage(e) } disabled={ page === 0 } > 이전 </button>
-                    <span>{page+1}</span>
-                    <button className={ lastPost === true ? "text-gray-300" : "" } name="nextBtn" onClick={ (e) => currentPage(e) } disabled={ lastPost === true ? true : false }>다음</button>
+                    <Pagination
+                        size="large"
+                        page={ firstPost }
+                        count={ lastPost }
+                        hidePrevButton={ page === 0 }
+                        hideNextButton={ firstPost === lastPost }
+                        onChange={ currentPage } />
                 </div>
             </div>
         </>

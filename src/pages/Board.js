@@ -2,8 +2,6 @@ import React, {useEffect, useState} from "react";
 import Recipe_tab from "../components/board/Recipe_tab";
 import CocktailSnack_tab from "../components/board/CocktailSnack_tab";
 import Etc_tab from "../components/board/Etc_tab";
-import moment from "moment";
-import "moment/locale/ko";
 import All_tab from "../components/board/All_tab";
 import Toggle_tab from "../components/board/Toggle_tab";
 
@@ -11,8 +9,6 @@ const Board = () => {
     // 탭 인덱스 상태변수
     const [index, setIndex] = useState(0);
 
-    // 게시글 시간 표기
-    // const nowTime = moment().format("YYYY-MM-DD hh:mm:ss");
 
     return (
         <div className="w-full h-screen items-center justify-center bg-[#FBF9EC] bg-cover ">
@@ -22,6 +18,7 @@ const Board = () => {
                     className="w-full h-28" style={{ backgroundImage: "url(https://cdn.pixabay.com/photo/2015/03/30/12/35/mojito-698499_1280.jpg)" }} />
                 {/* 탭 */}
                 <Toggle_tab index={ index } setIndex={ setIndex }/>
+
                 {/* 게시판 */}
                 <div>
                     <section className="container px-4 mx-auto">
