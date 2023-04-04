@@ -1,12 +1,11 @@
-import React, {useContext} from "react";
-import {Link, useNavigate} from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
 import AuthContext from "../context/AuthContextProvider";
 const Header = () => {
-
   // 로그인&로그아웃
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
@@ -30,7 +29,7 @@ const Header = () => {
           { isLoggedIn ? (
             <>
               <Link to={"/MyPage/:userId"}>MyPage</Link>
-              <button onClick={ handleLogout }>Logout</button>
+              <button onClick={handleLogout}>Logout</button>
             </>
           ) : (
             <Link to={"/LoginForm"}>Login</Link>

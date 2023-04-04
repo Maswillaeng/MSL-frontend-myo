@@ -39,17 +39,19 @@ const BoardWrite = () => {
   };
   let { title, content, category, thumbnail } = posting;
   //img 데이터 전송
-  const imgSubmitData = async (e) => {
+  const onSubmitImgData = async (e) => {
+    const formData = new FormData();
+    formData.append("photo", thumbnail);
     try {
-      const formData = new FormData();
-      formData.append("photo", thumbnail);
-      const response = await axios.post("/api/post/upload", formData);
-      if (response.data && response.data.ok === 1) {
-        setPosting({
-          photo: "",
-        });
-      }
+      const response = await axios.post("/api/user/upload", formData);
+      posting((prevState) => ({
+        ...prevState,
+        thumbnail: response.data.path,
+      }));
+      // path property가 없음
+      console.log(response.data.path);
     } catch (error) {
+      console.log("이미지 전송 실패");
       console.log(error);
     }
   };
@@ -61,7 +63,7 @@ const BoardWrite = () => {
       formData.append("title", title);
       formData.append("content", content);
       formData.append("category", category);
-
+      formData.append("thumbnail", thumbnail);
       let accessToken = localStorage.getItem("accessToken");
       let refreshToken = localStorage.getItem("refreshToken");
       const response = await axios.post("/api/post", formData, {
@@ -79,6 +81,7 @@ const BoardWrite = () => {
           title: "",
           content: "",
           category: "",
+          thumbnail: "",
         });
 
         navigate(`/api/post/${postId}`);
@@ -91,8 +94,8 @@ const BoardWrite = () => {
     }
   };
   const handleClick = () => {
+    onSubmitImgData();
     onSubmitHandler();
-    imgSubmitData();
   };
 
   // submit
