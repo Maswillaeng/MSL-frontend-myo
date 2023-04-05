@@ -33,34 +33,28 @@ const Join = () => {
   const regexrNickname = /^[가-힣a-zA-Z]{3,10}$/;
   //  핸드폰 번호 형식
   const regexrNum = /^01(0|1|6|7|8|9)\d{7,8}$/;
-  // img 전송
-  const onSubmitImgData = async (e) => {
-    const { userImage } = join;
-    const formData = new FormData();
-    formData.append("photo", userImage);
 
-    try {
-      const response = await axios.post("/api/user/upload", formData);
-      setJoin((prevState) => ({
-        ...prevState,
-        userImage: response.data.path,
-      }));
+  //프로필 사진 변경
 
-      // path property가 없음
-      console.log(response);
-      console.log(response.data.path);
-    } catch (error) {
-      console.log("이미지 전송 실패");
-      console.log(error);
-    }
-  };
-  //프로필 이름 변경
-
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     if (e.target.files[0]) {
       const formData = new FormData();
-      formData.append("userImage", e.target.files[0]);
-      onSubmitImgData();
+      formData.append("photo", e.target.files[0]);
+
+      try {
+        const response = await axios.post("/api/user/upload", formData);
+        setJoin((prevState) => ({
+          ...prevState,
+          userImage: response.data.img,
+        }));
+
+        console.log(response.data.img);
+      } catch (error) {
+        console.log("이미지 전송 실패");
+        console.log(error);
+      }
+    } else {
+      setJoin((prevState) => ({ ...prevState, userImage: "/img/user.jpg" }));
     }
     // else {
     //   //업로드 취소할 시
