@@ -26,10 +26,10 @@ const BoardWrite = () => {
   let [posting, setPosting] = useState({
     title: "",
     content: "",
-    category: "",
+    // category: "",
     thumbnail: "",
   });
-
+  const [imageFile, setImageFile] = useState(null);
   // title 작성
   const onTitleHandler = (e) => {
     setPosting((prevState) => ({
@@ -38,22 +38,13 @@ const BoardWrite = () => {
     }));
   };
   let { title, content, category, thumbnail } = posting;
-  //img 데이터 전송
-  const onSubmitImgData = async (e) => {
-    const formData = new FormData();
-    formData.append("photo", thumbnail);
-    try {
-      const response = await axios.post("/api/user/upload", formData);
-      posting((prevState) => ({
-        ...prevState,
-        thumbnail: response.data.path,
-      }));
-      // path property가 없음
-      console.log(response.data.path);
-    } catch (error) {
-      console.log("이미지 전송 실패");
-      console.log(error);
-    }
+
+  const handleContentChange = (value, images) => {
+    setPosting((prevState) => ({
+      ...prevState,
+      content: value,
+    }));
+    setImageFile(images);
   };
 
   // 게시글데이터 전송
@@ -62,7 +53,7 @@ const BoardWrite = () => {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("content", content);
-      formData.append("category", category);
+      // formData.append("category", category);
       formData.append("thumbnail", thumbnail);
       let accessToken = localStorage.getItem("accessToken");
       let refreshToken = localStorage.getItem("refreshToken");
@@ -80,7 +71,7 @@ const BoardWrite = () => {
         setPosting({
           title: "",
           content: "",
-          category: "",
+          // category: "",
           thumbnail: "",
         });
 
@@ -93,36 +84,49 @@ const BoardWrite = () => {
       alert("게시물을 저장하는 도중 오류가 발생하였습니다.");
     }
   };
-  const handleClick = () => {
-    onSubmitImgData();
-    onSubmitHandler();
-  };
+  // Img 경로값 반환
+  const handleImageUpload = async (e) => {
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append("photo", imageFile);
 
+      try {
+        const response = await axios.post("/api/post/upload", formData);
+        setPosting((prevState) => ({
+          ...prevState,
+          thumbnail: response.data.img,
+        }));
+        console.log(response.data.img);
+        console.log("이미지전송성공");
+      } catch (error) {
+        console.log("이미지 전송 실패");
+        console.log(error);
+      }
+    }
+  };
   // submit
-  const onSubmitHandler = (e) => {
-    e.preventDefault();
+  // const onSubmitHandler = (e) => {
+  //   // e.preventDefault();
 
-    if (!title.trim()) {
-      return titleInputRef.current.focus();
-    }
+  //   if (!title.trim()) {
+  //     return titleInputRef.current.focus();
+  //   }
 
-    if (category === "") {
-      alert("카테고리를 선택해주세요");
-      return;
-    }
-    if (!content.trim()) {
-      return contentEditorRef.current.querySelector(".ql-editor").focus();
-    }
-    postingSubmitData();
-  };
+  //   if (category === "") {
+  //     alert("카테고리를 선택해주세요");
+  //     return;
+  //   }
+  //   if (!content.trim()) {
+  //     return contentEditorRef.current.querySelector(".ql-editor").focus();
+  //   }
+  //   postingSubmitData();
+  // };
 
-  // editor 내용 변경
-  const onEditorChange = (value) => {
-    setPosting((prevPosting) => ({
-      ...prevPosting,
-      content: value,
-    }));
-  };
+  // const handleClick = () => {
+  //   handleImageUpload(thumbnail);
+  //   onSubmitHandler();
+  //   console.log(posting);
+  // };
 
   // 카테고리 선택
   const handleSelect = (categories) => {
@@ -151,7 +155,8 @@ const BoardWrite = () => {
           <Editor
             forwardedRef={editorRef}
             value={posting.content}
-            onChange={onEditorChange}
+            onChange={handleContentChange}
+            thumbnail={posting.thumbnail}
             // onImageUpload={onImageUpload}
           />
         </div>
@@ -161,7 +166,7 @@ const BoardWrite = () => {
           임시저장
         </button>
         <button
-          onClick={handleClick}
+          onClick={handleImageUpload}
           className="block bg-red-500 px-20 py-3 mt-28 font-bold text-white"
         >
           글 게시
