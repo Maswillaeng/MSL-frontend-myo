@@ -18,8 +18,6 @@ const AllTab = () => {
     // 마지막 페이지
     const [lastPost, setLastPost] = useState(0)
     // 페이지 당 게시물 수 확인
-    const [postCount, setPostCount] = useState(0);
-    // 페이지 당 게시물 수 확인
     const [totalPostCount, setTotalPostCount] = useState(0);
     // 서버 데이터의 현재 페이지
     const [page, setPage] = useState(0);
@@ -28,39 +26,27 @@ const AllTab = () => {
         setPage(value-1)
         setFirstPost(value)
     }
-    // page가 변경 될 때마다 서버에서 데이터 요청
+    // page가 변경 될 때마다 서버에 데이터 요청
     useEffect(() => {
         const ListData = async () => {
             const postRes = await axios.get(`api/post/posts/${page}`)
             // 콘솔 확인용
-            console.log(postRes.status) //200
-            console.log(postRes.data) //list - id,nickname,thumbnail,title,createdDate
+            console.log(postRes.data) // list - id,nickname,thumbnail,title,createdDate
             return postRes.data;
         }
-
-    // 해시태그 테스트, 현재 jwt 권한 걸려있음
-    //     const getHashTag = async () => {
-    //       const hashRes = await axios.get("api/post/9/hashtag")
-    //       console.log(hashRes.status)
-    //       console.log(hashRes)
-    //
-    //       return hashRes;
-    //     }
-    //     getHashTag()
-    //         .then((hash) => console.log(hash))
         setLoading(true)
         ListData()
             .then((posts) => {
                 setAllList(posts.content)
                 setTotalPostCount(posts.totalElements) // 전체 게시물 갯수
-                setPostCount(posts.numberOfElements) // 현재 페이지 게시물 갯수
                 setLastPost(posts.totalPages) // 총 페이지 수
             })
             .catch((err) => console.log("게시물 리스트 에러 " + err))
         setLoading(false)
     }, [page])
 
-    // 검색 ...?
+
+    // 검색 (구현 대기 중)
     const [userInput, setUserInput] = useState("");
     const [searchFilterList, setSearchFilterList] = useState([]);
     const getSearchValue = (e) => {
@@ -129,8 +115,8 @@ const AllTab = () => {
                                                 className="bg-transparent border-none mr-3 leading-tight focus:outline-none"
                                                 type="text"
                                                 placeholder="검색"
-                                                value={userInput}
-                                                onChange={getSearchValue}/>
+                                                value={ userInput }
+                                                onChange={ getSearchValue }/>
                                             <button
                                                 className="right-10 top-0 mr-4"
                                                 onClick={onSearch}
@@ -158,27 +144,22 @@ const AllTab = () => {
                                         <div className="text-center p-5 h-auto" key={item.id}>
                                             <Link to="/Board">
                                                 <div className="h-52 overflow-hidden rounded-md">
-                                                    {/* thumbnail */}
                                                     <img src={item.thumbnail} />
                                                 </div>
                                                 <div
                                                     className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis hover:text-[#EA4E4E]">
-                                                    {/* title */}
-                                                    {/* 더미데이터 불렀을 때, 이미지 경로 출력 됨 (타이틀, 썸네일 바뀜) */}
                                                     {item.title}
                                                 </div>
                                             </Link>
                                             <div>
-                                                {/*  user_id  */}
                                                 <span className="text-sm pr-3">
-                                                    <Link to="/MyPage/:user_id">
-                                                    {item.nickname}
+                                                    <Link to="/MyPage/:nickname">
+                                                    { item.nickname }
                                                     </Link>
                                                 </span>
                                                 {/*  creat_At  */}
                                                 <span className="text-sm">
                                                     { displayCreatedAt(item.createdDate) }
-                                                    {/*{ displayCreatedAt("2022-12-24T16:11:45.820984") }*/}
                                                 </span>
                                             </div>
                                             {/* 댓글수 */}
@@ -189,11 +170,10 @@ const AllTab = () => {
                                             <span className="text-sm pl-3">
                                                 👀 9999
                                             </span>
-                                            {/* 좋아요 테스트 중 */}
+                                            {/* 좋아요 제작 중 */}
                                             <span className="text-sm pl-3">
                                                 💗 100
                                             </span>
-
                                             <div className="grid grid-cols-3">
                                                 <span className="bg-gray-200 rounded-md text-xs p-1 m-1 overflow-hidden whitespace-nowrap text-ellipsis ">
                                                   #해시태그
@@ -206,7 +186,6 @@ const AllTab = () => {
                         </div>
                     </div>
                 </div>
-
                 {/* 페이지 네이션 */}
                 {/* page 현재 페이지 count 마지막 페이지 수 onChange 화살표 눌렀을 때 함수 hidePrevButton 이전버튼 숨기기 hideNextButton 다음버튼 숨기기 */}
                 <div className="my-5 m-auto text-2xl">

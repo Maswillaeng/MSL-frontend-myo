@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -7,16 +7,40 @@ import DialogActions from "@mui/material/DialogActions";
 import {AiFillPlusCircle} from "react-icons/ai";
 import {Grid} from "@mui/material";
 import axios from "axios";
+import AuthContext from "../../context/AuthContextProvider";
 
-const UserProfile = () => {
+const UserProfile = ({ userId, member }) => {
+    // 로그인 상태
+    const { isLoggedIn, loginUser } = useContext(AuthContext);
+
+    // 프로필 수정 모달
+    // 에러 메세지
     const [errMsg, setErrMsg] = useState("");
+    // 모달 오프너, 클로저
     const [modalOpen, setModalOpen] = useState(false);
     const handleOpen = () => {
         setModalOpen(true)
     }
-    const handleClose = () => {
+    const handleClose = (e) => {
+        e.preventDefault();
         setModalOpen(false)
+        setProfileUpdateForm({
+            nickname: "",
+            userImage: "/img/user.jpg",
+            introduction: "",
+            phoneNumber: "",
+            password: "",
+            newPwd: "",
+            RnewPwd: "",
+        })
+        setErrMsg("")
+        setNickNameConfirm(false)
+        setPasswordConfirm(false)
+        setNewPasswordConfirm(false)
+        setPhoneNumberConfirm(false)
     }
+
+    // 프로필 이미지
     const [imgFile, setImgFile] = useState("");
     const imgRef = useRef();
     const handleImg = () => {
@@ -32,38 +56,61 @@ const UserProfile = () => {
         }
         console.log(profileUpdateForm)
     }
-    // 프로필 수정 모달 formData, 유저 데이터 들어올 시 수정 할 것
+
+    // 유저데이터 업데이트 폼
     const [profileUpdateForm, setProfileUpdateForm] = useState({
         nickname: "",
         userImage: "/img/user.jpg",
         introduction: "",
+        phoneNumber: "",
+        password: "",
+        newPwd: "",
+        RnewPwd: "",
         }
     );
-    const {nickname, userImage, introduction} = profileUpdateForm;
+    const { nickname, userImage, introduction, phoneNumber, password, newPwd, RnewPwd } = profileUpdateForm;
 
-    //입력 값 formData에 넣기
+    // 입력 값 formData에 넣기
     const onCheckInputValue = (e) => {
+
         const { name, value } = e.target;
         setProfileUpdateForm({
             ...profileUpdateForm,
             [name] : value,
         })
+
+        setErrMsg("")
+
+        // 컨펌 통과 후 입력 값 변경 시 컨펌 초기화
+        if (name === "nickname"){
+        setNickNameConfirm(false)
+        }else if (name === "password"){
+        setPasswordConfirm(false)
+        }else if (name === "newPwd" || name === "RnewPwd"){
+        setNewPasswordConfirm(false)
+        }else if (name === "phoneNumber"){
+        setPhoneNumberConfirm(false)
+        }
         console.log(profileUpdateForm)
     }
 
-    // { headers: { "Context-Type": "application/json" }}
-    // 닉네임 검사
-    // 닉네임 정규식
-    const checkNickname2 = /^[가-힣a-zA-Z]{2,10}$/;
+    // 유효성 검사
+    const [nickNameConfirm, setNickNameConfirm] = useState(false)
+    const [passwordConfirm, setPasswordConfirm] = useState(false)
+    const [newPasswordConfirm, setNewPasswordConfirm] = useState(false)
+    const [phoneNumberConfirm, setPhoneNumberConfirm] = useState(false)
 
+    // 닉네임
+    const checkNickname = /^[가-힣a-zA-Z]{2,10}$/;
     const onNicknameCheck = (e) => {
         e.preventDefault()
-
         if(nickname === ''){
             setErrMsg("닉네임을 입력해주세요")
+            setNickNameConfirm(false)
             return;
-        }else if(!checkNickname2.test(nickname)) {
+        }else if(!checkNickname.test(nickname)) {
             setErrMsg("2자 이상의 한글이나, 영문으로 입력해주세요")
+            setNickNameConfirm(false)
             return;
         }else {
             axios.post("/api/auth/duplicate/nickname",{
@@ -71,15 +118,136 @@ const UserProfile = () => {
             })
                 .then((res) => {
                     if(res.status === 200) {
+                        setNickNameConfirm(true)
                         setErrMsg("닉네임 사용 가능")
-                        console.log(res)
                     }
                     else if(res.status === 409) {
                         setErrMsg("닉네임 사용 불가")
-                        console.log(res)
+                        setNickNameConfirm(false)
                         return;
                     }
-                }).catch((err) => console.log(err))
+                })
+                .catch((err) => {
+                    setErrMsg("닉네임 확인 중 서버 에러")
+                    setNickNameConfirm(false)
+                    console.log(err)
+                    return;
+            })
+        }
+    }
+    // 로그인 api를 이용하여 현재 비밀번호 확인,, 토큰에 문제 생길 수도 있을 것 같아서 확인 해봐야할 듯...
+    const passwordCheck = async (e) => {
+        if(password === ''){
+            setErrMsg("비밀번호를 입력해주세요")
+            setPasswordConfirm(false)
+            return;
+        } else {
+            await axios.post("/api/auth/login",{
+                email: loginUser.email,
+                password: password
+            })
+            .then((res) => {
+                if(res.status === 200) {
+                    setPasswordConfirm(true)
+                    setErrMsg("")
+                }else {
+                    setErrMsg("현재 비밀번호가 일치하지 않습니다")
+                    setPasswordConfirm(false)
+                    return;
+                }
+            })
+            .catch((err) => {
+                setErrMsg("비밀번호 확인 중 서버 에러")
+                setPasswordConfirm(false)
+                console.log(err)
+            })
+        }
+    }
+    // 새 비밀번호
+    const checkPwd = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,15}$/;
+    const onNewPwdCheck = (e) => {
+        if (newPwd !== '' || RnewPwd !== '') {
+            if (newPwd !== RnewPwd) {
+                setErrMsg("새 비밀번호가 일치하지 않습니다")
+                setNewPasswordConfirm(false)
+                return;
+            } else if (!checkPwd.test(newPwd)) {
+                setErrMsg("새 비밀번호를 1개 이상의 영문과 숫자가 포함된 8~15자리로 입력해주세요")
+                setNewPasswordConfirm(false)
+                return;
+            }
+        }
+            setErrMsg("")
+            setNewPasswordConfirm(true)
+    }
+
+    // 핸드폰 번호
+    const checkPhoneNumber = /^01(0|1|6|7|8|9)\d{7,8}$/;
+    const onPhoneNumberCheck = (e) => {
+        if (phoneNumber === "") {
+            setErrMsg("핸드폰 번호를 입력해주세요")
+            setPhoneNumberConfirm(false)
+            return;
+        }else if (!checkPhoneNumber.test(phoneNumber)){
+            setErrMsg("핸드폰 번호를 올바르게 입력해주세요")
+            setPhoneNumberConfirm(false)
+            return;
+        }else {
+            setErrMsg("")
+            setPhoneNumberConfirm(true)
+        }
+    }
+
+    const profileUpdateSubmit = (e) => {
+        e.preventDefault();
+
+        // 새 비밀번호란이 비었고, 확인하지 않은 경우
+        if( newPwd === "" && RnewPwd === "" && !newPasswordConfirm) {
+            if(!nickNameConfirm) {
+                setErrMsg("닉네임 중복을 확인해주세요")
+                return;
+            } else if(!passwordConfirm) {
+                setErrMsg("현재 비밀번호를 확인해주세요")
+                return;
+            } else if(!phoneNumberConfirm) {
+                setErrMsg("핸드폰번호를 확인해주세요")
+                return;
+            }
+            const updateRequest = async () => {
+                const accessToken = await localStorage.getItem("accessToken");
+                const res = await axios.put(`/api/user/${userId}`,{
+                    nickname: nickname,
+                    password: password,
+                    phoneNumber: phoneNumber,
+                    introduction: introduction,
+                    userImage: userImage
+                },{ headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "Content-Type": "application/json",
+                    },
+                })
+
+            }
+
+            // 새 비밀번호를 확인한 경우
+        } else if (newPwd === RnewPwd && newPasswordConfirm) {
+            if(!nickNameConfirm ) {
+                setErrMsg("닉네임 중복을 확인해주세요")
+                return;
+            } else if(!passwordConfirm) {
+                setErrMsg("현재 비밀번호를 확인해주세요")
+                return;
+            } else if(!phoneNumberConfirm) {
+                setErrMsg("핸드폰번호를 확인해주세요")
+                return;
+            }
+            const updateRequest = async () => {
+
+            }
+        }
+        else {
+            setErrMsg("알 수 없는 에러")
+            return;
         }
     }
 
@@ -94,66 +262,98 @@ const UserProfile = () => {
                         묘묘
                     </div>
                     <div className="m-auto mx-5 flex justify-around">
-                        <span className="font-bold">
-                            팔로우
-                        </span>
+                        <span className="font-bold">팔로우</span>
                         <span>
                             1
                         </span>
-                        <span className="font-bold">
-                            팔로워
-                        </span>
+                        <span className="font-bold">팔로워</span>
                         <span>
                             1056
                         </span>
                     </div>
+
                     <div className="m-auto mt-10 ">
-                        소개글 ~~~~~~~~~~~~~~~~~~~~~~~
+                        소개글
                     </div>
-                    <div className="mt-10 text-sm font-bold text-gray-400">
-                        <button onClick={ handleOpen }>프로필 수정</button>
-                    </div>
-                    <button className="m-7 w-10/12 h-10 bg-[#EA4E4E] text-lg text-white font-bold rounded-md mx-3">
-                        팔로우
-                    </button>
+
+                    {/*{ member.nickname === loginUser.nickname ?*/}
+                    {/*    <>*/}
+                            <div className="mt-10 text-sm font-bold text-gray-400">
+                                <button className="mx-3" onClick={ handleOpen }>프로필 수정</button>
+                                <button className="mx-3" >회원 탈퇴</button>
+                            </div>
+                    {/*    </>*/}
+                    {/*    : null*/}
+                    {/*}*/}
+
+                    <button className="m-7 w-10/12 h-10 text-lg text-white font-bold bg-[#EA4E4E] rounded-md mx-3">팔로우</button>
                 </div>
             </div>
 
             {/* 프로필 수정 모달 UI 미완성 상태 */}
             <Dialog open={ modalOpen }>
-                <form className="p-3 pr-5 bg-[#fbf9ec] w-auto">
+                <form className="p-3 pr-5 bg-[#fbf9ec] w-auto" onSubmit={ profileUpdateSubmit }>
                 <DialogTitle className="">프로필 수정</DialogTitle>
                     <DialogContent>
                         <Grid container>
-                            <Grid item xs="6">
-                                <div className="m-auto border rounded-full w-52 h-52 overflow-hidden">
-                                    <img src={ imgFile ? imgFile : "/img/user.jpg" } className="w-52 h-52"/>
-                                    <input type="file" accept="image/*" id="profile_photo" className="hidden overflow-hidden w-0 h-0 p-0" onChange={ handleImg } ref={ imgRef }/>
-                                </div>
-                                <label htmlFor="profile_photo" className="cursor-pointer">프로필 사진 변경</label>
-                            </Grid>
-                            <Grid item xs="6">
-                                <DialogContentText>
-                                    닉네임
-                                </DialogContentText>
+                            <Grid item xs={6}>
                                 <div>
-                                    <input type="text" className="border" name="nickname" value={nickname} onChange={ onCheckInputValue }/>
-                                    <button className="" onClick={ onNicknameCheck }>중복검사</button>
+                                    <div className="my-3 border rounded-full w-52 h-52 overflow-hidden">
+                                        <img src={ imgFile ? imgFile : "/img/user.jpg" } className="w-52 h-52"/>
+                                        <input type="file" accept="image/*" id="profile_photo" className="hidden overflow-hidden w-0 h-0 p-0" onChange={ handleImg } ref={ imgRef }/>
+                                    </div>
+                                    <label htmlFor="profile_photo" className="pl-14 cursor-pointer text-sm">프로필 사진 변경</label>
                                 </div>
-                                <div className="mt-3 text-center text-sm font-bold">
-                                    {errMsg}
+                            </Grid>
+                            <Grid item xs={6}>
+                                <div className="w-96">
+                                    <DialogContentText>
+                                        닉네임
+                                    </DialogContentText>
+                                    <div>
+                                        <input type="text" className="border w-44" name="nickname" value={ nickname } onChange={ onCheckInputValue }/>
+                                        <button className="text-sm w-24 h-7 ml-2 bg-[#EA4E4E] text-white rounded-md" onClick={ onNicknameCheck }>중복검사</button>
+                                    </div>
+                                    <DialogContentText>
+                                        현재 비밀번호
+                                    </DialogContentText>
+                                    <div>
+                                        <input type="password" className="border w-56" name="password" value={ password } onChange={ onCheckInputValue } onBlur={ passwordCheck }/>
+                                    </div>
+                                    <DialogContentText>
+                                        새 비밀번호
+                                    </DialogContentText>
+                                    <div>
+                                        <input type="password" className="border w-56" name="newPwd" value={ newPwd } onChange={ onCheckInputValue } onBlur={onNewPwdCheck}/>
+                                    </div>
+                                    <DialogContentText>
+                                        새 비밀번호 확인
+                                    </DialogContentText>
+                                    <div>
+                                        <input type="password" className="border w-56" name="RnewPwd" value={ RnewPwd } onChange={ onCheckInputValue } onBlur={onNewPwdCheck} />
+                                    </div>
+                                    <DialogContentText>
+                                        핸드폰 번호
+                                        <span className="text-xs text-gray-400"> ex) 01012345678</span>
+                                    </DialogContentText>
+                                    <div>
+                                        <input type="text" className="border w-56" name="phoneNumber" value={ phoneNumber } onChange={ onCheckInputValue } onBlur={onPhoneNumberCheck}/>
+                                    </div>
+                                    <DialogContentText>
+                                        자기소개
+                                    </DialogContentText>
+                                    <input type="text" className="border w-56" name="introduction" value={ introduction } onChange={ onCheckInputValue }/>
+                                    <div className="my-3 text-sm font-bold text-[#EA4E4E]">
+                                        { errMsg }
+                                    </div>
                                 </div>
-                                <DialogContentText>
-                                    자기소개
-                                </DialogContentText>
-                                <input type="text" className="border" name="introduction" value={introduction} onChange={ onCheckInputValue }/>
                             </Grid>
                         </Grid>
                     </DialogContent>
-                <DialogActions>
-                    <button>수정</button>
-                    <button onClick={ handleClose }>닫기</button>
-                </DialogActions>
+                    <DialogActions>
+                        <button className="w-12 h-8 bg-[#EA4E4E] text-white rounded-md">수정</button>
+                        <button className="w-12 h-8 bg-gray-300 rounded-md" onClick={ handleClose }>닫기</button>
+                    </DialogActions>
                 </form>
             </Dialog>
         </>

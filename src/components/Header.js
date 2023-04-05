@@ -17,6 +17,7 @@ const Header = () => {
     dispatch(DELETE_TOKEN());
     window.location.assign("/LoginForm")
   };
+
   return (
     <div className="relative bg-main font-extrabold">
       <div className="border-b-zinc-400 border-t-stone-600 flex h-20  items-center justify-between border-t-4 border-b-2 ">
@@ -28,7 +29,7 @@ const Header = () => {
           <Link to={"/Board"}>Board</Link>
           { isLoggedIn ? (
             <>
-              <Link to={"/MyPage/:userId"}>MyPage</Link>
+              <Link to={"/MyPage"}>MyPage</Link>
               <button onClick={handleLogout}>Logout</button>
             </>
           ) : (

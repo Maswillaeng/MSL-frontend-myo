@@ -50,6 +50,7 @@ const LoginForm = () => {
       const refreshToken = response.data.refreshToken;
       localStorage.clear();
       loginHandler(accessToken, refreshToken)
+      console.log(response.data)
 
       dispatch(SET_TOKEN(state));
       dispatch(loginSuccess(accessToken, refreshToken));

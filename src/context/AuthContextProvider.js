@@ -4,8 +4,8 @@ import React, {createContext, useEffect, useState} from 'react';
 const AuthContext = createContext({
     isLoggedIn: false,
     setIsLoggedIn: () => {},
-    userInfo: {},
-    setUserInfo: () => {},
+    loginUser: {},
+    setLoginUser: () => {},
     loginHandler: () => {},
     logoutHandler: () => {},
 });
@@ -25,14 +25,15 @@ export const AuthContextProvider = (props) => {
             setIsLoggedIn(false)
     },[])
 
-    // 유저 정보 저장
-    const [userInfo, setUserInfo] = useState({
+    // 현재 로그인 한 유저 정보 저장 - 데이터 불러올 방법 못 찾음...
+    const [loginUser, setLoginUser] = useState({
         email: "",
         nickname : "",
         userImage : "",
         introduction : "",
     })
     // 유저 정보 변경
+
 
     // 로그인 & 로그아웃 처리
     const loginHandler = (accessToken, refreshToken) => {
@@ -53,8 +54,8 @@ export const AuthContextProvider = (props) => {
             value={{
                 isLoggedIn,
                 setIsLoggedIn,
-                userInfo,
-                setUserInfo,
+                loginUser,
+                setLoginUser,
                 loginHandler,
                 logoutHandler,
         }}>
