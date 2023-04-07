@@ -4,9 +4,9 @@ import "react-quill/dist/quill.snow.css";
 import axios from "axios";
 import { useMemo, useRef, useState } from "react";
 
-const Editor = () => {
-  const [contentValue, setContentValue] = useState("");
+const Editor = ({ onChange, content, thumbnail, setThumbnail }) => {
   const quillRef = useRef();
+  let [imgUrl, setImgUrl] = useState("");
   const imageHandler = () => {
     console.log("핸들러시작");
 
@@ -40,17 +40,33 @@ const Editor = () => {
         const editor = quillRef.current.getEditor();
         const range = editor.getSelection();
         editor.insertEmbed(range.index, "image", IMG_URL);
+        // img 경로 썸네일로 보내는 코드
+        // setThumbnail((prevState) => ({
+        //   ...prevState,
+        //   thumbnail: IMG_URL,
+        // }));
       } catch (error) {
         console.log("실패");
       }
     });
   };
+  const handleChange = (content, delta, source, editor) => {
+    const images = [];
+    delta.ops.forEach((op) => {
+      if (op.insert && typeof op.insert === "object" && op.insert.image) {
+        images.push(op.insert.image);
+      }
+    });
+
+    onChange(content, imgUrl);
+  };
+
   const modules = useMemo(() => {
     return {
       toolbar: {
         container: [
           [{ header: [1, 2, 3, 4, 5, 6, false] }],
-          [{ font: [] }],
+
           [{ align: [] }],
           ["bold", "italic", "underline", "strike", "blockquote"],
           [{ list: "ordered" }, { list: "bullet" }, "link"],
@@ -140,9 +156,9 @@ const Editor = () => {
         theme="snow"
         modules={modules}
         formats={formats}
-        value={contentValue || ""}
+        value={content || ""}
         ref={quillRef}
-        onChange={setContentValue}
+        onChange={handleChange}
       />
       <button onClick={handleButtonClick}>에디터 안의 내용들</button>
     </div>

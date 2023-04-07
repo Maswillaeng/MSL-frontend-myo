@@ -1,7 +1,7 @@
 import "./App.css";
 import "./style/input.css";
 import Header from "./components/Header";
-import React, {useContext, useEffect, useState} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import BoardDetail from "./pages/BoardDetail";
 import Board from "./pages/Board";
@@ -11,7 +11,7 @@ import MyPage from "./pages/MyPage";
 import BoardWrite from "./pages/BoardWrite";
 import axios from "axios";
 import Join from "./pages/Join";
-import AuthenticateCheck from "./components/AuthenticateCheck"
+import AuthenticateCheck from "./components/AuthenticateCheck";
 import AuthContext from "./context/AuthContextProvider";
 function App() {
   // const [authToken, setAuthToken] = useState("");
@@ -33,10 +33,9 @@ function App() {
   //   }
   // );
 
-    const { isLoggedIn } = useContext(AuthContext)
+  const { isLoggedIn } = useContext(AuthContext);
 
   return (
-
     <div className="App">
       <Header />
       <Routes>
@@ -44,14 +43,15 @@ function App() {
         <Route path="/Join" element={<Join />} />
         <Route path="/LoginForm" element={<LoginForm />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/Board" element={<BoardDetail />} />
+        <Route path="/Board/:postId" element={<BoardDetail />} />
+
         <Route
           path="/BoardWrite"
           element={<BoardWrite />}
           // element={<PrivateRoute path="/BoardWrite" component={BoardWrite} />}
         />
-          <Route path="/MyPage/:nickname" element={<MyPage />} />
-          <Route path="/MyPage/:userId" element={<MyPage />} />
+        <Route path="/MyPage/:nickname" element={<MyPage />} />
+        <Route path="/MyPage/:userId" element={<MyPage />} />
       </Routes>
     </div>
   );

@@ -18,39 +18,39 @@ import DialogTitle from "@mui/material/DialogTitle";
 // import { TransitionProps } from "@mui/material/transitions";
 
 const BoardDetail = () => {
-  // 토큰가지고오기
-  // const token = useSelector((state) => state.Auth.token);
-  // navigate
-  // const navigate = useNavigate();
+  // URL 파라미터 받기 -board의 id
+  const { postId } = useParams();
+
   const [userImage, setUserImage] = useState("/img/user.jpg");
   // 게시글 정보
   const [post, setPost] = useState([]);
   // 게시판 정보가 로딩되었는지 여부를 저장
   const [isLoaded, setIsLoaded] = useState(false);
-  // URL 파라미터 받기 - post의 id
-  const { postId } = useParams();
+  // token
+  const token = localStorage.getItem("accessToken");
   // 삭제 modal이 보이는 여부 상태
   const [open, setOpen] = useState(false);
-
-  // baseUrl
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   // post 가져오기
   useEffect(() => {
     const getBoard = async () => {
       const { data } = await axios.get(`/api/post/${postId}`);
+      console.log(data);
       return data;
     };
     getBoard()
       .then((result) => setPost(result))
       .then(() => setIsLoaded(true));
   }, []);
+
+  //modal 열기
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  //modal 닫기
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   // url 복사
   const handleCopyClipBoard = async (text) => {
@@ -70,16 +70,12 @@ const BoardDetail = () => {
     console.log(url);
   };
 
-  // report
-  const report = () => {};
   return (
     <React.Fragment>
       <div className="mx-auto max-w-4xl py-24 ">
         <div className=" mb-10 flex items-center justify-between">
           <div>
-            <h2 className="mb-2 font-bold text-red-500">
-              {post.category}칵테일
-            </h2>
+            <h2 className="mb-2 font-bold text-red-500">{post.category}</h2>
             <div className="mb-2 text-2xl font-black">
               {post.title}무슨 칵테일이 어쩌고 저쩌고
             </div>
@@ -110,7 +106,6 @@ const BoardDetail = () => {
             <div onClick={handleClick}>
               <FiShare />
             </div>
-            <MdOutlineReportProblem onClick={report} />
           </div>
         </div>
         <button className="delete-button" onClick={handleClickOpen}>
