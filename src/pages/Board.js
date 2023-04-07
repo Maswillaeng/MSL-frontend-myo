@@ -9,7 +9,6 @@ const Board = () => {
     // 탭 인덱스 상태변수
     const [index, setIndex] = useState(0);
 
-
     return (
         <div className="w-full h-screen items-center justify-center bg-[#FBF9EC] bg-cover ">
             <div>

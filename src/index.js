@@ -7,24 +7,24 @@ import App from "./App";
 import { AuthContextProvider } from './context/AuthContextProvider';
 import { Provider } from "react-redux";
 import { CookiesProvider } from "react-cookie";
-import store from "./store";
-
-// axios 쿠키 주고 받기 -> localstorage로 변경 됨
-// axios.defaults.withCredentials = true;
+import store from './store'
+import {RecoilRoot} from "recoil";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <>
       <AuthContextProvider>
-        <CookiesProvider>
-          {" "}
-          <Provider store={store}>
-            <BrowserRouter>
+          <RecoilRoot>
+            <CookiesProvider>
               {" "}
-              <App />
-            </BrowserRouter>
-          </Provider>
-        </CookiesProvider>
+              <Provider store={store}>
+                <BrowserRouter>
+                  {" "}
+                  <App />
+                </BrowserRouter>
+              </Provider>
+            </CookiesProvider>
+          </RecoilRoot>
       </AuthContextProvider>
   </>
 );

@@ -1,22 +1,46 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 
 import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
-import AuthContext from "../context/AuthContextProvider";
+import AuthContext, {getLoginUser} from "../context/AuthContextProvider";
+import axios from "axios";
+import {useRecoilValue} from "recoil";
 const Header = () => {
   // 로그인&로그아웃
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
 
-  const { isLoggedIn, logoutHandler }= useContext(AuthContext)
+  const { isLoggedIn, logoutHandler, token }= useContext(AuthContext);
+  const userId = useRecoilValue(getLoginUser);
+  const [nickname, setNickName] = useState({});
 
-  const handleLogout = () => {
-    logoutHandler();
-    dispatch(DELETE_TOKEN());
-    window.location.assign("/LoginForm")
+  const handleLogout = async () => {
+      const res = await axios.post(`api/auth/logout`,{
+          userId: userId
+      })
+      console.log(res)
+      logoutHandler();
+      dispatch(DELETE_TOKEN());
+      window.location.assign("/LoginForm")
   };
+
+  // 현재 로그인한 유저 닉네임 가져오기
+  useEffect(() => {
+      const getLoginMember = async () => {
+          const res = await axios.get(`/api/user/${userId}`,{
+              headers: {
+                  Authorization: `Bearer ${token}`,
+              },
+          })
+          console.log(res.data)
+          return res.data.nickname;
+      }
+      getLoginMember()
+          .then((member) => setNickName(member))
+          .catch((err) => console.log(err))
+  },[])
 
   return (
     <div className="relative bg-main font-extrabold">
@@ -29,8 +53,8 @@ const Header = () => {
           <Link to={"/Board"}>Board</Link>
           { isLoggedIn ? (
             <>
-              <Link to={"/MyPage"}>MyPage</Link>
-              <button onClick={handleLogout}>Logout</button>
+              <Link to={`/UserPage/${nickname}`}>MyPage</Link>
+              <button onClick={ handleLogout }>Logout</button>
             </>
           ) : (
             <Link to={"/LoginForm"}>Login</Link>

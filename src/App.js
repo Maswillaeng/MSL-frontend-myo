@@ -50,8 +50,7 @@ function App() {
           element={<BoardWrite />}
           // element={<PrivateRoute path="/BoardWrite" component={BoardWrite} />}
         />
-          <Route path="/MyPage/:nickname" element={<MyPage />} />
-          <Route path="/MyPage/:userId" element={<MyPage />} />
+          <Route path="/UserPage/:nickname" element={<MyPage />} />
       </Routes>
     </div>
   );

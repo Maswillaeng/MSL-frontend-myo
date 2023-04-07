@@ -2,8 +2,7 @@ import React, {useEffect, useState} from "react";
 import {Link, useLocation, useNavigate, useParams} from "react-router-dom";
 import {Pagination} from "@mui/material";
 import axios from "axios";
-import Moment from 'react-moment';
-import 'moment-timezone';
+import { displayCreatedAt } from "../../function/Board_api";
 
 const AllTab = () => {
     // 게시물 데이터
@@ -17,7 +16,7 @@ const AllTab = () => {
     const [firstPost, setFirstPost] = useState(1)
     // 마지막 페이지
     const [lastPost, setLastPost] = useState(0)
-    // 페이지 당 게시물 수 확인
+    // 총 현재 탭 게시물 수 확인
     const [totalPostCount, setTotalPostCount] = useState(0);
     // 서버 데이터의 현재 페이지
     const [page, setPage] = useState(0);
@@ -54,29 +53,6 @@ const AllTab = () => {
     };
     const onSearch = (e) => {
         // value 데이터를 서버에 요청 보내서 검색 기능 만들어야 할 듯.
-    };
-
-    // 업로드 시간
-    const displayCreatedAt = (createdDate) => {
-        const today = new Date() // 현재 시간
-        const timeValue = new Date(createdDate) // 게시물 시간
-
-        // 분 화
-        const betweenTime = Math.floor((today.getTime() - timeValue.getTime()) / 1000 / 60);
-        // 1분 미만 = 방금 전
-        if (betweenTime < 1) return <span>방금 전</span>;
-        // 1시간 미만 = ~분 전
-        if (betweenTime < 60) {
-            return <span>{ betweenTime }분 전</span>;
-        }
-        // 시간 화
-        const betweenTimeHour = Math.floor(betweenTime / 60);
-        // 24시간 미만 = ~시간 전
-        if (betweenTimeHour < 24) {
-            return <span>{ betweenTimeHour }시간 전</span>;
-        }
-        // 24시간 이상 = YYYY년 MM월 DD일
-        return <Moment format="Y년 M월 D일">{ timeValue }</Moment>
     };
 
     return (
@@ -144,7 +120,7 @@ const AllTab = () => {
                                         <div className="text-center p-5 h-auto" key={item.id}>
                                             <Link to="/Board">
                                                 <div className="h-52 overflow-hidden rounded-md">
-                                                    <img src={item.thumbnail} />
+                                                    {/*<img src={item.thumbnail} />*/}
                                                 </div>
                                                 <div
                                                     className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis hover:text-[#EA4E4E]">
@@ -153,7 +129,7 @@ const AllTab = () => {
                                             </Link>
                                             <div>
                                                 <span className="text-sm pr-3">
-                                                    <Link to="/MyPage/:nickname">
+                                                    <Link to={`/UserPage/${item.nickname}`}>
                                                     { item.nickname }
                                                     </Link>
                                                 </span>
@@ -187,7 +163,6 @@ const AllTab = () => {
                     </div>
                 </div>
                 {/* 페이지 네이션 */}
-                {/* page 현재 페이지 count 마지막 페이지 수 onChange 화살표 눌렀을 때 함수 hidePrevButton 이전버튼 숨기기 hideNextButton 다음버튼 숨기기 */}
                 <div className="my-5 m-auto text-2xl">
                     <Pagination
                         size="large"

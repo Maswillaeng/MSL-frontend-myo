@@ -4,12 +4,14 @@ import { loginSuccess, loginFailure } from "../redux/auth/actions";
 import { SET_TOKEN } from "../store/Auth";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import AuthContext from "../context/AuthContextProvider";
+import AuthContext, {setLoginUser} from "../context/AuthContextProvider";
+import { useRecoilState } from "recoil";
 const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { setIsLoggedIn, loginHandler } = useContext(AuthContext)
+  const [, setUser] = useRecoilState(setLoginUser);
 
   // 유저 입력 데이터 묶기
   const [join, setJoin] = useState({
@@ -46,17 +48,17 @@ const LoginForm = () => {
         email: email,
         password: password,
       });
+      console.log(response.data)
       const accessToken = response.data.accessToken;
       const refreshToken = response.data.refreshToken;
       localStorage.clear();
       loginHandler(accessToken, refreshToken)
-      console.log(response.data)
-
+      setUser(response.data.userId)
       dispatch(SET_TOKEN(state));
       dispatch(loginSuccess(accessToken, refreshToken));
       setIsLoggedIn(true);
-
       navigate("/");
+
     } catch (error) {
       console.error(error);
       dispatch(loginFailure(error));

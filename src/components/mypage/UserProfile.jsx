@@ -7,12 +7,32 @@ import DialogActions from "@mui/material/DialogActions";
 import {AiFillPlusCircle} from "react-icons/ai";
 import {Grid} from "@mui/material";
 import axios from "axios";
-import AuthContext from "../../context/AuthContextProvider";
+import AuthContext, {getLoginUser} from "../../context/AuthContextProvider";
+import {useNavigate} from "react-router-dom";
+import {replace} from "formik";
+import {useRecoilValue} from "recoil";
 
-const UserProfile = ({ userId, member }) => {
-    // 로그인 상태
-    const { isLoggedIn, loginUser } = useContext(AuthContext);
+const UserProfile = ({ member, token, visitUser }) => {
+    const userId = useRecoilValue(getLoginUser);
+    const [loginUserState, setLoginUserState] = useState({});
 
+    // 회원 수정, 탈퇴, 팔로우 접근 제어용 현유저 정보 끌어오기
+    useEffect(() => {
+        const getLoginMember = async () => {
+            const res = await axios.get(`/api/user/${userId}`,{
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            console.log(res.data)
+            return res.data;
+        }
+        getLoginMember()
+            .then((user) => setLoginUserState(user)) // email, nickname, userImage, introduction
+            .catch((err) => console.log(err))
+    }, [])
+
+    const navigate = useNavigate();
     // 프로필 수정 모달
     // 에러 메세지
     const [errMsg, setErrMsg] = useState("");
@@ -25,9 +45,9 @@ const UserProfile = ({ userId, member }) => {
         e.preventDefault();
         setModalOpen(false)
         setProfileUpdateForm({
-            nickname: "",
-            userImage: "/img/user.jpg",
-            introduction: "",
+            nickname: member.nickname,
+            userImage: imgFile,
+            introduction: member.introduction,
             phoneNumber: "",
             password: "",
             newPwd: "",
@@ -38,20 +58,46 @@ const UserProfile = ({ userId, member }) => {
         setPasswordConfirm(false)
         setNewPasswordConfirm(false)
         setPhoneNumberConfirm(false)
+        console.log(member)
     }
-
-    // 프로필 이미지
+    useEffect(() => {
+        if(member.userImage === null) {
+            return;
+        }else {
+            setImgFile(member.userImage)
+        }
+    },[])
+    // 프로필 이미지 + 미리보기 + 경로 받아오기
     const [imgFile, setImgFile] = useState("");
     const imgRef = useRef();
     const handleImg = () => {
+        // 미리보기 먼저 처리
         const file = imgRef.current.files[0];
         const reader = new FileReader();
         reader.readAsDataURL(file);
+
+        // form-data 방식으로 이미지 경로 데이터 요청
+        const formData = new FormData();
+        formData.append("photo", file);
+        let imgPath = "";
+        if (file) { // 사진이 있는 경우
+            axios.post("/api/user/upload", formData)
+            .then((res) => {
+                 imgPath = res.data;
+                console.log(imgPath);
+            })
+                .catch((err) => {
+                    console.log("이미지 경로 받아오기 실패")
+                    console.log(err)
+                })
+        }
+
+        // 미리보기 띄우기, 업데이트 폼에 받아온 이미지 경로 넣기
         reader.onload = () => {
             setImgFile(reader.result);
             setProfileUpdateForm({
                 ...profileUpdateForm,
-                userImage: reader.result
+                userImage: imgPath
             })
         }
         console.log(profileUpdateForm)
@@ -59,9 +105,9 @@ const UserProfile = ({ userId, member }) => {
 
     // 유저데이터 업데이트 폼
     const [profileUpdateForm, setProfileUpdateForm] = useState({
-        nickname: "",
-        userImage: "/img/user.jpg",
-        introduction: "",
+        nickname: member.nickname,
+        userImage: imgFile,
+        introduction: member.introduction,
         phoneNumber: "",
         password: "",
         newPwd: "",
@@ -72,7 +118,6 @@ const UserProfile = ({ userId, member }) => {
 
     // 입력 값 formData에 넣기
     const onCheckInputValue = (e) => {
-
         const { name, value } = e.target;
         setProfileUpdateForm({
             ...profileUpdateForm,
@@ -135,18 +180,29 @@ const UserProfile = ({ userId, member }) => {
             })
         }
     }
-    // 로그인 api를 이용하여 현재 비밀번호 확인,, 토큰에 문제 생길 수도 있을 것 같아서 확인 해봐야할 듯...
+    // 현재 비밀번호 확인
     const passwordCheck = async (e) => {
+        if(!userId){
+         setErrMsg("로그인 정보 상이")
+         return;
+        }
         if(password === ''){
             setErrMsg("비밀번호를 입력해주세요")
             setPasswordConfirm(false)
             return;
         } else {
-            await axios.post("/api/auth/login",{
-                email: loginUser.email,
+            await axios.post("/api/user/password",{
+                userId: userId,
                 password: password
-            })
+            },{
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                }
+            }
+            )
             .then((res) => {
+                console.log(res)
                 if(res.status === 200) {
                     setPasswordConfirm(true)
                     setErrMsg("")
@@ -214,7 +270,6 @@ const UserProfile = ({ userId, member }) => {
                 return;
             }
             const updateRequest = async () => {
-                const accessToken = await localStorage.getItem("accessToken");
                 const res = await axios.put(`/api/user/${userId}`,{
                     nickname: nickname,
                     password: password,
@@ -222,12 +277,15 @@ const UserProfile = ({ userId, member }) => {
                     introduction: introduction,
                     userImage: userImage
                 },{ headers: {
-                        Authorization: `Bearer ${accessToken}`,
+                        Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
                 })
-
+                console.log(res)
             }
+            updateRequest()
+                .then()
+                .catch()
 
             // 새 비밀번호를 확인한 경우
         } else if (newPwd === RnewPwd && newPasswordConfirm) {
@@ -242,11 +300,48 @@ const UserProfile = ({ userId, member }) => {
                 return;
             }
             const updateRequest = async () => {
-
+                const res = await axios.put(`/api/user/${userId}`,{
+                    nickname: nickname,
+                    password: password,
+                    phoneNumber: phoneNumber,
+                    introduction: introduction,
+                    userImage: userImage
+                },{ headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                })
+                console.log(res)
             }
+            updateRequest()
+                .then()
+                .catch()
         }
         else {
             setErrMsg("알 수 없는 에러")
+            return;
+        }
+    }
+
+    const deleteHandler = async () => {
+        let confirm = window.confirm("정말 탈퇴하시겠습니까?")
+        if(confirm === true) {
+            await axios.delete(`/api/user/${userId}`)
+                .then((res) => {
+                        console.log(res)
+                    if(res.status === 200) {
+                        navigate("/LoginForm", { replace : true})
+                        alert("이용해주셔서 감사합니다.")
+                    } else {
+                            alert("탈퇴를 처리하는 중 문제가 생겼습니다.")
+                            return;
+                    }
+                }).catch((err) => {
+                    console.log(err)
+                    console.log("탈퇴 서버 에러")
+                })
+                }
+        else {
             return;
         }
     }
@@ -256,10 +351,10 @@ const UserProfile = ({ userId, member }) => {
             <div className=" w-1/3 h-screen">
                 <div className="w-full text-center">
                     <div className="w-40 h-40 m-auto mt-5 border-2 bg-gray-300 overflow-hidden rounded-full">
-                        <img src="https://cdn.pixabay.com/photo/2014/07/11/11/57/cocktail-389798_1280.jpg" />
+                        <img src={ member.userImage } />
                     </div>
                     <div className="my-6 text-3xl font-bold">
-                        묘묘
+                        { member.nickname }
                     </div>
                     <div className="m-auto mx-5 flex justify-around">
                         <span className="font-bold">팔로우</span>
@@ -273,22 +368,24 @@ const UserProfile = ({ userId, member }) => {
                     </div>
 
                     <div className="m-auto mt-10 ">
-                        소개글
+                        { member.introduction }
                     </div>
 
-                    {/*{ member.nickname === loginUser.nickname ?*/}
-                    {/*    <>*/}
+                    { loginUserState.nickname === visitUser ?
+                        <>
                             <div className="mt-10 text-sm font-bold text-gray-400">
                                 <button className="mx-3" onClick={ handleOpen }>프로필 수정</button>
-                                <button className="mx-3" >회원 탈퇴</button>
+                                <button className="mx-3" onClick={ deleteHandler }>회원 탈퇴</button>
                             </div>
-                    {/*    </>*/}
-                    {/*    : null*/}
-                    {/*}*/}
-
+                        </>
+                        : null
+                    }
+                    { loginUserState.nickname === visitUser ? null :
                     <button className="m-7 w-10/12 h-10 text-lg text-white font-bold bg-[#EA4E4E] rounded-md mx-3">팔로우</button>
+                    }
                 </div>
             </div>
+
 
             {/* 프로필 수정 모달 UI 미완성 상태 */}
             <Dialog open={ modalOpen }>
