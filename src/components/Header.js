@@ -14,7 +14,7 @@ const Header = ({ userId }) => {
   const [nickname, setNickName] = useState({});
 
   const handleLogout = async () => {
-      const res = await axios.post(`/api/auth/logout`,{
+      await axios.post(`/api/auth/logout`,{
           userId: userId
       })
       logoutHandler();
@@ -32,7 +32,6 @@ const Header = ({ userId }) => {
 
   // 현재 로그인한 유저 닉네임 가져오기
   useEffect(() => {
-      console.log(userId)
       getLoginMember()
           .then((member) => setNickName(member))
   },[userId])

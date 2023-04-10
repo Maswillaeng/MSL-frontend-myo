@@ -54,9 +54,8 @@ const LoginForm = () => {
 
             dispatch(SET_TOKEN(state));
             dispatch(loginSuccess(accessToken, refreshToken));
-
             navigate("/");
-            window.location.reload();
+            // window.location.reload();
         } catch (error) {
             dispatch(loginFailure(error));
             console.log("실패");

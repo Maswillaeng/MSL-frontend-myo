@@ -10,7 +10,7 @@ function App() {
     const userId = useRecoilValue(getLoginUser);
     return (
         <>
-            <Header userId={userId} />
+            <Header userId={ userId } />
             <Outlet/>
         </>
     );

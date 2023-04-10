@@ -27,7 +27,6 @@ const AuthenticateCheck = ({ path, auth }) => {
         }
     } if (auth === null) {
     }
-
     // useEffect(() => {
         // const tokenUpdate = async () => {
         // try {
