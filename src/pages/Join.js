@@ -30,7 +30,7 @@ const Join = () => {
   // 비밀번호 형식
   const regexrPass = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,15}$/;
   //  닉네임 형식
-  const regexrNickname = /^[가-힣a-zA-Z]{3,10}$/;
+  const regexrNickname = /^[가-힣a-zA-Z]{2,10}$/;
   //  핸드폰 번호 형식
   const regexrNum = /^01(0|1|6|7|8|9)\d{7,8}$/;
 
@@ -103,18 +103,15 @@ const Join = () => {
       const response = await axios.post(
         "/api/auth/duplicate/email",
         { email },
-        { headers: { "Content-Type": "application/json" } }
       );
       if (response.status === 200) {
         setEmailNotice({ message: "사용 가능한 이메일입니다.", alert: true });
-      } else if (response.status === 409) {
-        setEmailNotice({
-          message: "이미 사용중인 이메일입니다.",
-          alert: false,
-        });
       }
-    } catch (error) {
-      console.log(error);
+      } catch (error) {
+      setEmailNotice({
+        message: "이미 사용중인 이메일입니다.",
+        alert: false,
+      });
     }
   };
 
@@ -188,28 +185,35 @@ const Join = () => {
         alert: false,
       });
       return;
-    }
+    } else setNicknameNotice({
+        message: "",
+        alert: false,
+      })
   };
   const onCheckNicknameHandler = async () => {
     try {
       const response = await axios.post(
-        "/api/auth/duplicate/nickname",
-        { nickname },
-        { headers: { "Context-Type": "application/json" } }
+          "/api/auth/duplicate/nickname",
+          {nickname},
+          {headers: {"Context-Type": "application/json"}}
       );
       if (response.status === 200) {
         setNicknameNotice({
           message: "사용 가능한 닉네임입니다.",
           alert: true,
         });
-      } else if (response.status === 409) {
-        setNicknameNotice({
-          message: "이미 사용중인 닉네임입니다.",
-          alert: false,
-        });
       }
+      // else if (response.status === 409) {
+      //   setNicknameNotice({
+      //     message: "이미 사용중인 닉네임입니다.",
+      //     alert: false,
+      //   });
+    // }
     } catch (error) {
-      console.log(error);
+      setNicknameNotice({
+            message: "이미 사용중인 닉네임입니다.",
+            alert: false,
+          });
     }
   };
   //전화번호 검사
@@ -263,7 +267,7 @@ const Join = () => {
       !nicknameNotice.alert ||
       !phoneNumberNotice.alert
     ) {
-      return alert("작성");
+      return alert("다시 확인해주세요");
     }
     const joinSubmitData = async (e) => {
       try {
@@ -276,9 +280,10 @@ const Join = () => {
             },
           }
         );
-
         console.log(response);
-        navigate("/");
+        navigate("/LoginForm");
+        alert("회원가입 성공!")
+
       } catch (error) {
         console.log(error);
       }
@@ -447,7 +452,9 @@ const Join = () => {
             <div className="mb-5">
               {" "}
               <div className="flex flex-col">
-                <label className="mb-3 text-sm">휴대전화</label>
+                <label className="mb-3 text-sm">휴대전화
+                <span className="pl-2 text-xs text-gray-500">ex) 01012345678</span>
+                </label>
                 <div className="flex flex-wrap justify-between gap-5 ">
                   {" "}
                   <input

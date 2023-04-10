@@ -4,32 +4,64 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import {AiFillPlusCircle} from "react-icons/ai";
 import {Grid} from "@mui/material";
 import axios from "axios";
 import AuthContext, {getLoginUser} from "../../context/AuthContextProvider";
 import {useNavigate} from "react-router-dom";
-import {replace} from "formik";
 import {useRecoilValue} from "recoil";
 
-const UserProfile = ({ member, token, visitUser }) => {
+const UserProfile = ({member, token, visitUser}) => {
+    // 탈퇴 처리에 쓸 로그아웃
+    const {logoutHandler} = useContext(AuthContext)
+    // 요청에 쓸 id
     const userId = useRecoilValue(getLoginUser);
+    // 로그인 유저 정보 상태
     const [loginUserState, setLoginUserState] = useState({});
+    // 팔로잉, 팔로워
+    const [follower, setFollower] = useState(0);
+    const [following, setFollowing] = useState(0);
+    const [followState, setfollowState] = useState(false);
 
-    // 회원 수정, 탈퇴, 팔로우 접근 제어용 현유저 정보 끌어오기
+    // 회원 수정, 탈퇴, 팔로우 접근 제어용 현 유저 정보 끌어오기
     useEffect(() => {
+        // 이미지 여부
+        if (member.userImage === null) {
+            return;
+        } else {
+            setImgFile(member.userImage)
+        }
+
         const getLoginMember = async () => {
-            const res = await axios.get(`/api/user/${userId}`,{
+            const res = await axios.get(`/api/user/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             })
-            console.log(res.data)
             return res.data;
         }
         getLoginMember()
             .then((user) => setLoginUserState(user)) // email, nickname, userImage, introduction
-            .catch((err) => console.log(err))
+        // 팔로잉, 팔로워 요청
+        const getFollowing = async () => {
+            const following = await (`/api/follow/following/nickname/${visitUser}`)
+            console.log(following)
+        }
+        const getFollower = async () => {
+            const follower = await (`/api/follow/follower/nickname/${visitUser}`)
+            console.log(follower)
+        }
+        getFollowing()
+            // .then((res) => {
+            //     // 팔로잉 수
+            //     setFollowing(res.data.length)
+            // })
+        getFollower()
+            // .then((res) => {
+            //     // 해당 페이지 유저의 팔로워 중, 현 유저의 닉네임이 있으면 팔로우 버튼 비활성화
+            //     res.data.filter((item) =>  item.nickname === loginUserState.nickname && setfollowState(true))
+            //     // 팔로워 수
+            //     setFollower(res.data.length)
+            // })
     }, [])
 
     const navigate = useNavigate();
@@ -40,6 +72,11 @@ const UserProfile = ({ member, token, visitUser }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const handleOpen = () => {
         setModalOpen(true)
+        setProfileUpdateForm({
+            nickname: member.nickname,
+            userImage: imgFile,
+            introduction: member.introduction,
+        })
     }
     const handleClose = (e) => {
         e.preventDefault();
@@ -58,19 +95,14 @@ const UserProfile = ({ member, token, visitUser }) => {
         setPasswordConfirm(false)
         setNewPasswordConfirm(false)
         setPhoneNumberConfirm(false)
-        console.log(member)
     }
-    useEffect(() => {
-        if(member.userImage === null) {
-            return;
-        }else {
-            setImgFile(member.userImage)
-        }
-    },[])
+
     // 프로필 이미지 + 미리보기 + 경로 받아오기
     const [imgFile, setImgFile] = useState("");
     const imgRef = useRef();
-    const handleImg = () => {
+    const handleImg = async (e) => {
+        setImgFile(URL.createObjectURL(e.target.files[0]))
+
         // 미리보기 먼저 처리
         const file = imgRef.current.files[0];
         const reader = new FileReader();
@@ -78,68 +110,64 @@ const UserProfile = ({ member, token, visitUser }) => {
 
         // form-data 방식으로 이미지 경로 데이터 요청
         const formData = new FormData();
-        formData.append("photo", file);
+        formData.append("photo", e.target.files[0]);
+
         let imgPath = "";
         if (file) { // 사진이 있는 경우
-            axios.post("/api/user/upload", formData)
-            .then((res) => {
-                 imgPath = res.data;
-                console.log(imgPath);
-            })
+            await axios.post("/api/user/upload", formData)
+                .then((res) => {
+                    imgPath = res.data;
+                    console.log(imgPath);
+                })
                 .catch((err) => {
                     console.log("이미지 경로 받아오기 실패")
                     console.log(err)
                 })
         }
-
         // 미리보기 띄우기, 업데이트 폼에 받아온 이미지 경로 넣기
-        reader.onload = () => {
-            setImgFile(reader.result);
-            setProfileUpdateForm({
-                ...profileUpdateForm,
-                userImage: imgPath
-            })
-        }
-        console.log(profileUpdateForm)
+        // reader.onload = () => {
+        //     setImgFile(reader.result);
+        //     setProfileUpdateForm({
+        //         ...profileUpdateForm,
+        //         userImage: imgPath
+        //     })
+        // }
     }
 
     // 유저데이터 업데이트 폼
     const [profileUpdateForm, setProfileUpdateForm] = useState({
-        nickname: member.nickname,
-        userImage: imgFile,
-        introduction: member.introduction,
-        phoneNumber: "",
-        password: "",
-        newPwd: "",
-        RnewPwd: "",
+            nickname: member.nickname,
+            userImage: imgFile,
+            introduction: member.introduction,
+            phoneNumber: "",
+            password: "",
+            newPwd: "",
+            RnewPwd: "",
         }
     );
-    const { nickname, userImage, introduction, phoneNumber, password, newPwd, RnewPwd } = profileUpdateForm;
+    const {nickname, userImage, introduction, phoneNumber, password, newPwd, RnewPwd} = profileUpdateForm;
 
-    // 입력 값 formData에 넣기
+    // 입력 값 넣기
     const onCheckInputValue = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setProfileUpdateForm({
             ...profileUpdateForm,
-            [name] : value,
+            [name]: value,
         })
-
         setErrMsg("")
 
         // 컨펌 통과 후 입력 값 변경 시 컨펌 초기화
-        if (name === "nickname"){
-        setNickNameConfirm(false)
-        }else if (name === "password"){
-        setPasswordConfirm(false)
-        }else if (name === "newPwd" || name === "RnewPwd"){
-        setNewPasswordConfirm(false)
-        }else if (name === "phoneNumber"){
-        setPhoneNumberConfirm(false)
+        if (name === "nickname") {
+            setNickNameConfirm(false)
+        } else if (name === "password") {
+            setPasswordConfirm(false)
+        } else if (name === "newPwd" || name === "RnewPwd") {
+            setNewPasswordConfirm(false)
+        } else if (name === "phoneNumber") {
+            setPhoneNumberConfirm(false)
         }
-        console.log(profileUpdateForm)
     }
-
-    // 유효성 검사
+    // 유효성 검사 컨펌
     const [nickNameConfirm, setNickNameConfirm] = useState(false)
     const [passwordConfirm, setPasswordConfirm] = useState(false)
     const [newPasswordConfirm, setNewPasswordConfirm] = useState(false)
@@ -149,24 +177,25 @@ const UserProfile = ({ member, token, visitUser }) => {
     const checkNickname = /^[가-힣a-zA-Z]{2,10}$/;
     const onNicknameCheck = (e) => {
         e.preventDefault()
-        if(nickname === ''){
+        if (nickname === '') {
             setErrMsg("닉네임을 입력해주세요")
             setNickNameConfirm(false)
             return;
-        }else if(!checkNickname.test(nickname)) {
+        } else if (!checkNickname.test(nickname)) {
             setErrMsg("2자 이상의 한글이나, 영문으로 입력해주세요")
             setNickNameConfirm(false)
             return;
-        }else {
-            axios.post("/api/auth/duplicate/nickname",{
-                nickname
+        } else if (nickname === member.nickname) {
+            setNickNameConfirm(true)
+        } else {
+            axios.post("/api/auth/duplicate/nickname", {
+                nickname: nickname,
             })
                 .then((res) => {
-                    if(res.status === 200) {
+                    if (res.status === 200) {
                         setNickNameConfirm(true)
                         setErrMsg("닉네임 사용 가능")
-                    }
-                    else if(res.status === 409) {
+                    } else if (res.status === 409) {
                         setErrMsg("닉네임 사용 불가")
                         setNickNameConfirm(false)
                         return;
@@ -175,48 +204,47 @@ const UserProfile = ({ member, token, visitUser }) => {
                 .catch((err) => {
                     setErrMsg("닉네임 확인 중 서버 에러")
                     setNickNameConfirm(false)
-                    console.log(err)
                     return;
-            })
+                })
         }
     }
+
     // 현재 비밀번호 확인
     const passwordCheck = async (e) => {
-        if(!userId){
-         setErrMsg("로그인 정보 상이")
-         return;
+        if (!userId) {
+            setErrMsg("로그인 정보 상이")
+            return;
         }
-        if(password === ''){
+
+        if (password === '') {
             setErrMsg("비밀번호를 입력해주세요")
             setPasswordConfirm(false)
             return;
         } else {
-            await axios.post("/api/user/password",{
-                userId: userId,
-                password: password
-            },{
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
+            await axios.post("/api/auth/password", {
+                    userId: userId,
+                    password: password
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
                 }
-            }
             )
-            .then((res) => {
-                console.log(res)
-                if(res.status === 200) {
-                    setPasswordConfirm(true)
-                    setErrMsg("")
-                }else {
-                    setErrMsg("현재 비밀번호가 일치하지 않습니다")
+                .then((res) => {
+                    if (res.status === 200) {
+                        console.log(res)
+                        setPasswordConfirm(true)
+                        setErrMsg("비밀번호가 일치합니다.")
+                    } else {
+                        setErrMsg("현재 비밀번호가 일치하지 않습니다")
+                        setPasswordConfirm(false)
+                        return;
+                    }
+                })
+                .catch((err) => {
+                    setErrMsg("비밀번호 확인 중 서버 에러")
                     setPasswordConfirm(false)
-                    return;
-                }
-            })
-            .catch((err) => {
-                setErrMsg("비밀번호 확인 중 서버 에러")
-                setPasswordConfirm(false)
-                console.log(err)
-            })
+                })
         }
     }
     // 새 비밀번호
@@ -233,8 +261,8 @@ const UserProfile = ({ member, token, visitUser }) => {
                 return;
             }
         }
-            setErrMsg("")
-            setNewPasswordConfirm(true)
+        setErrMsg("")
+        setNewPasswordConfirm(true)
     }
 
     // 핸드폰 번호
@@ -244,204 +272,275 @@ const UserProfile = ({ member, token, visitUser }) => {
             setErrMsg("핸드폰 번호를 입력해주세요")
             setPhoneNumberConfirm(false)
             return;
-        }else if (!checkPhoneNumber.test(phoneNumber)){
+        } else if (!checkPhoneNumber.test(phoneNumber)) {
             setErrMsg("핸드폰 번호를 올바르게 입력해주세요")
             setPhoneNumberConfirm(false)
             return;
-        }else {
+        } else {
             setErrMsg("")
             setPhoneNumberConfirm(true)
         }
     }
-
     const profileUpdateSubmit = (e) => {
         e.preventDefault();
 
-        // 새 비밀번호란이 비었고, 확인하지 않은 경우
-        if( newPwd === "" && RnewPwd === "" && !newPasswordConfirm) {
-            if(!nickNameConfirm) {
-                setErrMsg("닉네임 중복을 확인해주세요")
-                return;
-            } else if(!passwordConfirm) {
-                setErrMsg("현재 비밀번호를 확인해주세요")
-                return;
-            } else if(!phoneNumberConfirm) {
-                setErrMsg("핸드폰번호를 확인해주세요")
-                return;
-            }
-            const updateRequest = async () => {
-                const res = await axios.put(`/api/user/${userId}`,{
-                    nickname: nickname,
-                    password: password,
-                    phoneNumber: phoneNumber,
-                    introduction: introduction,
-                    userImage: userImage
-                },{ headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                })
-                console.log(res)
-            }
-            updateRequest()
-                .then()
-                .catch()
-
-            // 새 비밀번호를 확인한 경우
-        } else if (newPwd === RnewPwd && newPasswordConfirm) {
-            if(!nickNameConfirm ) {
-                setErrMsg("닉네임 중복을 확인해주세요")
-                return;
-            } else if(!passwordConfirm) {
-                setErrMsg("현재 비밀번호를 확인해주세요")
-                return;
-            } else if(!phoneNumberConfirm) {
-                setErrMsg("핸드폰번호를 확인해주세요")
-                return;
-            }
-            const updateRequest = async () => {
-                const res = await axios.put(`/api/user/${userId}`,{
-                    nickname: nickname,
-                    password: password,
-                    phoneNumber: phoneNumber,
-                    introduction: introduction,
-                    userImage: userImage
-                },{ headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                })
-                console.log(res)
-            }
-            updateRequest()
-                .then()
-                .catch()
+        if(nickname === member.nickname) {
+            setNickNameConfirm(true)
         }
-        else {
-            setErrMsg("알 수 없는 에러")
+
+        // 새 비밀번호란이 비었고, 확인하지 않은 경우
+        if (newPwd === undefined && RnewPwd === undefined && !newPasswordConfirm) {
+            if (!nickNameConfirm) {
+                setErrMsg("닉네임 중복을 확인해주세요")
+                return;
+            } else if (!passwordConfirm) {
+                setErrMsg("현재 비밀번호를 확인해주세요")
+                return;
+            } else if (!phoneNumberConfirm) {
+                setErrMsg("핸드폰번호를 확인해주세요")
+                return;
+            } else {
+                const updateRequest = async () => {
+                    const res = await axios.put(`/api/user`, {
+                        nickname: nickname,
+                        password: password,
+                        phoneNumber: phoneNumber,
+                        introduction: introduction,
+                        userImage: userImage
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
+                }
+                updateRequest()
+                    .then((res) => {
+                        if (res.status === 200) {
+                            alert("회원정보 수정 완료")
+                            window.location.reload();
+                        } else {
+                            setErrMsg("입력하신 내용을 다시 확인해주세요")
+                            return;
+                        }
+                    })
+                    .catch((err) => {
+                        setErrMsg("알 수 없는 에러")
+                        return;
+                    })
+            }
+            // 새 비밀번호를 확인한 경우
+        } if (newPwd === RnewPwd && newPasswordConfirm) {
+            if (!nickNameConfirm) {
+                setErrMsg("닉네임 중복을 확인해주세요")
+                return;
+            } else if (!passwordConfirm) {
+                setErrMsg("현재 비밀번호를 확인해주세요")
+                return;
+            } else if (!phoneNumberConfirm) {
+                setErrMsg("핸드폰번호를 확인해주세요")
+                return;
+            } else {
+                const updateRequest = async () => {
+                    const res = await axios.put(`/api/user`, {
+                        nickname: nickname,
+                        password: password,
+                        phoneNumber: phoneNumber,
+                        introduction: introduction,
+                        userImage: userImage
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        },
+                    })
+                    return res;
+                }
+                updateRequest()
+                    .then((res) => {
+                        if (res.status === 200) {
+                            navigate("/", { replace: true })
+                            alert("회원정보 수정 완료")
+                        } else {
+                            setErrMsg("입력하신 내용을 다시 확인해주세요")
+                            return;
+                        }
+                    })
+                    .catch((err) => {
+                        setErrMsg("알 수 없는 에러")
+                        return;
+                    })
+            }
+        } else {
+            setErrMsg("다시 확인해주세요")
             return;
         }
     }
 
     const deleteHandler = async () => {
         let confirm = window.confirm("정말 탈퇴하시겠습니까?")
-        if(confirm === true) {
-            await axios.delete(`/api/user/${userId}`)
+
+        if (confirm === true) {
+            await axios.delete(`/api/user`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            })
                 .then((res) => {
-                        console.log(res)
-                    if(res.status === 200) {
-                        navigate("/LoginForm", { replace : true})
+                    if (res.status === 200) {
+                        axios.post(`/api/auth/logout`, {
+                            userId: userId
+                        })
+                        logoutHandler();
+                        navigate("/LoginForm", {replace: true})
                         alert("이용해주셔서 감사합니다.")
                     } else {
-                            alert("탈퇴를 처리하는 중 문제가 생겼습니다.")
-                            return;
+                        alert("탈퇴를 처리하는 중 문제가 생겼습니다.")
+                        return;
                     }
                 }).catch((err) => {
-                    console.log(err)
                     console.log("탈퇴 서버 에러")
                 })
-                }
-        else {
+        } else if(confirm === false){
             return;
         }
     }
-
+    const onFollow = async () => {
+        // 언팔로우, toUserId를 받을 곳이 없음
+    //     if(followState){
+    //         await axios.delete(`/api/follow/${}`,{
+    //         headers: {
+    //             Authorization: `Bearer ${token}`
+    //         }
+    //     })
+    //         .then((res) => {
+    //             setfollowState(false);
+    //             window.location.reload();
+    //         })
+    //         // 팔로우, toUserId를 받을 곳이 없음
+    // } else if(!followState){
+    //         await axios.post(`/api/follow/${}`,{
+    //             headers: {
+    //                 Authorization: `Bearer ${token}`
+    //             }
+    //         })
+    //             .then((res) => {
+    //                 setfollowState(true);
+    //                 window.location.reload();
+    //             })
+    //     }
+    }
     return (
         <>
             <div className=" w-1/3 h-screen">
                 <div className="w-full text-center">
                     <div className="w-40 h-40 m-auto mt-5 border-2 bg-gray-300 overflow-hidden rounded-full">
-                        <img src={ member.userImage } />
+                        <img src={member.userImage}/>
                     </div>
                     <div className="my-6 text-3xl font-bold">
-                        { member.nickname }
+                        {member.nickname}
                     </div>
                     <div className="m-auto mx-5 flex justify-around">
-                        <span className="font-bold">팔로우</span>
+                        <span className="font-bold">팔로잉</span>
                         <span>
-                            1
+                            {following}
                         </span>
                         <span className="font-bold">팔로워</span>
                         <span>
-                            1056
+                            {follower}
                         </span>
                     </div>
 
                     <div className="m-auto mt-10 ">
-                        { member.introduction }
+                        {member.introduction}
                     </div>
 
-                    { loginUserState.nickname === visitUser ?
+                    {loginUserState.nickname === visitUser ?
                         <>
                             <div className="mt-10 text-sm font-bold text-gray-400">
-                                <button className="mx-3" onClick={ handleOpen }>프로필 수정</button>
-                                <button className="mx-3" onClick={ deleteHandler }>회원 탈퇴</button>
+                                <button className="mx-3" onClick={handleOpen}>프로필 수정</button>
+                                <button className="mx-3" onClick={deleteHandler}>회원 탈퇴</button>
                             </div>
                         </>
                         : null
                     }
                     { loginUserState.nickname === visitUser ? null :
-                    <button className="m-7 w-10/12 h-10 text-lg text-white font-bold bg-[#EA4E4E] rounded-md mx-3">팔로우</button>
+                        <button
+                            className="m-7 w-10/12 h-10 text-lg text-white font-bold bg-[#EA4E4E] rounded-md mx-3"
+                            onClick={ onFollow }
+                            disabled={ followState }>
+                            { !followState ? <span>팔로우</span> : <span>팔로잉</span> }
+                        </button>
                     }
                 </div>
             </div>
 
-
             {/* 프로필 수정 모달 UI 미완성 상태 */}
-            <Dialog open={ modalOpen }>
-                <form className="p-3 pr-5 bg-[#fbf9ec] w-auto" onSubmit={ profileUpdateSubmit }>
-                <DialogTitle className="">프로필 수정</DialogTitle>
+            <Dialog open={modalOpen}>
+                <form className="bg-[#fbf9ec]" onSubmit={profileUpdateSubmit}>
+                    <DialogTitle className="">프로필 수정</DialogTitle>
                     <DialogContent>
                         <Grid container>
                             <Grid item xs={6}>
                                 <div>
                                     <div className="my-3 border rounded-full w-52 h-52 overflow-hidden">
-                                        <img src={ imgFile ? imgFile : "/img/user.jpg" } className="w-52 h-52"/>
-                                        <input type="file" accept="image/*" id="profile_photo" className="hidden overflow-hidden w-0 h-0 p-0" onChange={ handleImg } ref={ imgRef }/>
+                                        <img src={imgFile ? imgFile : "/img/user.jpg"} className="w-52 h-52"/>
+                                        <input type="file" accept="image/*" id="profile_photo"
+                                               className="hidden overflow-hidden w-0 h-0 p-0"
+                                               onChange={(e) => handleImg(e)}
+                                               ref={imgRef}/>
                                     </div>
-                                    <label htmlFor="profile_photo" className="pl-14 cursor-pointer text-sm">프로필 사진 변경</label>
+                                    <label htmlFor="profile_photo" className="pl-14 cursor-pointer text-sm">프로필 사진
+                                        변경</label>
                                 </div>
                             </Grid>
                             <Grid item xs={6}>
-                                <div className="w-96">
+                                <div className="">
                                     <DialogContentText>
                                         닉네임
                                     </DialogContentText>
                                     <div>
-                                        <input type="text" className="border w-44" name="nickname" value={ nickname } onChange={ onCheckInputValue }/>
-                                        <button className="text-sm w-24 h-7 ml-2 bg-[#EA4E4E] text-white rounded-md" onClick={ onNicknameCheck }>중복검사</button>
+                                        <input type="text" className="border w-40" name="nickname" value={nickname}
+                                               onChange={onCheckInputValue}/>
+                                        <button className="text-xs w-12 h-6 ml-2 bg-[#EA4E4E] text-white rounded-md"
+                                                onClick={onNicknameCheck}>중복검사
+                                        </button>
                                     </div>
                                     <DialogContentText>
                                         현재 비밀번호
                                     </DialogContentText>
                                     <div>
-                                        <input type="password" className="border w-56" name="password" value={ password } onChange={ onCheckInputValue } onBlur={ passwordCheck }/>
+                                        <input type="password" className="border w-56" name="password" value={password}
+                                               onChange={onCheckInputValue} onBlur={passwordCheck}/>
                                     </div>
                                     <DialogContentText>
                                         새 비밀번호
                                     </DialogContentText>
                                     <div>
-                                        <input type="password" className="border w-56" name="newPwd" value={ newPwd } onChange={ onCheckInputValue } onBlur={onNewPwdCheck}/>
+                                        <input type="password" className="border w-56" name="newPwd" value={newPwd}
+                                               onChange={onCheckInputValue} onBlur={onNewPwdCheck}/>
                                     </div>
                                     <DialogContentText>
                                         새 비밀번호 확인
                                     </DialogContentText>
                                     <div>
-                                        <input type="password" className="border w-56" name="RnewPwd" value={ RnewPwd } onChange={ onCheckInputValue } onBlur={onNewPwdCheck} />
+                                        <input type="password" className="border w-56" name="RnewPwd" value={RnewPwd}
+                                               onChange={onCheckInputValue} onBlur={onNewPwdCheck}/>
                                     </div>
                                     <DialogContentText>
                                         핸드폰 번호
                                         <span className="text-xs text-gray-400"> ex) 01012345678</span>
                                     </DialogContentText>
                                     <div>
-                                        <input type="text" className="border w-56" name="phoneNumber" value={ phoneNumber } onChange={ onCheckInputValue } onBlur={onPhoneNumberCheck}/>
+                                        <input type="text" className="border w-56" name="phoneNumber"
+                                               value={phoneNumber} onChange={onCheckInputValue}
+                                               onBlur={onPhoneNumberCheck}/>
                                     </div>
                                     <DialogContentText>
                                         자기소개
                                     </DialogContentText>
-                                    <input type="text" className="border w-56" name="introduction" value={ introduction } onChange={ onCheckInputValue }/>
-                                    <div className="my-3 text-sm font-bold text-[#EA4E4E]">
-                                        { errMsg }
+                                    <input type="text" className="border w-56" name="introduction" value={introduction}
+                                           onChange={onCheckInputValue}/>
+                                    <div className="my-3 text-xs font-bold text-[#EA4E4E]">
+                                        {errMsg}
                                     </div>
                                 </div>
                             </Grid>
@@ -449,12 +548,11 @@ const UserProfile = ({ member, token, visitUser }) => {
                     </DialogContent>
                     <DialogActions>
                         <button className="w-12 h-8 bg-[#EA4E4E] text-white rounded-md">수정</button>
-                        <button className="w-12 h-8 bg-gray-300 rounded-md" onClick={ handleClose }>닫기</button>
+                        <button className="w-12 h-8 bg-gray-300 rounded-md" onClick={handleClose}>닫기</button>
                     </DialogActions>
                 </form>
             </Dialog>
         </>
     );
 };
-
 export default UserProfile;

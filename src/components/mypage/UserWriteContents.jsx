@@ -6,9 +6,6 @@ import {displayCreatedAt} from "../../function/Board_api";
 const UserWriteContents = ({ nickname, token }) => {
     // 게시물 데이터
     const [userWriteList, setUserWriteList] = useState([]);
-    // 로딩 상태
-    const [loading, setLoading] = useState(false);
-
     // 페이지 네이션
     const [firstPost, setFirstPost] = useState(1)
     // 마지막 페이지
@@ -43,7 +40,6 @@ const UserWriteContents = ({ nickname, token }) => {
                 console.log(err)
             })
     },[page])
-
     return (
         <>
             {

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import {BrowserRouter, RouterProvider} from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 import App from "./App";
@@ -9,6 +9,7 @@ import { Provider } from "react-redux";
 import { CookiesProvider } from "react-cookie";
 import store from './store'
 import {RecoilRoot} from "recoil";
+import router from "./router/Router";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -16,12 +17,10 @@ root.render(
       <AuthContextProvider>
           <RecoilRoot>
             <CookiesProvider>
-              {" "}
               <Provider store={store}>
-                <BrowserRouter>
-                  {" "}
+                <RouterProvider router={ router }>
                   <App />
-                </BrowserRouter>
+                </RouterProvider>
               </Provider>
             </CookiesProvider>
           </RecoilRoot>

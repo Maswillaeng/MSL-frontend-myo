@@ -1,46 +1,41 @@
 import React, {useContext, useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
-
 import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
 import AuthContext, {getLoginUser} from "../context/AuthContextProvider";
 import axios from "axios";
 import {useRecoilValue} from "recoil";
-const Header = () => {
-  // 로그인&로그아웃
+const Header = ({ userId }) => {
+  // 로그인 & 로그아웃
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
-
   const { isLoggedIn, logoutHandler, token }= useContext(AuthContext);
-  const userId = useRecoilValue(getLoginUser);
   const [nickname, setNickName] = useState({});
 
   const handleLogout = async () => {
-      const res = await axios.post(`api/auth/logout`,{
+      const res = await axios.post(`/api/auth/logout`,{
           userId: userId
       })
-      console.log(res)
       logoutHandler();
       dispatch(DELETE_TOKEN());
       window.location.assign("/LoginForm")
   };
+    const getLoginMember = async () => {
+        const res = await axios.get(`/api/user/${userId}`,{
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+        return res.data.nickname;
+    }
 
   // 현재 로그인한 유저 닉네임 가져오기
   useEffect(() => {
-      const getLoginMember = async () => {
-          const res = await axios.get(`/api/user/${userId}`,{
-              headers: {
-                  Authorization: `Bearer ${token}`,
-              },
-          })
-          console.log(res.data)
-          return res.data.nickname;
-      }
+      console.log(userId)
       getLoginMember()
           .then((member) => setNickName(member))
-          .catch((err) => console.log(err))
-  },[])
+  },[userId])
 
   return (
     <div className="relative bg-main font-extrabold">
@@ -50,7 +45,7 @@ const Header = () => {
         </div>
         <div className="flex items-center gap-40">
           <FiSearch className="font-bold text-red-500" />
-          <Link to={"/Board"}>Board</Link>
+          <Link to={"/"}>Board</Link>
           { isLoggedIn ? (
             <>
               <Link to={`/UserPage/${nickname}`}>MyPage</Link>
