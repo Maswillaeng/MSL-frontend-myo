@@ -26,10 +26,10 @@ const BoardWrite = () => {
   let [posting, setPosting] = useState({
     title: "",
     content: "",
-    // category: "",
+    category: "",
     thumbnail: "",
   });
-  const [imageFile, setImageFile] = useState(null);
+  let { title, content, category, thumbnail } = posting;
   // title 작성
   const onTitleHandler = (e) => {
     setPosting((prevState) => ({
@@ -37,14 +37,26 @@ const BoardWrite = () => {
       title: e.target.value,
     }));
   };
-  let { title, content, category, thumbnail } = posting;
+  // content와 thumbnail담기
+  const handleContentChange = (value) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(value, "text/html");
+    const imgs = doc.querySelectorAll("img");
+    const src = imgs.length > 0 ? imgs[0].getAttribute("src") : null;
 
-  const handleContentChange = (value, images) => {
     setPosting((prevState) => ({
       ...prevState,
       content: value,
+      thumbnail: src,
     }));
-    setImageFile(images);
+  };
+
+  // 카테고리 선택
+  const handleSelect = (categories) => {
+    setPosting((prevPosting) => ({
+      ...prevPosting,
+      category: categories,
+    }));
   };
 
   // 게시글데이터 전송
@@ -53,7 +65,7 @@ const BoardWrite = () => {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("content", content);
-      // formData.append("category", category);
+      formData.append("category", category);
       formData.append("thumbnail", thumbnail);
       let accessToken = localStorage.getItem("accessToken");
       let refreshToken = localStorage.getItem("refreshToken");
@@ -65,17 +77,17 @@ const BoardWrite = () => {
         withCredentials: true,
         data: { grant_type: "refresh_token", refresh_token: refreshToken },
       });
-
-      if (response.data && response.data.ok === 1) {
+      console.log(response.data);
+      if (response.data) {
         let postId = response.data;
         setPosting({
           title: "",
           content: "",
-          // category: "",
+          category: "",
           thumbnail: "",
         });
 
-        navigate(`/api/post/${postId}`);
+        navigate(`/Board/${postId}`);
       }
 
       // 게시물 등록이 성공하면 posting 상태를 초기화
@@ -84,56 +96,24 @@ const BoardWrite = () => {
       alert("게시물을 저장하는 도중 오류가 발생하였습니다.");
     }
   };
-  // Img 경로값 반환
-  const handleImageUpload = async (e) => {
-    if (imageFile) {
-      const formData = new FormData();
-      formData.append("photo", imageFile);
 
-      try {
-        const response = await axios.post("/api/post/upload", formData);
-        setPosting((prevState) => ({
-          ...prevState,
-          thumbnail: response.data.img,
-        }));
-        console.log(response.data.img);
-        console.log("이미지전송성공");
-      } catch (error) {
-        console.log("이미지 전송 실패");
-        console.log(error);
-      }
+  //  글작성 데이터 전송
+  const onSubmitHandler = (e) => {
+    console.log(posting);
+    e.preventDefault();
+
+    if (!title.trim()) {
+      return titleInputRef.current.focus();
     }
-  };
-  // submit
-  // const onSubmitHandler = (e) => {
-  //   // e.preventDefault();
 
-  //   if (!title.trim()) {
-  //     return titleInputRef.current.focus();
-  //   }
-
-  //   if (category === "") {
-  //     alert("카테고리를 선택해주세요");
-  //     return;
-  //   }
-  //   if (!content.trim()) {
-  //     return contentEditorRef.current.querySelector(".ql-editor").focus();
-  //   }
-  //   postingSubmitData();
-  // };
-
-  // const handleClick = () => {
-  //   handleImageUpload(thumbnail);
-  //   onSubmitHandler();
-  //   console.log(posting);
-  // };
-
-  // 카테고리 선택
-  const handleSelect = (categories) => {
-    setPosting((prevPosting) => ({
-      ...prevPosting,
-      category: categories,
-    }));
+    if (category === "") {
+      alert("카테고리를 선택해주세요");
+      return;
+    }
+    if (!content.trim()) {
+      return contentEditorRef.current.querySelector(".ql-editor").focus();
+    }
+    postingSubmitData();
   };
 
   return (
@@ -154,19 +134,17 @@ const BoardWrite = () => {
         <div ref={contentEditorRef}>
           <Editor
             forwardedRef={editorRef}
-            value={posting.content}
             onChange={handleContentChange}
+            content={posting.content}
+            setContent={setPosting.content}
             thumbnail={posting.thumbnail}
-            // onImageUpload={onImageUpload}
+            setThumbnail={setPosting.thumbnail}
           />
         </div>
       </div>
       <div className="flex justify-center gap-20 ">
-        <button className="block border  border-red-500 bg-white  font-bold px-20 py-3 mt-28 ">
-          임시저장
-        </button>
         <button
-          onClick={handleImageUpload}
+          onClick={onSubmitHandler}
           className="block bg-red-500 px-20 py-3 mt-28 font-bold text-white"
         >
           글 게시
