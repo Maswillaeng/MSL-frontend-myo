@@ -1,12 +1,13 @@
-import React from "react";
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Editor from "../components/boardWrite/Editor";
 import axios from "axios";
 
 import CategorySelector from "../components/category/CategorySelector";
 
-const BoardWrite = () => {
+const BoardEdit = () => {
+  // URL 파라미터 받기 -board의 id
+  const { postId } = useParams();
   // title Focus
   const titleInputRef = useRef(null);
   // 페이지 이동
@@ -29,6 +30,18 @@ const BoardWrite = () => {
     category: "",
     thumbnail: "",
   });
+  // post가져오기
+  useEffect(() => {
+    const getPost = async () => {
+      try {
+        const { data } = await axios.get(`/api/post/${postId}`);
+        setPosting(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getPost();
+  }, [postId]);
   let { title, content, category, thumbnail } = posting;
   // title 작성
   const onTitleHandler = (e) => {
@@ -59,41 +72,16 @@ const BoardWrite = () => {
     }));
   };
 
-  // 게시글데이터 전송
-  const postingSubmitData = async (e) => {
+  // 글 수정하기
+  const postingSubmitData = async () => {
+    let { title, content, category, thumbnail } = posting;
     try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("content", content);
-      formData.append("category", category);
-      formData.append("thumbnail", thumbnail);
-      let accessToken = localStorage.getItem("accessToken");
-      let refreshToken = localStorage.getItem("refreshToken");
-      const response = await axios.post("/api/post", formData, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-        data: { grant_type: "refresh_token", refresh_token: refreshToken },
-      });
-      console.log(response.data);
-      if (response.data) {
-        let postId = response.data;
-        setPosting({
-          title: "",
-          content: "",
-          category: "",
-          thumbnail: "",
-        });
-
-        navigate(`/Board/${postId}`);
-      }
-
-      // 게시물 등록이 성공하면 posting 상태를 초기화
-    } catch (error) {
-      console.log(error);
-      alert("게시물을 저장하는 도중 오류가 발생하였습니다.");
+      await axios.put(`/api/post/${postId}`, posting);
+      // 이전 페이지로 돌아가기
+      window.location.href = `/`;
+    } catch (e) {
+      // 서버에서 받은 에러 메시지 출력
+      console.log(e);
     }
   };
 
@@ -147,11 +135,11 @@ const BoardWrite = () => {
           onClick={onSubmitHandler}
           className="block bg-red-500 px-20 py-3 mt-28 font-bold text-white"
         >
-          글 게시
+          수정완료
         </button>
       </div>
     </div>
   );
 };
 
-export default BoardWrite;
+export default BoardEdit;
