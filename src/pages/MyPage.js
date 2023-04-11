@@ -1,25 +1,20 @@
 import React, {useContext, useEffect, useState} from 'react';
 import UserProfile from "../components/mypage/UserProfile";
 import UserWriteContents from "../components/mypage/UserWriteContents";
-import UserLikeContents from "../components/mypage/UserLikeContents";
 import {useParams} from "react-router-dom";
 import axios from "axios";
 import AuthContext from "../context/AuthContextProvider";
 
 const MyPage = () => {
     // 로그인 상태, 토큰
-    const { isLoggedIn, token } = useContext(AuthContext);
+    const { isLoggedIn, token, updateToken } = useContext(AuthContext);
     const { nickname } = useParams();
     // 유저 정보 상태
     const [member, setMember] = useState({})
     // 유저 데이터 불러오기
     useEffect(() => {
         const getMember = async () => {
-            const res = await axios.get(`/api/user/nickname?nickname=${nickname}`,{
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
+            const res = await axios.get(`/api/user/nickname?nickname=${nickname}`)
             console.log(res.data)
             return res.data;
         }

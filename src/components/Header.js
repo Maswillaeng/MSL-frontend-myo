@@ -5,12 +5,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
 import AuthContext, { getLoginUser } from "../context/AuthContextProvider";
 import axios from "axios";
-import { useRecoilValue } from "recoil";
+
 const Header = ({ userId }) => {
   // 로그인 & 로그아웃
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
-  const { isLoggedIn, logoutHandler, token } = useContext(AuthContext);
+  const { isLoggedIn, logoutHandler, token, setIsLoggedIn } = useContext(AuthContext);
   const [nickname, setNickName] = useState({});
 
   const handleLogout = async () => {
@@ -21,13 +21,18 @@ const Header = ({ userId }) => {
     dispatch(DELETE_TOKEN());
     window.location.assign("/LoginForm");
   };
+
   const getLoginMember = async () => {
+    try {
     const res = await axios.get(`/api/user/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     return res.data.nickname;
+    } catch (error){
+      console.error(error)
+    }
   };
 
   // 현재 로그인한 유저 닉네임 가져오기

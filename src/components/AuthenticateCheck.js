@@ -1,6 +1,5 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import AuthContext from "../context/AuthContextProvider";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../pages/LoginForm";
 import MyPage from "../pages/MyPage";
@@ -11,7 +10,7 @@ import BoardDetail from "../pages/BoardDetail";
 import BoardEdit from "../pages/BoardEdit";
 
 const AuthenticateCheck = ({ path, auth }) => {
-  // 로그인 만료시간 체크용 컴포넌트 테스트 중이에요
+  // 접근 제어
   const { isLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -21,17 +20,6 @@ const AuthenticateCheck = ({ path, auth }) => {
       navigate("/", { replace: true });
       alert("로그인 상태입니다!");
     }
-
-    // useEffect(() => {
-    // const tokenUpdate = async () => {
-    // try {
-    //     const tokenRes = await axios.post("/api/auth/issue")
-    //
-    // } catch (err) {
-    //
-    // }
-    // }
-    // },[])
   }
 
   return (

@@ -2,18 +2,18 @@ import React, {useContext, useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import {loginSuccess, loginFailure} from "../redux/auth/actions";
 import {SET_TOKEN} from "../store/Auth";
-import axios from "axios";
 import {useDispatch} from "react-redux";
 import AuthContext, {setLoginUser} from "../context/AuthContextProvider";
 import {useRecoilState} from "recoil";
+import {getLogin} from "../function/Login_api";
 
 const LoginForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const {setIsLoggedIn, loginHandler} = useContext(AuthContext)
+    const {loginHandler} = useContext(AuthContext)
     const [, setUser] = useRecoilState(setLoginUser);
     // 유저 입력 데이터 묶기
-    const [join, setJoin] = useState({ email: "", password: "" });
+    const [join, setJoin] = useState({email: "", password: ""});
     // 유효성 검사 메세지
     const [errMSG, setErrMSG] = useState("");
 
@@ -24,7 +24,7 @@ const LoginForm = () => {
             [name]: value,
         });
     };
-    const { email, password } = join;
+    const {email, password} = join;
 
     // 로그인 유효성
     const loginSubmit = (e) => {
@@ -37,28 +37,22 @@ const LoginForm = () => {
         }
         dispatch(getTokens(email, password));
     };
-
     // access token과 refresh token을 받아오는 함수
     const getTokens = (email, password, state) => async (dispatch) => {
         try {
-            const response = await axios.post("/api/auth/login", {
-                email: email,
-                password: password,
-            });
-            const accessToken = response.data.accessToken;
-            const refreshToken = response.data.refreshToken;
-            localStorage.clear();
-            loginHandler(accessToken, refreshToken)
-            setUser(response.data.userId)
-            setIsLoggedIn(true);
+            await getLogin(email, password)
+                .then((response) => {
+                    localStorage.clear();
+                    loginHandler(response.accessToken, response.refreshToken)
+                    setUser(response.userId)
 
-            dispatch(SET_TOKEN(state));
-            dispatch(loginSuccess(accessToken, refreshToken));
-            navigate("/");
-            // window.location.reload();
-        } catch (error) {
-            dispatch(loginFailure(error));
-            console.log("실패");
+                    dispatch(SET_TOKEN(state));
+                    dispatch(loginSuccess(response.refreshToken, response.refreshToken));
+                    navigate("/", {replace: true});
+                })
+        } catch (err) {
+            dispatch(loginFailure(err));
+            alert("아이디 비밀번호를 확인해주세요")
         }
     };
 
@@ -83,8 +77,8 @@ const LoginForm = () => {
                             <div className="mb-4 text-lg">
                                 <input
                                     className="rounded-3xl border-none bg-gray-50 bg-opacity-20 px-6 py-2 placeholder-slate-100 outline-none backdrop-blur-md"
-                                    onChange={ inputValue }
-                                    value={ email }
+                                    onChange={inputValue}
+                                    value={email}
                                     name="email"
                                     type="text"
                                     placeholder="아이디"
@@ -93,7 +87,7 @@ const LoginForm = () => {
                             <div className="mb-4 text-lg">
                                 <input
                                     className="rounded-3xl border-none bg-gray-50 bg-opacity-20 px-6 py-2 placeholder-slate-100 outline-none backdrop-blur-md"
-                                    onChange={ inputValue }
+                                    onChange={inputValue}
                                     value={password}
                                     name="password"
                                     type="password"
@@ -104,7 +98,8 @@ const LoginForm = () => {
                                 </div>
                             </div>
                             <div className="mt-4 flex justify-center text-lg">
-                                <button type="submit" className="rounded-3xl bg-[#EA4E4E] px-24 py-2 text-white shadow-xl duration-300 hover:bg-red-300">
+                                <button type="submit"
+                                        className="rounded-3xl bg-[#EA4E4E] px-24 py-2 text-white shadow-xl duration-300 hover:bg-red-300">
                                     로그인
                                 </button>
                             </div>

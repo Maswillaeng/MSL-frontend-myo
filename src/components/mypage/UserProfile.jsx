@@ -18,9 +18,9 @@ const UserProfile = ({member, token, visitUser}) => {
     // 로그인 유저 정보 상태
     const [loginUserState, setLoginUserState] = useState({});
     // 팔로잉, 팔로워
+    const [followState, setFollowState] = useState(false);
     const [follower, setFollower] = useState(0);
     const [following, setFollowing] = useState(0);
-    const [followState, setfollowState] = useState(false);
 
     // 회원 수정, 탈퇴, 팔로우 접근 제어용 현 유저 정보 끌어오기
     useEffect(() => {
@@ -30,18 +30,16 @@ const UserProfile = ({member, token, visitUser}) => {
         } else {
             setImgFile(member.userImage)
         }
+        setFollowing(member.followingCnt)
+        setFollower(member.followerCnt)
 
         const getLoginMember = async () => {
-            const res = await axios.get(`/api/user/${userId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
+            const res = await axios.get(`/api/user/${userId}`)
             return res.data;
         }
         getLoginMember()
             .then((user) => setLoginUserState(user)) // email, nickname, userImage, introduction
-        // 팔로잉, 팔로워 요청
+        //팔로잉, 팔로워 요청
         const getFollowing = async () => {
             const following = await (`/api/follow/following/nickname/${visitUser}`)
             console.log(following)
@@ -51,17 +49,18 @@ const UserProfile = ({member, token, visitUser}) => {
             console.log(follower)
         }
         getFollowing()
-            // .then((res) => {
-            //     // 팔로잉 수
-            //     setFollowing(res.data.length)
-            // })
+            .then((res) => {
+                // 팔로잉 수
+                setFollowing(res.data.length)
+            })
         getFollower()
-            // .then((res) => {
-            //     // 해당 페이지 유저의 팔로워 중, 현 유저의 닉네임이 있으면 팔로우 버튼 비활성화
-            //     res.data.filter((item) =>  item.nickname === loginUserState.nickname && setfollowState(true))
-            //     // 팔로워 수
-            //     setFollower(res.data.length)
-            // })
+            .then((res) => {
+                // 해당 페이지 유저의 팔로워 중, 현 유저의 닉네임이 있으면 팔로우 버튼 비활성화
+                res.data.filter((item) =>  item.nickname === loginUserState.nickname && setFollowState(true))
+                // 팔로워 수
+                setFollower(res.data.length)
+            })
+
     }, [])
 
     const navigate = useNavigate();
@@ -76,6 +75,10 @@ const UserProfile = ({member, token, visitUser}) => {
             nickname: member.nickname,
             userImage: imgFile,
             introduction: member.introduction,
+            phoneNumber: "",
+            password: "",
+            newPwd: "",
+            RnewPwd: "",
         })
     }
     const handleClose = (e) => {
@@ -95,6 +98,7 @@ const UserProfile = ({member, token, visitUser}) => {
         setPasswordConfirm(false)
         setNewPasswordConfirm(false)
         setPhoneNumberConfirm(false)
+        setImgFile(member.userImage)
     }
 
     // 프로필 이미지 + 미리보기 + 경로 받아오기
@@ -224,14 +228,14 @@ const UserProfile = ({member, token, visitUser}) => {
             await axios.post("/api/auth/password", {
                     userId: userId,
                     password: password
-                }, {
+                },{
                     headers: {
                         Authorization: `Bearer ${token}`,
-                    }
+                    },
                 }
             )
                 .then((res) => {
-                    if (res.status === 200) {
+                    if (res.data === true) {
                         console.log(res)
                         setPasswordConfirm(true)
                         setErrMsg("비밀번호가 일치합니다.")
@@ -307,17 +311,19 @@ const UserProfile = ({member, token, visitUser}) => {
                         phoneNumber: phoneNumber,
                         introduction: introduction,
                         userImage: userImage
-                    }, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    })
+                    },{
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    )
                 }
                 updateRequest()
                     .then((res) => {
                         if (res.status === 200) {
+                            navigate("/", { replace: true })
                             alert("회원정보 수정 완료")
-                            window.location.reload();
+                            window.location.assign("/")
                         } else {
                             setErrMsg("입력하신 내용을 다시 확인해주세요")
                             return;
@@ -347,11 +353,11 @@ const UserProfile = ({member, token, visitUser}) => {
                         phoneNumber: phoneNumber,
                         introduction: introduction,
                         userImage: userImage
-                    }, {
+                    },{
                         headers: {
-                            Authorization: `Bearer ${token}`
+                            Authorization: `Bearer ${token}`,
                         },
-                    })
+                    } )
                     return res;
                 }
                 updateRequest()
@@ -359,6 +365,7 @@ const UserProfile = ({member, token, visitUser}) => {
                         if (res.status === 200) {
                             navigate("/", { replace: true })
                             alert("회원정보 수정 완료")
+                            window.location.assign("/")
                         } else {
                             setErrMsg("입력하신 내용을 다시 확인해주세요")
                             return;
@@ -379,11 +386,7 @@ const UserProfile = ({member, token, visitUser}) => {
         let confirm = window.confirm("정말 탈퇴하시겠습니까?")
 
         if (confirm === true) {
-            await axios.delete(`/api/user`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-            })
+            await axios.delete(`/api/user`, )
                 .then((res) => {
                     if (res.status === 200) {
                         axios.post(`/api/auth/logout`, {
@@ -441,11 +444,11 @@ const UserProfile = ({member, token, visitUser}) => {
                     <div className="m-auto mx-5 flex justify-around">
                         <span className="font-bold">팔로잉</span>
                         <span>
-                            {following}
+                            {member.followingCnt === undefined ? "0" : member.followingCnt}
                         </span>
                         <span className="font-bold">팔로워</span>
                         <span>
-                            {follower}
+                            {member.followerCnt === undefined ? "0" : member.followerCnt}
                         </span>
                     </div>
 
@@ -499,7 +502,7 @@ const UserProfile = ({member, token, visitUser}) => {
                                     </DialogContentText>
                                     <div>
                                         <input type="text" className="border w-40" name="nickname" value={nickname}
-                                               onChange={onCheckInputValue}/>
+                                               onChange={ (e) => onCheckInputValue(e) }/>
                                         <button className="text-xs w-12 h-6 ml-2 bg-[#EA4E4E] text-white rounded-md"
                                                 onClick={onNicknameCheck}>중복검사
                                         </button>
@@ -509,21 +512,21 @@ const UserProfile = ({member, token, visitUser}) => {
                                     </DialogContentText>
                                     <div>
                                         <input type="password" className="border w-56" name="password" value={password}
-                                               onChange={onCheckInputValue} onBlur={passwordCheck}/>
+                                               onChange={ (e) => onCheckInputValue(e) } onBlur={passwordCheck}/>
                                     </div>
                                     <DialogContentText>
                                         새 비밀번호
                                     </DialogContentText>
                                     <div>
                                         <input type="password" className="border w-56" name="newPwd" value={newPwd}
-                                               onChange={onCheckInputValue} onBlur={onNewPwdCheck}/>
+                                               onChange={ (e) => onCheckInputValue(e) } onBlur={onNewPwdCheck}/>
                                     </div>
                                     <DialogContentText>
                                         새 비밀번호 확인
                                     </DialogContentText>
                                     <div>
                                         <input type="password" className="border w-56" name="RnewPwd" value={RnewPwd}
-                                               onChange={onCheckInputValue} onBlur={onNewPwdCheck}/>
+                                               onChange={ (e) => onCheckInputValue(e) } onBlur={onNewPwdCheck}/>
                                     </div>
                                     <DialogContentText>
                                         핸드폰 번호
@@ -531,14 +534,14 @@ const UserProfile = ({member, token, visitUser}) => {
                                     </DialogContentText>
                                     <div>
                                         <input type="text" className="border w-56" name="phoneNumber"
-                                               value={phoneNumber} onChange={onCheckInputValue}
+                                               value={phoneNumber} onChange={ (e) => onCheckInputValue(e) }
                                                onBlur={onPhoneNumberCheck}/>
                                     </div>
                                     <DialogContentText>
                                         자기소개
                                     </DialogContentText>
-                                    <input type="text" className="border w-56" name="introduction" value={introduction}
-                                           onChange={onCheckInputValue}/>
+                                    <input type="text" className="border w-56" name="introduction" value={ introduction === null ? "" : introduction}
+                                           onChange={(e) => onCheckInputValue(e) }/>
                                     <div className="my-3 text-xs font-bold text-[#EA4E4E]">
                                         {errMsg}
                                     </div>

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {Pagination} from "@mui/material";
 import {displayCreatedAt} from "../../function/Board_api";
+import {Link} from "react-router-dom";
 
 const UserWriteContents = ({ nickname, token }) => {
     // 게시물 데이터
@@ -45,12 +46,14 @@ const UserWriteContents = ({ nickname, token }) => {
             {
                 userWriteList.map((item) => (
             <div className="text-center p-5" key={item.id}>
-                <div className="h-52 overflow-hidden rounded-md">
-                    <img src={item.thumbnail} />
-                </div>
-                <div className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis">
-                    {item.title}
-                </div>
+                <Link to={`/Board/${item.id}`}>
+                    <div className="h-52 overflow-hidden rounded-md">
+                        <img src={item.thumbnail} />
+                    </div>
+                    <div className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis">
+                        {item.title}
+                    </div>
+                </Link>
                 <span className="text-sm pr-3">
                     { displayCreatedAt(item.createdDate) }
                 </span>

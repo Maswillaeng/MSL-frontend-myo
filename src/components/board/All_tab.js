@@ -10,6 +10,9 @@ const AllTab = () => {
     // 로딩 상태
     const [loading, setLoading] = useState(false);
 
+    const [postIds, setPostIds] = useState([]);
+    const [likes, setLikes] = useState([])
+
     // 페이지 네이션 (offset ver.)
     // 게시물 인지
     // page는 0부터 시작하지만, 첫 페이지 버튼은 1부터 시작
@@ -33,27 +36,37 @@ const AllTab = () => {
             console.log(postRes.data) // list - id,nickname,thumbnail,title,createdDate
             return postRes.data;
         }
+        const LikeMatch = async () => {
+            try {
+                const responses = await Promise.all(postIds.map((item) => axios.get(`api/post/posts/${item}`)));
+                const likes = responses.map((res) => res.data.likeCnt);
+                setLikes(likes);
+            } catch (error) {
+                console.log(error);
+            }
+        };
         setLoading(true)
+        LikeMatch()
         ListData()
             .then((posts) => {
                 setAllList(posts.content)
                 setTotalPostCount(posts.totalElements) // 전체 게시물 갯수
                 setLastPost(posts.totalPages) // 총 페이지 수
+                setPostIds(posts.content.id) // postid들
             })
             .catch((err) => console.log("게시물 리스트 에러 " + err))
+
+        // const LikeMatch = async () => {
+        //     postIds.map((item) => (
+        //     const resLikes = await axios.get(`api/post/posts/${item}`)
+        //         .then((res) => setLikes(res.data.likeCnt))
+        //         .catch((err) => console.log(err))
+        // ))
+        // }
+
+
         setLoading(false)
     }, [page])
-
-
-    // 검색 (구현 대기 중)
-    const [userInput, setUserInput] = useState("");
-    const [searchFilterList, setSearchFilterList] = useState([]);
-    const getSearchValue = (e) => {
-        setUserInput(e.target.value);
-    };
-    const onSearch = (e) => {
-        // value 데이터를 서버에 요청 보내서 검색 기능 만들어야 할 듯.
-    };
 
     return (
         <>
@@ -68,38 +81,24 @@ const AllTab = () => {
                         <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg p-2">
                             <div className="flex w-full h-11 border-b-2 border-black">
                                 {/* 정렬 버튼 */}
-                                <div className="inline-flex flex-auto text-xs">
-                                    <button className="mx-3 decoration-red">
-                                        <span className="">●</span>
-                                        최신순
-                                    </button>
-                                    <button className="mx-3">
-                                        <span>●</span>
-                                        추천순
-                                    </button>
-                                    <button className="mx-3">
-                                        <span>●</span>
-                                        조회순
-                                    </button>
-                                </div>
+                                {/*<div className="inline-flex flex-auto text-xs">*/}
+                                {/*    <button className="mx-3 decoration-red">*/}
+                                {/*        <span className="">●</span>*/}
+                                {/*        최신순*/}
+                                {/*    </button>*/}
+                                {/*    <button className="mx-3">*/}
+                                {/*        <span>●</span>*/}
+                                {/*        추천순*/}
+                                {/*    </button>*/}
+                                {/*    <button className="mx-3">*/}
+                                {/*        <span>●</span>*/}
+                                {/*        조회순*/}
+                                {/*    </button>*/}
+                                {/*</div>*/}
 
                                 {/* 검색, 글쓰기 버튼 */}
                                 <div className="flex justify-end">
-                                    <div className="relative text-lg bg-transparent text-gray-800">
-                                        <div className="inline-flex text-sm items-center border-b border-b-2 py-3">
-                                            <input
-                                                className="bg-transparent border-none mr-3 leading-tight focus:outline-none"
-                                                type="text"
-                                                placeholder="검색"
-                                                value={ userInput }
-                                                onChange={ getSearchValue }/>
-                                            <button
-                                                className="right-10 top-0 mr-4"
-                                                onClick={onSearch}
-                                            >
-                                                검색
-                                            </button>
-                                        </div>
+                                    <div className="text-lg bg-transparent text-gray-800">
                                         <button
                                             className="w-16 rounded-md mx-3 h-8 text-sm text-white font-bold bg-[#EA4E4E]">
                                             <Link to={"/BoardWrite"}>
@@ -115,10 +114,10 @@ const AllTab = () => {
                             {/* 게시물 */}
                             <div className="mx-1 grid grid-cols-4">
                                 {
-                                    allList.map((item) => (
+                                    allList.map((item ,idx) => (
 
                                         <div className="text-center p-5 h-auto" key={item.id}>
-                                            <Link to="/Board">
+                                            <Link to={`/Board/${item.id}`}>
                                                 <div className="h-52 overflow-hidden rounded-md">
                                                     {/*<img src={item.thumbnail} />*/}
                                                 </div>
@@ -148,7 +147,8 @@ const AllTab = () => {
                                             </span>
                                             {/* 좋아요 제작 중 */}
                                             <span className="text-sm pl-3">
-                                                💗 100
+                                                {/* 뜨는지 모르겠음*/}
+                                                💗 { likes.filter((like, index) => index === idx) ? likes.filter((like, index) => index === idx) : "0"}
                                             </span>
                                             <div className="grid grid-cols-3">
                                                 <span className="bg-gray-200 rounded-md text-xs p-1 m-1 overflow-hidden whitespace-nowrap text-ellipsis ">

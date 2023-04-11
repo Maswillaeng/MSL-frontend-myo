@@ -1,8 +1,5 @@
 import React from "react";
-import Board from "../pages/Board";
-import MyPage from "../pages/MyPage";
 import { createBrowserRouter } from "react-router-dom";
-import LoginForm from "../pages/LoginForm";
 import AuthenticateCheck from "../components/AuthenticateCheck";
 import NotFound from "../pages/NotFound";
 import App from "../App";
