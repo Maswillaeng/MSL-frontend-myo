@@ -1,7 +1,7 @@
 import React from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { AiOutlineHeart, AiOutlineDelete } from "react-icons/ai";
+import { AiOutlineHeart, AiOutlineDelete, AiFillHeart } from "react-icons/ai";
 import { FiShare, FiEdit2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -17,18 +17,20 @@ const BoardDetail = () => {
   // URL 파라미터 받기 -board의 id
   const { postId } = useParams();
   const navigate = useNavigate();
-  const [userImage, setUserImage] = useState("/img/user.jpg");
-  const [show, setShow] = useState(false);
+  // const [userImage, setUserImage] = useState("/img/user.jpg");
+  // const [show, setShow] = useState(false);
   // 게시글 정보
   const [post, setPost] = useState([]);
   // 게시판 정보가 로딩되었는지 여부를 저장
   const [isLoaded, setIsLoaded] = useState(false);
   // token
-  const token = localStorage.getItem("accessToken");
+  // const token = localStorage.getItem("accessToken");
   // 삭제 modal이 보이는 여부 상태
   const [open, setOpen] = useState(false);
-  // 좋아요 count
+  // 좋아요 상태
   const [liked, setLiked] = useState(false);
+  // 좋아요 count
+  const [likedCount, setLikedCount] = useState(0);
   // date 형태 변경
   const date = new Date(post.createdDate);
   const formattedDate = date.toLocaleString();
@@ -45,7 +47,6 @@ const BoardDetail = () => {
     };
     getPost();
   }, [postId]);
-  console.log(post);
   //modal 열기
   const handleClickOpen = () => {
     setOpen(true);
@@ -74,13 +75,11 @@ const BoardDetail = () => {
   };
   // 좋아요 기능
   const handleLike = async () => {
+    setLiked(!liked);
     try {
-      await axios.post(`/api/post/${postId}/like`);
-      setLiked(true);
-      setPost((prevPost) => ({
-        ...prevPost,
-        likeCount: prevPost.likeCount + 1,
-      }));
+      await axios.post(`/api/like/${postId}`);
+
+      setLikedCount(likedCount + 1);
     } catch (error) {
       console.error(error);
     }
@@ -112,13 +111,7 @@ const BoardDetail = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-2xl">
-            <div onClick={handleLike}>
-              {liked ? "좋아요" : <AiOutlineHeart />}
-            </div>
-
-            <div>0</div>
-          </div>
+          <div className="flex items-center gap-3 text-2xl"></div>
         </div>
         <div className="mb-5 h-96 border-2 p-10 bg-white"> {post.content}</div>
 
@@ -155,7 +148,12 @@ const BoardDetail = () => {
         <button onClick={deleteAdd}>
           <AiOutlineDelete />
         </button>
-        <Comments postId={postId} />
+        <div onClick={handleLike}>
+          {liked ? <AiFillHeart /> : <AiOutlineHeart />}
+        </div>
+
+        <div>0</div>
+        <Comments postId={postId} post={post} />
       </div>{" "}
       <Dialog
         open={open}

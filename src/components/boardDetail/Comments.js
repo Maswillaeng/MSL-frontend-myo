@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const Comments = ({ postId }) => {
+const Comments = ({ postId, post }) => {
   // 로그인 후 다시 돌아오기위해 사용
   const location = useLocation();
   const navigate = useNavigate();
@@ -17,27 +17,11 @@ const Comments = ({ postId }) => {
   const [pageCount, setPageCount] = useState(0);
   // modal이 보이는 여부 상태
   const [showModal, setShowModal] = useState(false);
+  const [posting, setPosting] = useState(post);
+  console.log(posting);
   // user_id가지고오기
   // const userId = useRecoilValue(getLoginUser);
 
-  const getCommentList = async () => {
-    const response = await axios
-      .get(`/api/post/${postId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        // 응답에서 user_id를 가져오기
-
-        const userId = response.data.id;
-
-        console.log("postId 가지고오기");
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
   // 페이지에 해당하는 댓글 목록은 page 상태가 변경될 때마다 가져옴
   // 맨 처음 페이지가 1이므로 처음엔 1페이지에 해당하는 댓글을 가져온다
   // useEffect(() => {
@@ -64,8 +48,8 @@ const Comments = ({ postId }) => {
     };
     console.log(comment);
     try {
-      await axios.post(`/api/post/${postId}/comment`, comment);
-      alert("댓글 등록 완료");
+      let response = await axios.post(`/api/comment`, comment);
+      console.log(response);
       window.location.reload();
     } catch (error) {
       console.log(error);
@@ -73,9 +57,10 @@ const Comments = ({ postId }) => {
 
     // axios interceptor 사용 : 로그인한 사용자만 쓸 수 있다!
   }, [commentContent]);
+  console.log(commentList);
+
   useEffect(() => {
     setToken(localStorage.getItem("accessToken"));
-    getCommentList();
   }, []);
   const onCommentHandler = (e) => {
     setCommentContent(e.target.value);
