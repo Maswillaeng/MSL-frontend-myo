@@ -14,8 +14,10 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
 const BoardDetail = () => {
+  let token = localStorage.getItem("accessToken");
   // URL 파라미터 받기 -board의 id
   const { postId } = useParams();
+
   const navigate = useNavigate();
   // const [userImage, setUserImage] = useState("/img/user.jpg");
   // const [show, setShow] = useState(false);
@@ -34,23 +36,28 @@ const BoardDetail = () => {
   // date 형태 변경
   const date = new Date(post.createdDate);
   const formattedDate = date.toLocaleString();
+
   // post가져오기
   useEffect(() => {
-    const getPost = async () => {
-      try {
-        const { data } = await axios.get(`/api/post/${postId}`);
-        setPost(data);
-        setIsLoaded(true);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    getPost();
+    if (postId) {
+      const getPost = async () => {
+        try {
+          const { data } = await axios.get(`/api/post/${postId}`);
+          setPost(data);
+          setIsLoaded(true);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      getPost();
+    }
   }, [postId]);
+
   //modal 열기
   const handleClickOpen = () => {
     setOpen(true);
   };
+
   //modal 닫기
   const handleClose = () => {
     setOpen(false);
@@ -65,6 +72,7 @@ const BoardDetail = () => {
       console.log(err);
     }
   };
+
   // 링크 복붙
   const handleClick = (event) => {
     const baseUrl = "http://localhost:8080";
@@ -73,17 +81,41 @@ const BoardDetail = () => {
     handleCopyClipBoard(url);
     console.log(url);
   };
+
   // 좋아요 기능
   const handleLike = async () => {
     setLiked(!liked);
+
     try {
-      await axios.post(`/api/like/${postId}`);
+      await axios.post(`/api/like/${postId}`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setLikedCount(likedCount + 1);
     } catch (error) {
       console.error(error);
     }
   };
+  const deleteLike = async () => {
+    setLiked(!liked);
+
+    try {
+      await axios.post(`/api/like/${postId}`, null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      setLikedCount(likedCount - 1);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   //  삭제
   const deleteAdd = async () => {
     try {
@@ -93,6 +125,7 @@ const BoardDetail = () => {
       console.error(error);
     }
   };
+
   return (
     <React.Fragment>
       <div className="mx-auto max-w-4xl py-24 ">
@@ -148,11 +181,15 @@ const BoardDetail = () => {
         <button onClick={deleteAdd}>
           <AiOutlineDelete />
         </button>
-        <div onClick={handleLike}>
-          {liked ? <AiFillHeart /> : <AiOutlineHeart />}
+        <div>
+          {liked ? (
+            <AiFillHeart onClick={deleteLike} />
+          ) : (
+            <AiOutlineHeart onClick={handleLike} />
+          )}
         </div>
 
-        <div>0</div>
+        <div>{likedCount}</div>
         <Comments postId={postId} post={post} />
       </div>{" "}
       <Dialog

@@ -11,57 +11,37 @@ const Comments = ({ postId, post }) => {
   const [commentList, setCommentList] = useState([]);
   // 입력한 댓글 내용
   const [commentContent, setCommentContent] = useState("");
-  const [token, setToken] = useState(null);
+
   // 현재 페이지, 전체 페이지 갯수
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
   // modal이 보이는 여부 상태
   const [showModal, setShowModal] = useState(false);
-  const [posting, setPosting] = useState(post);
-  console.log(posting);
-  // user_id가지고오기
-  // const userId = useRecoilValue(getLoginUser);
+  let token = localStorage.getItem("accessToken");
 
-  // 페이지에 해당하는 댓글 목록은 page 상태가 변경될 때마다 가져옴
-  // 맨 처음 페이지가 1이므로 처음엔 1페이지에 해당하는 댓글을 가져온다
-  // useEffect(() => {
-  //   const getCommentList = async (commentContent) => {
-  //     const { data } = await axios.post(
-  //       `/api/post/${postId}/comment`,
-  //       commentContent
-  //     );
-  //     return data;
-  //   };
-
-  // 기존 comment에 데이터를 덧붙임
-  //   getCommentList().then((result) =>
-  //     setCommentList([...commentList, ...result])
-  //   );
-  // }, [page]);
-
-  // 댓글 추가하기, 댓글 추가하는 API는 인증 미들웨어가 설정되어 있으므로
-  // HTTP HEADER에 jwt-token 정보를 보내는 interceptor 사용
   const submit = useCallback(async () => {
     const comment = {
       postId: postId,
       content: commentContent,
     };
-    console.log(comment);
+
     try {
-      let response = await axios.post(`/api/comment`, comment);
+      let response = await axios.post(`/api/comment`, comment, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      setCommentList(post.commentList);
+      setCommentContent("");
       console.log(response);
-      window.location.reload();
     } catch (error) {
       console.log(error);
     }
 
     // axios interceptor 사용 : 로그인한 사용자만 쓸 수 있다!
   }, [commentContent]);
-  console.log(commentList);
 
-  useEffect(() => {
-    setToken(localStorage.getItem("accessToken"));
-  }, []);
   const onCommentHandler = (e) => {
     setCommentContent(e.target.value);
   };
@@ -88,8 +68,26 @@ const Comments = ({ postId, post }) => {
           </button>
         </div>
       </div>
-      <div className="font-bold text-xl mb-5">댓글 0</div>
-      <SingleComments />
+      <div className="font-bold text-xl mb-5">
+        댓글 {post.commentList ? post.commentList.length : 0}
+      </div>
+
+      <div className="bg-white flex px-12 py-8 border-t-2">
+        <div className="mr-5 h-10 w-10 border-2 rounded-full overflow-hidden">
+          <img src={post.userImage} className="w-10 h-10" alt="" />
+        </div>
+        <div>
+          <div className="flex font-extrabold mb-3 gap-10">
+            <div>{post.nickname}</div>
+            <div className="text-red-500">2일전</div>
+          </div>
+          <div className="mb-3">좋은 정보 정말 감사합니다</div>
+          <ul className="flex gap-3">
+            <li className="font-bold">답글</li>
+            <li className="text-gray-500">신고</li>
+          </ul>
+        </div>
+      </div>
       <button
         onClick={() => {
           navigate("/");
