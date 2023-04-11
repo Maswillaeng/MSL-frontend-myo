@@ -1,40 +1,39 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
-import AuthContext, {getLoginUser} from "../context/AuthContextProvider";
+import AuthContext, { getLoginUser } from "../context/AuthContextProvider";
 import axios from "axios";
-import {useRecoilValue} from "recoil";
+import { useRecoilValue } from "recoil";
 const Header = ({ userId }) => {
   // 로그인 & 로그아웃
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
-  const { isLoggedIn, logoutHandler, token }= useContext(AuthContext);
+  const { isLoggedIn, logoutHandler, token } = useContext(AuthContext);
   const [nickname, setNickName] = useState({});
 
   const handleLogout = async () => {
-      await axios.post(`/api/auth/logout`,{
-          userId: userId
-      })
-      logoutHandler();
-      dispatch(DELETE_TOKEN());
-      window.location.assign("/LoginForm")
+    const res = await axios.post(`/api/auth/logout`, {
+      userId: userId,
+    });
+    logoutHandler();
+    dispatch(DELETE_TOKEN());
+    window.location.assign("/LoginForm");
   };
-    const getLoginMember = async () => {
-        const res = await axios.get(`/api/user/${userId}`,{
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-        return res.data.nickname;
-    }
+  const getLoginMember = async () => {
+    const res = await axios.get(`/api/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data.nickname;
+  };
 
   // 현재 로그인한 유저 닉네임 가져오기
   useEffect(() => {
-      getLoginMember()
-          .then((member) => setNickName(member))
-  },[userId])
+    getLoginMember().then((member) => setNickName(member));
+  }, [userId]);
 
   return (
     <div className="relative bg-main font-extrabold">
@@ -45,10 +44,10 @@ const Header = ({ userId }) => {
         <div className="flex items-center gap-40">
           <FiSearch className="font-bold text-red-500" />
           <Link to={"/"}>Board</Link>
-          { isLoggedIn ? (
+          {isLoggedIn ? (
             <>
               <Link to={`/UserPage/${nickname}`}>MyPage</Link>
-              <button onClick={ handleLogout }>Logout</button>
+              <button onClick={handleLogout}>Logout</button>
             </>
           ) : (
             <Link to={"/LoginForm"}>Login</Link>
