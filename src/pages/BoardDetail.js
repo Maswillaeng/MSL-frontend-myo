@@ -53,7 +53,7 @@ const BoardDetail = () => {
       getPost();
     }
   }, [postId]);
-  console.log(post);
+
   //modal 열기
   const handleClickOpen = () => {
     setOpen(true);

@@ -57,7 +57,6 @@ const Editor = ({ onChange, content, thumbnail, setThumbnail }) => {
         images.push(op.insert.image);
       }
     });
-
     onChange(content, imgUrl);
   };
 
@@ -141,12 +140,6 @@ const Editor = ({ onChange, content, thumbnail, setThumbnail }) => {
     "background",
   ];
 
-  const handleButtonClick = () => {
-    const editor = quillRef.current.getEditor();
-    console.log(editor.root);
-    console.log("안의 내용물 전부", quillRef.current.getEditorContents());
-  };
-
   return (
     <div>
       {" "}
@@ -160,7 +153,6 @@ const Editor = ({ onChange, content, thumbnail, setThumbnail }) => {
         ref={quillRef}
         onChange={handleChange}
       />
-      <button onClick={handleButtonClick}>에디터 안의 내용들</button>
     </div>
   );
 };
