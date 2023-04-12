@@ -33,27 +33,28 @@ const BoardDetail = () => {
   // 좋아요 상태
   const [liked, setLiked] = useState(false);
   // 좋아요 count
-  const [likedCount, setLikedCount] = useState(0);
+  // const [likedCount, setLikedCount] = useState(0);
   // date 형태 변경
   const date = new Date(post.createdDate);
   const formattedDate = date.toLocaleString();
 
+  const getPost = async () => {
+    try {
+      const { data } = await axios.get(`/api/post/${postId}`);
+      // 확인용
+      console.log(data)
+      setPost(data);
+      setPostComment(data.commentList);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   // post가져오기
   useEffect(() => {
-    if (postId) {
-      const getPost = async () => {
-        try {
-          const { data } = await axios.get(`/api/post/${postId}`);
-          setPost(data);
-          setPostComment(data.commentList);
-        } catch (error) {
-          console.error(error);
-        }
-      };
       getPost();
-    }
   }, [postId]);
-  console.log(post);
+
   //modal 열기
   const handleClickOpen = () => {
     setOpen(true);
@@ -85,38 +86,38 @@ const BoardDetail = () => {
 
   // 좋아요 추가
   const handleLike = async () => {
-    setLiked(!liked);
     try {
-      let response = await axios.post(`/api/like/${postId}`, null, {
+      let response = await axios.post(`/api/like/${postId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
       });
-      console.log(response.data);
-      setLikedCount(likedCount + 1);
+      setLiked(true)
+      getPost()
+      // setLikedCount(likedCount + 1);
     } catch (error) {
+      setLiked(true)
       console.error(error);
     }
   };
 
   // 좋아요 삭제
   const deleteLike = async () => {
-    setLiked(!liked);
     try {
-      await axios.post(`/api/like/${postId}`, null, {
+      await axios.delete(`/api/like/${postId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
       });
-      setLikedCount(likedCount - 1);
+      getPost()
+      // setLikedCount(likedCount - 1);
+      setLiked(false)
     } catch (error) {
+      setLiked(false)
       console.error(error);
     }
   };
-
-  //  좋아요 삭제
+   // 좋아요 삭제
   const deleteAdd = async () => {
     try {
       await axios.delete(`/api/post/${postId}`);
@@ -127,7 +128,8 @@ const BoardDetail = () => {
   };
 
   return (
-    <React.Fragment>
+
+    <>
       <div className="mx-auto max-w-4xl py-24 ">
         <div className=" mb-10 flex items-center justify-between">
           <div>
@@ -181,6 +183,7 @@ const BoardDetail = () => {
         <button onClick={deleteAdd}>
           <AiOutlineDelete />
         </button>
+
         <div>
           {liked ? (
             <AiFillHeart onClick={deleteLike} />
@@ -191,7 +194,7 @@ const BoardDetail = () => {
 
         <div>{post.likeCnt}</div>
         <Comments postId={postId} postComment={postComment} />
-      </div>{" "}
+      </div>
       <Dialog
         open={open}
         // TransitionComponent={Transition}
@@ -211,7 +214,7 @@ const BoardDetail = () => {
           <button onClick={handleClose}>Agree</button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
+    </>
   );
 };
 

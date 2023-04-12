@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
 import { DELETE_TOKEN } from "../store/Auth";
-import AuthContext, { getLoginUser } from "../context/AuthContextProvider";
+import AuthContext from "../context/AuthContextProvider";
 import axios from "axios";
 
 const Header = ({ userId }) => {
@@ -15,9 +15,9 @@ const Header = ({ userId }) => {
   const [nickname, setNickName] = useState({});
 
   const handleLogout = async () => {
-    // const res = await axios.post(`/api/auth/logout`, {
-    //   userId: userId,
-    // });
+    const res = await axios.post(`/api/auth/logout`, {
+      userId: userId,
+    });
     logoutHandler();
     dispatch(DELETE_TOKEN());
     window.location.assign("/LoginForm");

@@ -603,7 +603,7 @@ const UserProfile = ({member, token, visitUser }) => {
             {/* 팔로잉 모달 */}
             <Dialog open={fwingModalOpen}>
                 <div className="bg-[#fbf9ec] w-96">
-                    <DialogTitle className="">팔로워</DialogTitle>
+                    <DialogTitle className="">팔로잉</DialogTitle>
                     <DialogContent>
                         {
                             followingList.map((item) => (
