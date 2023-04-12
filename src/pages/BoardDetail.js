@@ -52,8 +52,8 @@ const BoardDetail = () => {
       };
       getPost();
     }
-  }, [postId, postComment]);
-
+  }, [postId]);
+  console.log(post);
   //modal 열기
   const handleClickOpen = () => {
     setOpen(true);
