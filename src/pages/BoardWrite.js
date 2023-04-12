@@ -18,7 +18,7 @@ const BoardWrite = () => {
   // 글 카테고리
   let categories = [
     { id: 0, name: "RECIPE" },
-    { id: 1, name: "COCKTAIL / SNACK" },
+    { id: 1, name: "COCKTAIL" },
     { id: 2, name: "ETC" },
   ];
 
