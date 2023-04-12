@@ -35,7 +35,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/BoardEdit/:postId",
-        element: <AuthenticateCheck path={"/BoardEdit/:postId"} auth={false} />,
+        element: <AuthenticateCheck path={"/BoardEdit/:postId"} auth={true} />,
       },
     ],
     errorElement: <NotFound />,

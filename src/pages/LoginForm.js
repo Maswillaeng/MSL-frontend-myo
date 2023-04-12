@@ -48,7 +48,8 @@ const LoginForm = () => {
 
                     dispatch(SET_TOKEN(state));
                     dispatch(loginSuccess(response.refreshToken, response.refreshToken));
-                    navigate("/", {replace: true});
+                    // navigate("/", {replace: true});
+                    window.location.replace("/")
                 })
         } catch (err) {
             dispatch(loginFailure(err));

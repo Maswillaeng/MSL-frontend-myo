@@ -20,8 +20,12 @@ const AuthenticateCheck = ({ path, auth }) => {
       navigate("/", { replace: true });
       alert("로그인 상태입니다!");
     }
+  } if (auth === true) {
+    if (!isLoggedIn) {
+      navigate("/LoginForm", { replace: true });
+      alert("로그인이 필요합니다!");
+    }
   }
-
   return (
     <>
       {path === "/" && <Board />}
