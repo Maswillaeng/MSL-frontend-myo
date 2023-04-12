@@ -42,7 +42,6 @@ const BoardDetail = () => {
     try {
       const { data } = await axios.get(`/api/post/${postId}`);
       // 확인용
-      console.log(data)
       setPost(data);
       setPostComment(data.commentList);
     } catch (error) {
@@ -52,7 +51,7 @@ const BoardDetail = () => {
 
   // post가져오기
   useEffect(() => {
-      getPost();
+    getPost();
   }, [postId]);
 
   //modal 열기
@@ -92,11 +91,11 @@ const BoardDetail = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setLiked(true)
-      getPost()
+      setLiked(true);
+      getPost();
       // setLikedCount(likedCount + 1);
     } catch (error) {
-      setLiked(true)
+      setLiked(true);
       console.error(error);
     }
   };
@@ -109,15 +108,15 @@ const BoardDetail = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      getPost()
+      getPost();
       // setLikedCount(likedCount - 1);
-      setLiked(false)
+      setLiked(false);
     } catch (error) {
-      setLiked(false)
+      setLiked(false);
       console.error(error);
     }
   };
-   // 좋아요 삭제
+  // 좋아요 삭제
   const deleteAdd = async () => {
     try {
       await axios.delete(`/api/post/${postId}`);
@@ -128,7 +127,6 @@ const BoardDetail = () => {
   };
 
   return (
-
     <>
       <div className="mx-auto max-w-4xl py-24 ">
         <div className=" mb-10 flex items-center justify-between">

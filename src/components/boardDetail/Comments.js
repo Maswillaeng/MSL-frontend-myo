@@ -7,12 +7,9 @@ import axios from "axios";
 const Comments = ({ postId, postComment }) => {
   const navigate = useNavigate();
   const [comments, setComments] = useState(postComment);
-  const [recomments, setReComments] = useState("");
+  const [recomments, setReComments] = useState([]);
+  const [selectedContent, setSelectedContent] = useState(""); // 선택한 댓글의 commentId 상태 추가
 
-  // postComment 값이 변경될 때마다 comments 상태 업데이트
-  useEffect(() => {
-    setComments(postComment);
-  }, [postComment]);
   // 입력한 댓글 내용
   const [commentContent, setCommentContent] = useState("");
   const [recommentContent, setRecommentContent] = useState("");
@@ -38,6 +35,7 @@ const Comments = ({ postId, postComment }) => {
       });
       window.location.reload();
       setCommentContent("");
+      setSelectedContent(comments.commentId);
     } catch (error) {
       console.log(error);
     }
@@ -61,41 +59,60 @@ const Comments = ({ postId, postComment }) => {
     target.style.height = `${target.scrollHeight}px`;
     setTextAreaHeight(`${target.scrollHeight}px`);
     setRecommentContent(event.target.value);
-    //   setTodoItems((prevList) =>
-    //   prevList.map((todo) =>
-    //     todo.id === todoId
-    //       ? { ...todo, todo: inputModifyValue, isModify: !todo.isModify }
-    //       : todo
-    //   )
-    // );
   };
 
-  // 대댓글 창 열기
-  const handleToggle = async (e) => {
-    setIsOpen(!isOpen);
+  const handleReplyClick = (commentId) => {
+    if (selectedContent === commentId) {
+      setIsOpen(!isOpen);
+    } else {
+      setSelectedContent(commentId);
+      setIsOpen(true);
+    }
   };
-
   // 대댓글 post
   const recomment = async (e) => {
     const comment = {
-      parentId: comments.commentId,
+      parentId: selectedContent,
       content: recommentContent,
     };
 
     try {
-      await axios.post("/api/comment/reply", comment, {
+      let { data } = await axios.post("/api/comment/reply", comment, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
+      setReComments(data);
       setRecommentContent("");
     } catch (error) {
       console.log(error);
     }
   };
 
+  const getRecomment = async () => {
+    try {
+      const { data } = await axios.get(`/api/comment/reply/${selectedContent}`);
+      // 확인용
+      console.log(data);
+      setReComments(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  // recomment 가지고 오기
+  useEffect(() => {
+    if (selectedContent) {
+      getRecomment();
+    }
+    console.log(recomments);
+  }, [selectedContent]);
+
+  // postComment 값이 변경될 때마다 comments 상태 업데이트
+  useEffect(() => {
+    setComments(postComment);
+  }, [postComment]);
   return (
     <div className="border-t-2 h-44 bg-slate-50 ">
       <div className="p-5 mb-10 text-right">
@@ -139,7 +156,7 @@ const Comments = ({ postId, postComment }) => {
               <div className="mb-3">{item.content}</div>
               <div>
                 <div className="font-bold ">
-                  {isOpen ? (
+                  {isOpen && selectedContent === item.commentId ? (
                     <div>
                       <textarea
                         placeholder="답글을 작성해주세요"
@@ -151,31 +168,46 @@ const Comments = ({ postId, postComment }) => {
                       <button className="mb-3 mr-3" onClick={recomment}>
                         답글달기
                       </button>
-                      <button className="mb-3" onClick={handleToggle}>
+                      <button className="mb-3" onClick={handleReplyClick}>
                         취소
                       </button>
                     </div>
                   ) : (
-                    <button className="mb-3" onClick={handleToggle}>
+                    <button
+                      className="mb-3"
+                      data-selected-content={item.commentId}
+                      onClick={() => {
+                        handleReplyClick(item.commentId);
+                      }}
+                    >
                       답글
                     </button>
                   )}
                 </div>
               </div>
-              <div className="border-t-2 py-5 bg-gray-50">
-                <div className="w-full flex font-extrabold mb-3 ml-5 gap-5">
-                  <div className=" h-10 w-10 border-2 rounded-full overflow-hidden">
-                    <img src={item.userImage} className="w-10 h-10" alt="" />
-                  </div>
-                  <div>
-                    <div>{item.nickname}</div>
-                    <div className="text-red-500">
-                      {displayCreatedAt(item.createDate)}
+              {recomments &&
+                recomments.map((item, id) => {
+                  return (
+                    <div key={id} className="border-t-2 py-5 bg-gray-50">
+                      <div className="w-full flex font-extrabold mb-3 ml-5 gap-5">
+                        <div className=" h-10 w-10 border-2 rounded-full overflow-hidden">
+                          <img
+                            src={item.userImage}
+                            className="w-10 h-10"
+                            alt=""
+                          />
+                        </div>
+                        <div>
+                          <div>{item.nickname}</div>
+                          <div className="text-red-500">
+                            {displayCreatedAt(item.createDate)}
+                          </div>
+                          <div>{item.content}</div>
+                        </div>
+                      </div>
                     </div>
-                    <div>{item.content}</div>
-                  </div>
-                </div>
-              </div>
+                  );
+                })}
             </div>
           </div>
         );
