@@ -13,8 +13,11 @@ function App() {
     // (() => { console.warn = console.error = () => {}} )();
     // 렌더링 될 때 마다 토큰 재 발급
     useEffect(() => {
-        updateToken()
-    },[userId])
+        window.addEventListener('load', updateToken);
+        return () => {
+            window.removeEventListener('load', updateToken);
+        };
+    },[])
 
     return (
         <>

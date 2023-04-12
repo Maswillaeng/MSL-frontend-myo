@@ -7,20 +7,23 @@ import DialogActions from "@mui/material/DialogActions";
 import {Grid} from "@mui/material";
 import axios from "axios";
 import AuthContext, {getLoginUser} from "../../context/AuthContextProvider";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {useRecoilValue} from "recoil";
 
-const UserProfile = ({member, token, visitUser}) => {
-    // 탈퇴 처리에 쓸 로그아웃
-    const {logoutHandler} = useContext(AuthContext)
+const UserProfile = ({member, token, visitUser }) => {
     // 요청에 쓸 id
     const userId = useRecoilValue(getLoginUser);
     // 로그인 유저 정보 상태
     const [loginUserState, setLoginUserState] = useState({});
+    // 탈퇴 처리에 쓸 로그아웃
+    const {logoutHandler} = useContext(AuthContext)
     // 팔로잉, 팔로워
     const [followState, setFollowState] = useState(false);
     const [follower, setFollower] = useState(0);
     const [following, setFollowing] = useState(0);
+    const [followerList, setFollowerList] = useState([]);
+    const [followingList, setFollowingList] = useState([]);
+
 
     // 회원 수정, 탈퇴, 팔로우 접근 제어용 현 유저 정보 끌어오기
     useEffect(() => {
@@ -32,35 +35,27 @@ const UserProfile = ({member, token, visitUser}) => {
         }
         setFollowing(member.followingCnt)
         setFollower(member.followerCnt)
-
         const getLoginMember = async () => {
-            const res = await axios.get(`/api/user/${userId}`)
-            return res.data;
+            const loginMem = await axios.get(`/api/user/${userId}`)
+            const follower = await axios.get(`/api/follow/follower/nickname/${visitUser}`)
+            const nick = follower.data.map((item) => { return item.nickname })
+            setFollowerList(follower.data)
+            nick.filter((item) => item === loginMem.data.nickname && setFollowState(true))
+
+            return loginMem.data;
         }
         getLoginMember()
             .then((user) => setLoginUserState(user)) // email, nickname, userImage, introduction
-        //팔로잉, 팔로워 요청
+
+        // 팔로잉
         const getFollowing = async () => {
-            const following = await (`/api/follow/following/nickname/${visitUser}`)
-            console.log(following)
-        }
-        const getFollower = async () => {
-            const follower = await (`/api/follow/follower/nickname/${visitUser}`)
-            console.log(follower)
+           const following =  await axios.get(`/api/follow/following/nickname/${visitUser}`)
+            return following.data;
         }
         getFollowing()
             .then((res) => {
-                // 팔로잉 수
-                setFollowing(res.data.length)
+                setFollowingList(res)
             })
-        getFollower()
-            .then((res) => {
-                // 해당 페이지 유저의 팔로워 중, 현 유저의 닉네임이 있으면 팔로우 버튼 비활성화
-                res.data.filter((item) =>  item.nickname === loginUserState.nickname && setFollowState(true))
-                // 팔로워 수
-                setFollower(res.data.length)
-            })
-
     }, [])
 
     const navigate = useNavigate();
@@ -407,30 +402,48 @@ const UserProfile = ({member, token, visitUser}) => {
         }
     }
     const onFollow = async () => {
-        // 언팔로우, toUserId를 받을 곳이 없음
-    //     if(followState){
-    //         await axios.delete(`/api/follow/${}`,{
-    //         headers: {
-    //             Authorization: `Bearer ${token}`
-    //         }
-    //     })
-    //         .then((res) => {
-    //             setfollowState(false);
-    //             window.location.reload();
-    //         })
-    //         // 팔로우, toUserId를 받을 곳이 없음
-    // } else if(!followState){
-    //         await axios.post(`/api/follow/${}`,{
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`
-    //             }
-    //         })
-    //             .then((res) => {
-    //                 setfollowState(true);
-    //                 window.location.reload();
-    //             })
-    //     }
+        if(followState){
+            await axios.delete(`/api/follow/${visitUser}`,{
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then((res) => {
+                setFollowState(false);
+                window.location.reload();
+            })
+    } else if(!followState){
+            await axios.post(`/api/follow/${visitUser}`,{
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then((res) => {
+                    setFollowState(true);
+                    window.location.reload();
+                })
+        }
     }
+    // 팔로워 모달
+    const [fwerModalOpen, setFwerModalOpen] = useState(false)
+    const fwerHandleOpen = () => {
+        setFwerModalOpen(true)
+    }
+    const fwerHandleClose = () => {
+        setFwerModalOpen(false)
+        window.location.reload()
+    }
+
+    // 팔로잉 모달
+    const [fwingModalOpen, setFwingModalOpen] = useState(false)
+    const fwingHandleOpen = () => {
+        setFwingModalOpen(true)
+    }
+    const fwingHandleClose = () => {
+        setFwingModalOpen(false)
+        window.location.reload()
+    }
+
     return (
         <>
             <div className=" w-1/3 h-screen">
@@ -442,14 +455,18 @@ const UserProfile = ({member, token, visitUser}) => {
                         {member.nickname}
                     </div>
                     <div className="m-auto mx-5 flex justify-around">
-                        <span className="font-bold">팔로잉</span>
-                        <span>
-                            {member.followingCnt === undefined ? "0" : member.followingCnt}
-                        </span>
-                        <span className="font-bold">팔로워</span>
-                        <span>
-                            {member.followerCnt === undefined ? "0" : member.followerCnt}
-                        </span>
+                        <label className="flex justify-around hover:cursor-pointer" onClick={ fwingHandleOpen }>
+                            <span className="font-bold mx-5">팔로잉</span>
+                            <span className="mx-5">
+                                {member.followingCnt === undefined ? "0" : member.followingCnt}
+                            </span>
+                        </label>
+                        <label className="flex justify-around hover:cursor-pointer" onClick={ fwerHandleOpen }>
+                            <span className="font-bold mx-5">팔로워</span>
+                            <span className="mx-5">
+                                {member.followerCnt === undefined ? "0" : member.followerCnt}
+                            </span>
+                        </label>
                     </div>
 
                     <div className="m-auto mt-10 ">
@@ -467,9 +484,8 @@ const UserProfile = ({member, token, visitUser}) => {
                     }
                     { loginUserState.nickname === visitUser ? null :
                         <button
-                            className="m-7 w-10/12 h-10 text-lg text-white font-bold bg-[#EA4E4E] rounded-md mx-3"
-                            onClick={ onFollow }
-                            disabled={ followState }>
+                            className={ !followState ? "m-7 w-10/12 h-10 text-lg text-white font-bold bg-[#EA4E4E] rounded-md mx-3":"m-7 w-10/12 h-10 text-lg text-gray-400 font-bold bg-gray-200 rounded-md mx-3"}
+                            onClick={ onFollow }>
                             { !followState ? <span>팔로우</span> : <span>팔로잉</span> }
                         </button>
                     }
@@ -554,6 +570,62 @@ const UserProfile = ({member, token, visitUser}) => {
                         <button className="w-12 h-8 bg-gray-300 rounded-md" onClick={handleClose}>닫기</button>
                     </DialogActions>
                 </form>
+            </Dialog>
+
+            {/* 팔로워 모달 */}
+            <Dialog open={fwerModalOpen}>
+                <div className="bg-[#fbf9ec] w-96">
+                    <DialogTitle className="">팔로워</DialogTitle>
+                    <DialogContent>
+                        {
+                            followerList.map((item) => (
+                            <>
+                                <div className="my-5" onClick={fwerHandleClose}>
+                                    <Link to={`/UserPage/${item.nickname}`}>
+                                        <span className="border mx-5 rounded-full w-16 h-16 overflow-hidden">
+                                            <img src={item.userImage ? item.userImage : "/img/user.jpg"} className="rounded-full w-16 h-16 inline"/>
+                                        </span>
+                                        <span>
+                                            {item.nickname}
+                                        </span>
+                                    </Link>
+                                </div>
+                            </>
+                            ))
+                        }
+                    </DialogContent>
+                    <DialogActions>
+                        <button className="w-12 h-8 bg-gray-300 rounded-md" onClick={fwerHandleClose}>닫기</button>
+                    </DialogActions>
+                </div>
+            </Dialog>
+
+            {/* 팔로잉 모달 */}
+            <Dialog open={fwingModalOpen}>
+                <div className="bg-[#fbf9ec] w-96">
+                    <DialogTitle className="">팔로워</DialogTitle>
+                    <DialogContent>
+                        {
+                            followingList.map((item) => (
+                                <>
+                                    <div className="my-5" onClick={fwingHandleClose}>
+                                        <Link to={`/UserPage/${item.nickname}`}>
+                                        <span className="border mx-5 rounded-full w-16 h-16 overflow-hidden">
+                                            <img src={item.userImage ? item.userImage : "/img/user.jpg"} className="rounded-full w-16 h-16 inline"/>
+                                        </span>
+                                            <span>
+                                            {item.nickname}
+                                        </span>
+                                        </Link>
+                                    </div>
+                                </>
+                            ))
+                        }
+                    </DialogContent>
+                    <DialogActions>
+                        <button className="w-12 h-8 bg-gray-300 rounded-md" onClick={fwingHandleClose}>닫기</button>
+                    </DialogActions>
+                </div>
             </Dialog>
         </>
     );

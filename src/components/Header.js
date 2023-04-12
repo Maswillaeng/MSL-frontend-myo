@@ -15,9 +15,9 @@ const Header = ({ userId }) => {
   const [nickname, setNickName] = useState({});
 
   const handleLogout = async () => {
-    const res = await axios.post(`/api/auth/logout`, {
-      userId: userId,
-    });
+    // const res = await axios.post(`/api/auth/logout`, {
+    //   userId: userId,
+    // });
     logoutHandler();
     dispatch(DELETE_TOKEN());
     window.location.assign("/LoginForm");

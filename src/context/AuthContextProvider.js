@@ -3,7 +3,7 @@ import {atom, selector} from "recoil";
 import {recoilPersist} from "recoil-persist";
 import axios from "axios";
 
-const EXPIRE_TIME = 1000 * 60;// 1시간
+const EXPIRE_TIME = 1000 * 60 * 60;// 1시간
 
 // context 초기값 셋팅
 const AuthContext = createContext({
@@ -41,7 +41,6 @@ export const getLoginUser = selector({
 export const AuthContextProvider = (props) => {
     // 로컬에 있는 토큰 가져오기
     const initialToken = localStorage.getItem("accessToken");
-
     // at
     const [token, setToken] = useState(initialToken);
 
@@ -64,12 +63,11 @@ export const AuthContextProvider = (props) => {
     // 로그인 성공 시, defaults.header 설정, 59분 후 updateToken 함수 실행 설정
     const loginOk = (accessToken) => {
         axios.defaults.headers.common["Authorization"] = token ? `Bearer ${accessToken}` : null;
-        setTimeout(updateToken, EXPIRE_TIME - 6000);
+        setTimeout(updateToken, EXPIRE_TIME - 60000);
     }
     // 토큰 만료 1분 전에 RTR 실행
     const updateToken = async () => {
         const refreshToken = localStorage.getItem("refreshToken");
-
         try {
         await axios.post("/api/auth/issue", {
             refreshToken: refreshToken

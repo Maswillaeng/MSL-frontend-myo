@@ -9,6 +9,8 @@ const CocktailSnackTab = () => {
     const [cocktailList, setCocktailList] = useState([]);
     // 로딩 상태
     const [loading, setLoading] = useState(false);
+    // 좋아요 리스트
+    const [likes, setLikes] = useState([])
 
     // 페이지 네이션 (offset ver.)
     // 게시물 인지
@@ -29,10 +31,11 @@ const CocktailSnackTab = () => {
     useEffect(() => {
         const ListData = async () => {
             const postRes = await axios.get(`api/post/posts/category/COCKTAIL/${page}`)
-            const posts = postRes.data
-            // 콘솔 확인용
-            console.log(posts) // list - id,nickname,thumbnail,title,createdDate
-            return posts;
+            const LikeMatch = await Promise.all(postRes.data.content.map((item) => axios.get(`api/post/${item.id}`)));
+            const likes = LikeMatch.map((res) => res.data.likeCnt);
+            setLikes(likes);
+
+            return postRes.data;
         }
         setLoading(true)
         ListData()
@@ -105,11 +108,11 @@ const CocktailSnackTab = () => {
                             {/* 게시물 */}
                             <div className="mx-1 grid grid-cols-4">
                                 {
-                                    cocktailList.map((item) => (
+                                    cocktailList.map((item, idx) => (
                                         <div className="text-center p-5 h-auto" key={item.id}>
-                                            <Link to="/Board">
+                                            <Link to={`/Board/${item.id}`}>
                                                 <div className="h-52 overflow-hidden rounded-md">
-                                                    <img src={item.thumbnail} />
+                                                    <img src={ item.thumbnail === null ? item.thumbnail : "/img/board_thumbnail.png" } className="m-auto w-52 h-52" />
                                                 </div>
                                                 <div
                                                     className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis hover:text-[#EA4E4E]">
@@ -127,17 +130,13 @@ const CocktailSnackTab = () => {
                                                     { displayCreatedAt(item.createdDate) }
                                                 </span>
                                             </div>
-                                            {/* 댓글수 */}
-                                            <span className="text-sm text-[#EA4E4E]">
-                                                {/* {item.postId === } */}
-                                            </span>
                                             {/* 조회수는 아직 구현 중 */}
                                             <span className="text-sm pl-3">
                                                 👀 9999
                                             </span>
                                             {/* 좋아요 제작 중 */}
                                             <span className="text-sm pl-3">
-                                                💗 100
+                                                💗 { likes.filter((like, index) => index === idx) ? likes.filter((like, index) => index === idx) : "0"}
                                             </span>
                                             <div className="grid grid-cols-3">
                                                 <span className="bg-gray-200 rounded-md text-xs p-1 m-1 overflow-hidden whitespace-nowrap text-ellipsis ">

@@ -15,6 +15,8 @@ const UserWriteContents = ({ nickname, token }) => {
     const [totalPostCount, setTotalPostCount] = useState(0);
     // 서버 데이터의 현재 페이지
     const [page, setPage] = useState(0);
+    // 좋아요 리스트
+    const [likes, setLikes] = useState([])
     // 현재 페이지 바꾸기
     const currentPage = (e, value) => {
         setPage(value-1)
@@ -27,7 +29,10 @@ const UserWriteContents = ({ nickname, token }) => {
                     Authorization: `Bearer ${token}`,
                 },
             })
-            console.log(res.data)
+            const LikeMatch = await Promise.all(res.data.content.map((item) => axios.get(`/api/post/${item.id}`)));
+            const likes = LikeMatch.map((res) => res.data.likeCnt);
+            setLikes(likes);
+
             return res.data;
         }
         writeContentList()
@@ -44,11 +49,11 @@ const UserWriteContents = ({ nickname, token }) => {
     return (
         <>
             {
-                userWriteList.map((item) => (
+                userWriteList.map((item, idx) => (
             <div className="text-center p-5" key={item.id}>
                 <Link to={`/Board/${item.id}`}>
                     <div className="h-52 overflow-hidden rounded-md">
-                        <img src={item.thumbnail} />
+                        <img src={ item.thumbnail === null ? item.thumbnail : "/img/board_thumbnail.png" } className="m-auto w-52 h-52" />
                     </div>
                     <div className="font-bold my-3 overflow-hidden whitespace-nowrap text-ellipsis">
                         {item.title}
@@ -58,7 +63,7 @@ const UserWriteContents = ({ nickname, token }) => {
                     { displayCreatedAt(item.createdDate) }
                 </span>
                 <span className="text-sm pl-3">
-                    💗 1
+                    💗 {likes.filter((like, index) => index === idx) ? likes.filter((like, index) => index === idx) : "0"}
                 </span>
             </div>
                 ))
