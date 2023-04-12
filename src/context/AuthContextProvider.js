@@ -46,7 +46,6 @@ export const AuthContextProvider = (props) => {
 
     // 로그인 상태 확인
     const [isLoggedIn, setIsLoggedIn] = useState(false)
-
     useEffect(() => {
         if (token) {
             setIsLoggedIn(true)
