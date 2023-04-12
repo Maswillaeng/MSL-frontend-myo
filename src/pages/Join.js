@@ -210,17 +210,15 @@ const Join = () => {
       });
     }
   };
-  //전화번호 검사
+
+  // 전화번호 검사
   const onNumberHandler = (e) => {
     const value = e?.currentTarget?.value;
-    if (value) {
-      setJoin((prevState) => ({
-        ...prevState,
+      setJoin({
+        ...join,
         phoneNumber: value,
-      }));
-    }
+      });
   };
-
   const onBlurNumHandler = (e) => {
     let { phoneNumber } = join;
     if (phoneNumber === "") {
@@ -459,7 +457,7 @@ const Join = () => {
                     className="w-3/5 p-2 border flex-1 "
                     placeholder="전화번호 입력"
                     value={join.phoneNumber}
-                    onChange={onNumberHandler}
+                    onChange={(e) => onNumberHandler(e)}
                     onBlur={onBlurNumHandler}
                   />
                   {/* <button className="text-sm bg-red-500 px-4 font-bold text-white flex-none ">
