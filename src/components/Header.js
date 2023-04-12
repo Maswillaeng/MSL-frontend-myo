@@ -10,7 +10,8 @@ const Header = ({ userId }) => {
   // 로그인 & 로그아웃
   const authenticated = useSelector((state) => state.authToken.authenticated);
   const dispatch = useDispatch();
-  const { isLoggedIn, logoutHandler, token, setIsLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, logoutHandler, token, setIsLoggedIn } =
+    useContext(AuthContext);
   const [nickname, setNickName] = useState({});
 
   const handleLogout = async () => {
@@ -24,14 +25,14 @@ const Header = ({ userId }) => {
 
   const getLoginMember = async () => {
     try {
-    const res = await axios.get(`/api/user/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return res.data.nickname;
-    } catch (error){
-      console.error(error)
+      const res = await axios.get(`/api/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return res.data.nickname;
+    } catch (error) {
+      console.error(error);
     }
   };
 

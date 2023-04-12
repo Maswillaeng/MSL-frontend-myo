@@ -23,8 +23,9 @@ const BoardDetail = () => {
   // const [show, setShow] = useState(false);
   // 게시글 정보
   const [post, setPost] = useState([]);
-  // 게시판 정보가 로딩되었는지 여부를 저장
-  const [isLoaded, setIsLoaded] = useState(false);
+  // 게시글 댓글 정보
+  const [postComment, setPostComment] = useState([]);
+
   // token
   // const token = localStorage.getItem("accessToken");
   // 삭제 modal이 보이는 여부 상태
@@ -44,14 +45,14 @@ const BoardDetail = () => {
         try {
           const { data } = await axios.get(`/api/post/${postId}`);
           setPost(data);
-          setIsLoaded(true);
+          setPostComment(data.commentList);
         } catch (error) {
           console.error(error);
         }
       };
       getPost();
     }
-  }, [postId]);
+  }, [postId, postComment]);
 
   //modal 열기
   const handleClickOpen = () => {
@@ -82,26 +83,26 @@ const BoardDetail = () => {
     console.log(url);
   };
 
-  // 좋아요 기능
+  // 좋아요 추가
   const handleLike = async () => {
     setLiked(!liked);
-
     try {
-      await axios.post(`/api/like/${postId}`, null, {
+      let response = await axios.post(`/api/like/${postId}`, null, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-
+      console.log(response.data);
       setLikedCount(likedCount + 1);
     } catch (error) {
       console.error(error);
     }
   };
+
+  // 좋아요 삭제
   const deleteLike = async () => {
     setLiked(!liked);
-
     try {
       await axios.post(`/api/like/${postId}`, null, {
         headers: {
@@ -109,14 +110,13 @@ const BoardDetail = () => {
           "Content-Type": "application/json",
         },
       });
-
       setLikedCount(likedCount - 1);
     } catch (error) {
       console.error(error);
     }
   };
 
-  //  삭제
+  //  좋아요 삭제
   const deleteAdd = async () => {
     try {
       await axios.delete(`/api/post/${postId}`);
@@ -189,8 +189,8 @@ const BoardDetail = () => {
           )}
         </div>
 
-        <div>{likedCount}</div>
-        <Comments postId={postId} post={post} />
+        <div>{post.likeCnt}</div>
+        <Comments postId={postId} postComment={postComment} />
       </div>{" "}
       <Dialog
         open={open}

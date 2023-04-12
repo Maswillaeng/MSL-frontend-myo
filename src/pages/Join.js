@@ -55,12 +55,8 @@ const Join = () => {
       }
     } else {
       setJoin((prevState) => ({ ...prevState, userImage: "/img/user.jpg" }));
+      return;
     }
-    // else {
-    //   //업로드 취소할 시
-    //   setJoin((prevState) => ({ ...prevState, userImage: "/img/user.jpg" }));
-    //   return;
-    // }
 
     //화면에 프로필 사진 표시 :FileReader API
     const reader = new FileReader();
@@ -100,14 +96,11 @@ const Join = () => {
   // email 검사 & 중복검사
   const onCheckEmailHandler = async () => {
     try {
-      const response = await axios.post(
-        "/api/auth/duplicate/email",
-        { email },
-      );
+      const response = await axios.post("/api/auth/duplicate/email", { email });
       if (response.status === 200) {
         setEmailNotice({ message: "사용 가능한 이메일입니다.", alert: true });
       }
-      } catch (error) {
+    } catch (error) {
       setEmailNotice({
         message: "이미 사용중인 이메일입니다.",
         alert: false,
@@ -185,17 +178,18 @@ const Join = () => {
         alert: false,
       });
       return;
-    } else setNicknameNotice({
+    } else
+      setNicknameNotice({
         message: "",
         alert: false,
-      })
+      });
   };
   const onCheckNicknameHandler = async () => {
     try {
       const response = await axios.post(
-          "/api/auth/duplicate/nickname",
-          {nickname},
-          {headers: {"Context-Type": "application/json"}}
+        "/api/auth/duplicate/nickname",
+        { nickname },
+        { headers: { "Context-Type": "application/json" } }
       );
       if (response.status === 200) {
         setNicknameNotice({
@@ -208,12 +202,12 @@ const Join = () => {
       //     message: "이미 사용중인 닉네임입니다.",
       //     alert: false,
       //   });
-    // }
+      // }
     } catch (error) {
       setNicknameNotice({
-            message: "이미 사용중인 닉네임입니다.",
-            alert: false,
-          });
+        message: "이미 사용중인 닉네임입니다.",
+        alert: false,
+      });
     }
   };
   //전화번호 검사
@@ -282,8 +276,7 @@ const Join = () => {
         );
         console.log(response);
         navigate("/LoginForm");
-        alert("회원가입 성공!")
-
+        alert("회원가입 성공!");
       } catch (error) {
         console.log(error);
       }
@@ -452,8 +445,11 @@ const Join = () => {
             <div className="mb-5">
               {" "}
               <div className="flex flex-col">
-                <label className="mb-3 text-sm">휴대전화
-                <span className="pl-2 text-xs text-gray-500">ex) 01012345678</span>
+                <label className="mb-3 text-sm">
+                  휴대전화
+                  <span className="pl-2 text-xs text-gray-500">
+                    ex) 01012345678
+                  </span>
                 </label>
                 <div className="flex flex-wrap justify-between gap-5 ">
                   {" "}
