@@ -14,6 +14,7 @@ const Comments = ({ postId, postComment }) => {
   const [commentContent, setCommentContent] = useState("");
   const [recommentContent, setRecommentContent] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [modifyIsOpen, setModifyIsOpen] = useState(false);
 
   const [textAreaHeight, setTextAreaHeight] = useState("auto"); // textarea 높이
   const textAreaRef = useRef(null); // textarea 레퍼런스
@@ -69,6 +70,14 @@ const Comments = ({ postId, postComment }) => {
       setIsOpen(true);
     }
   };
+  const handleModifyClick = (commentId) => {
+    if (selectedContent === commentId) {
+      setModifyIsOpen(!modifyIsOpen);
+    } else {
+      setSelectedContent(commentId);
+      setModifyIsOpen(true);
+    }
+  };
   // 대댓글 post
   const recomment = async (e) => {
     const comment = {
@@ -113,6 +122,11 @@ const Comments = ({ postId, postComment }) => {
   useEffect(() => {
     setComments(postComment);
   }, [postComment]);
+  // 댓글 삭제
+  const deleteComment = async (commentId) => {
+    await axios.delete(`/api/comment/${commentId}`);
+    window.location.reload();
+  };
   return (
     <div className="border-t-2 h-44 bg-slate-50 ">
       <div className="p-5 mb-10 text-right">
@@ -173,15 +187,55 @@ const Comments = ({ postId, postComment }) => {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      className="mb-3"
-                      data-selected-content={item.commentId}
-                      onClick={() => {
-                        handleReplyClick(item.commentId);
-                      }}
-                    >
-                      답글
-                    </button>
+                    <div className="flex gap-3 justify-between">
+                      <button
+                        className="mb-3"
+                        data-selected-content={item.commentId}
+                        onClick={() => {
+                          handleReplyClick(item.commentId);
+                        }}
+                      >
+                        답글
+                      </button>
+                      {modifyIsOpen && selectedContent === item.commentId ? (
+                        <div>
+                          <textarea
+                            placeholder="답글을 작성해주세요"
+                            className="border p-1 w-full h-10 resize-none"
+                            ref={textAreaRef}
+                            onChange={onCommentHandler}
+                            value={commentContent}
+                          ></textarea>
+                          <button
+                            className="mb-3 mr-5"
+                            onClick={() => {
+                              handleModifyClick(item.commentId);
+                            }}
+                          >
+                            완료
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <button
+                            className="mb-3 mr-5"
+                            onClick={() => {
+                              handleModifyClick(item.commentId);
+                            }}
+                          >
+                            수정
+                          </button>
+                          <button
+                            className="mb-3"
+                            onClick={() => {
+                              deleteComment(item.commentId);
+                            }}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
